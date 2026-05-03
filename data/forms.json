@@ -1,14 +1,19 @@
 {
-  "last_updated": "2026-05-03T20:45:49.126223+00:00",
+  "last_updated": "2026-05-03T21:01:48.714558+00:00",
   "forms": [
     {
       "id": "69f229ebc935e500086b5c26",
       "name": "woonstroom",
       "site_id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
       "site_name": "woonstroom-interesse-landing",
-      "total_submissions": 0,
-      "last_submission_date": null,
-      "daily": []
+      "total_submissions": 1,
+      "last_submission_date": "2026-05-03",
+      "daily": [
+        {
+          "date": "2026-05-03",
+          "count": 1
+        }
+      ]
     },
     {
       "id": "69f229d3a7e77d0008da4617",
