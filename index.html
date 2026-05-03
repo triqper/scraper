@@ -422,9 +422,10 @@
   async function main() {
     const app = document.getElementById("app");
     try {
+      const bust = new Date().toISOString().slice(0, 10);
       const [pvRes, formsRes] = await Promise.all([
-        fetch("./data/pageviews.json"),
-        fetch("./data/forms.json"),
+        fetch(`./data/pageviews.json?v=${bust}`, { cache: "no-store" }),
+        fetch(`./data/forms.json?v=${bust}`, { cache: "no-store" }),
       ]);
       if (!pvRes.ok || !formsRes.ok) throw new Error("Kon databestanden niet laden.");
 
