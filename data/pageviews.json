@@ -1,11 +1,11 @@
 {
-  "last_updated": "2026-05-03T21:26:12.055729+00:00",
+  "last_updated": "2026-05-03T21:38:57.591291+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
       "name": "woonstroom-interesse-landing",
       "url": "https://woonstroom-interesse-landing.netlify.app",
-      "total_pageviews": 15,
+      "total_pageviews": 16,
       "daily": [
         {
           "date": "2026-04-26",
@@ -13,39 +13,55 @@
         },
         {
           "date": "2026-04-27",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-04-28",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-04-29",
-          "pageviews": 5
+          "pageviews": 5,
+          "pageviews_nl": 0,
+          "visitors": 4
         },
         {
           "date": "2026-04-30",
-          "pageviews": 2
+          "pageviews": 2,
+          "pageviews_nl": 0,
+          "visitors": 2
         },
         {
           "date": "2026-05-01",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-02",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-03",
-          "pageviews": 8
+          "pageviews": 9,
+          "pageviews_nl": 0,
+          "visitors": 5
         }
-      ]
+      ],
+      "total_pageviews_nl": 0,
+      "total_visitors": 11
     },
     {
       "id": "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5",
       "name": "woonstroom-woningwaarde-landing",
       "url": "https://woonstroom-woningwaarde-landing.netlify.app",
-      "total_pageviews": 19,
+      "total_pageviews": 20,
       "daily": [
         {
           "date": "2026-04-26",
@@ -53,33 +69,49 @@
         },
         {
           "date": "2026-04-27",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-04-28",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-04-29",
-          "pageviews": 16
+          "pageviews": 16,
+          "pageviews_nl": 0,
+          "visitors": 10
         },
         {
           "date": "2026-04-30",
-          "pageviews": 2
+          "pageviews": 2,
+          "pageviews_nl": 0,
+          "visitors": 2
         },
         {
           "date": "2026-05-01",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-02",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-03",
-          "pageviews": 1
+          "pageviews": 2,
+          "pageviews_nl": 0,
+          "visitors": 2
         }
-      ]
+      ],
+      "total_pageviews_nl": 0,
+      "total_visitors": 14
     },
     {
       "id": "3970cc41-10db-4747-b7b2-89ea7532c283",
@@ -93,33 +125,49 @@
         },
         {
           "date": "2026-04-27",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-04-28",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-04-29",
-          "pageviews": 11
+          "pageviews": 11,
+          "pageviews_nl": 0,
+          "visitors": 6
         },
         {
           "date": "2026-04-30",
-          "pageviews": 6
+          "pageviews": 6,
+          "pageviews_nl": 0,
+          "visitors": 5
         },
         {
           "date": "2026-05-01",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-02",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-03",
-          "pageviews": 1
+          "pageviews": 1,
+          "pageviews_nl": 0,
+          "visitors": 1
         }
-      ]
+      ],
+      "total_pageviews_nl": 0,
+      "total_visitors": 12
     },
     {
       "id": "60c23cf1-4c52-4e2a-9e3d-f3399176f47d",
@@ -133,33 +181,49 @@
         },
         {
           "date": "2026-04-27",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-04-28",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-04-29",
-          "pageviews": 14
+          "pageviews": 14,
+          "pageviews_nl": 0,
+          "visitors": 13
         },
         {
           "date": "2026-04-30",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-01",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-02",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-03",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         }
-      ]
+      ],
+      "total_pageviews_nl": 0,
+      "total_visitors": 13
     },
     {
       "id": "82333e01-6c2b-48b2-a7ca-564ad851bf6b",
@@ -173,33 +237,49 @@
         },
         {
           "date": "2026-04-27",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-04-28",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-04-29",
-          "pageviews": 10
+          "pageviews": 10,
+          "pageviews_nl": 0,
+          "visitors": 9
         },
         {
           "date": "2026-04-30",
-          "pageviews": 4
+          "pageviews": 4,
+          "pageviews_nl": 0,
+          "visitors": 4
         },
         {
           "date": "2026-05-01",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-02",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-03",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         }
-      ]
+      ],
+      "total_pageviews_nl": 0,
+      "total_visitors": 13
     },
     {
       "id": "49961024-5cc5-4b6c-b77e-636bc91d016c",
@@ -213,33 +293,49 @@
         },
         {
           "date": "2026-04-27",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-04-28",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-04-29",
-          "pageviews": 7
+          "pageviews": 7,
+          "pageviews_nl": 0,
+          "visitors": 7
         },
         {
           "date": "2026-04-30",
-          "pageviews": 1
+          "pageviews": 1,
+          "pageviews_nl": 0,
+          "visitors": 1
         },
         {
           "date": "2026-05-01",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-02",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         },
         {
           "date": "2026-05-03",
-          "pageviews": 0
+          "pageviews": 0,
+          "pageviews_nl": 0,
+          "visitors": 0
         }
-      ]
+      ],
+      "total_pageviews_nl": 0,
+      "total_visitors": 8
     }
   ]
 }
