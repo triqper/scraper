@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Netlify Analytics Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f1f5f9;
+      --surface:   #ffffff;
+      --border:    #e2e8f0;
+      --text:      #0f172a;
+      --muted:     #64748b;
+      --accent:    #6366f1;
+      --accent-bg: #eef2ff;
+      --green:     #22c55e;
+      --radius:    0.75rem;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    header h1 span.logo { font-size: 1.4rem; }
+    .last-updated {
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    /* ── Layout ─────────────────────────────────────── */
+    main {
+      max-width: 1280px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .section { margin-bottom: 2.5rem; }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Stat cards ─────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+    }
+    .stat-label {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1.1;
+    }
+    .stat-sub {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    /* ── Chart card ─────────────────────────────────── */
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .chart-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .chart-wrap {
+      position: relative;
+      height: 320px;
+    }
+    .chart-wrap.small { height: 90px; margin-top: 0.75rem; }
+
+    /* ── Site cards grid ────────────────────────────── */
+    .site-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .site-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .site-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .site-name  { font-weight: 600; font-size: 0.9375rem; }
+    .site-url   { font-size: 0.75rem; color: var(--muted); margin-top: 0.15rem; word-break: break-all; }
+    .site-total { font-size: 1.75rem; font-weight: 800; color: var(--accent); white-space: nowrap; }
+
+    /* ── Forms table ────────────────────────────────── */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th {
+      text-align: left;
+      padding: 0.75rem 1.25rem;
+      border-bottom: 2px solid var(--border);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    td { padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    .badge {
+      display: inline-block;
+      background: var(--accent-bg);
+      color: var(--accent);
+      font-size: 0.8125rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+    }
+    .badge-green {
+      background: #f0fdf4;
+      color: #16a34a;
+    }
+
+    /* ── States ─────────────────────────────────────── */
+    .empty {
+      text-align: center;
+      padding: 3.5rem 1rem;
+      color: var(--muted);
+      font-size: 0.9375rem;
+    }
+    .loading {
+      text-align: center;
+      padding: 5rem 1rem;
+      color: var(--muted);
+    }
+    .error-banner {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      color: #b91c1c;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <h1><span class="logo">📊</span> Netlify Analytics Dashboard</h1>
+    <span class="last-updated" id="last-updated"></span>
+  </div>
+</header>
+
+<main id="app">
+  <div class="loading">Dashboard laden…</div>
+</main>
+
+<script>
+  // Kleuren per website (herhalen als er meer zijn)
+  const COLORS = [
+    "#6366f1","#22c55e","#f59e0b","#ef4444",
+    "#8b5cf6","#06b6d4","#ec4899","#14b8a6",
+    "#f97316","#84cc16","#3b82f6","#a855f7",
+  ];
+
+  const fmt   = n  => Number(n).toLocaleString("nl-NL");
+  const fmtDt = s  => new Date(s).toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
+  const color = i  => COLORS[i % COLORS.length];
+
+  // Alle unieke datums over alle sites, gesorteerd
+  function allDates(sites) {
+    const s = new Set();
+    for (const site of sites) (site.daily || []).forEach(d => s.add(d.date));
+    return [...s].sort();
+  }
+
+  // Data voor één site over de volledige tijdlijn (null = geen data die dag)
+  function siteDataset(site, dates) {
+    const map = Object.fromEntries((site.daily || []).map(d => [d.date, d.pageviews]));
+    return dates.map(d => (d in map ? map[d] : null));
+  }
+
+  // ── Samenvatting ────────────────────────────────────────────────────────
+
+  function renderSummary(pv, forms) {
+    const totalPV    = (pv.sites   || []).reduce((s, x) => s + (x.total_pageviews   || 0), 0);
+    const totalForms = (forms.forms|| []).reduce((s, x) => s + (x.total_submissions || 0), 0);
+    return `
+      <div class="section">
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">Totale paginaweergaven</div>
+            <div class="stat-value">${fmt(totalPV)}</div>
+            <div class="stat-sub">alle websites samen</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Websites bijgehouden</div>
+            <div class="stat-value">${(pv.sites||[]).length}</div>
+            <div class="stat-sub">Netlify websites</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Formulierverzendingen</div>
+            <div class="stat-value">${fmt(totalForms)}</div>
+            <div class="stat-sub">alle formulieren samen</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Formulieren bijgehouden</div>
+            <div class="stat-value">${(forms.forms||[]).length}</div>
+            <div class="stat-sub">Netlify formulieren</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Gecombineerde lijnengrafiek ─────────────────────────────────────────
+
+  function renderAllSitesChart(sites) {
+    if (!sites.length) return "";
+    return `
+      <div class="section">
+        <div class="section-title">Paginaweergaven over tijd</div>
+        <div class="chart-card">
+          <div class="chart-wrap"><canvas id="chart-all"></canvas></div>
+        </div>
+      </div>`;
+  }
+
+  function initAllSitesChart(sites) {
+    if (!sites.length) return;
+    const dates    = allDates(sites);
+    const labels   = dates.map(fmtDt);
+    const datasets = sites.map((site, i) => ({
+      label:           site.name,
+      data:            siteDataset(site, dates),
+      borderColor:     color(i),
+      backgroundColor: color(i) + "18",
+      fill:            true,
+      tension:         0.35,
+      pointRadius:     dates.length > 30 ? 2 : 4,
+      pointHoverRadius:6,
+      spanGaps:        false,
+    }));
+    new Chart(document.getElementById("chart-all"), {
+      type: "line",
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: { legend: { position: "top" } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, ticks: { precision: 0 } },
+        },
+      },
+    });
+  }
+
+  // ── Per-site kaarten met mini-grafiek ───────────────────────────────────
+
+  function renderSiteCards(sites) {
+    if (!sites.length) return "";
+    const cards = sites.map((site, i) => `
+      <div class="site-card">
+        <div class="site-card-top">
+          <div>
+            <div class="site-name">${site.name}</div>
+            <div class="site-url">${site.url}</div>
+          </div>
+          <div class="site-total">${fmt(site.total_pageviews || 0)}</div>
+        </div>
+        <div class="chart-wrap small"><canvas id="chart-site-${i}"></canvas></div>
+      </div>`).join("");
+    return `
+      <div class="section">
+        <div class="section-title">Per website</div>
+        <div class="site-grid">${cards}</div>
+      </div>`;
+  }
+
+  function initSiteCharts(sites) {
+    sites.forEach((site, i) => {
+      const canvas = document.getElementById(`chart-site-${i}`);
+      if (!canvas) return;
+      const c   = color(i);
+      const daily = site.daily || [];
+      new Chart(canvas, {
+        type: "bar",
+        data: {
+          labels:   daily.map(d => fmtDt(d.date)),
+          datasets: [{
+            data:            daily.map(d => d.pageviews),
+            backgroundColor: c + "70",
+            borderColor:     c,
+            borderWidth:     1,
+            borderRadius:    2,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: {
+            callbacks: { title: items => items[0].label, label: ctx => `${fmt(ctx.raw)} pageviews` }
+          }},
+          scales: {
+            x: { display: false },
+            y: { display: false, beginAtZero: true },
+          },
+        },
+      });
+    });
+  }
+
+  // ── Formulierentabel ────────────────────────────────────────────────────
+
+  function renderFormsTable(forms) {
+    const title = `
+      <div class="section">
+        <div class="section-title">Formulierverzendingen per pagina</div>`;
+
+    if (!forms.length) {
+      return title + `<div class="empty">Geen formulieren gevonden.</div></div>`;
+    }
+
+    const rows = forms.map(f => {
+      const last7 = (f.daily || []).slice(-7).reduce((s, d) => s + d.count, 0);
+      const lastDate = f.last_submission_date
+        ? fmtDt(f.last_submission_date) : "—";
+      return `
+        <tr>
+          <td><strong>${f.name}</strong></td>
+          <td>${f.site_name}</td>
+          <td><span class="badge">${fmt(f.total_submissions || 0)}</span></td>
+          <td><span class="badge badge-green">+${fmt(last7)}</span></td>
+          <td>${lastDate}</td>
+        </tr>`;
+    }).join("");
+
+    return title + `
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Formulier</th>
+                <th>Website</th>
+                <th>Totaal ooit</th>
+                <th>Afgelopen 7 dagen</th>
+                <th>Laatste verzending</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }
+
+  // ── Hoofdlogica ─────────────────────────────────────────────────────────
+
+  async function main() {
+    const app = document.getElementById("app");
+    try {
+      const [pvRes, formsRes] = await Promise.all([
+        fetch("./data/pageviews.json"),
+        fetch("./data/forms.json"),
+      ]);
+      if (!pvRes.ok || !formsRes.ok) throw new Error("Kon databestanden niet laden.");
+
+      const pv    = await pvRes.json();
+      const forms = await formsRes.json();
+
+      // Tijdstempel in header
+      const lu = pv.last_updated || forms.last_updated;
+      if (lu) {
+        document.getElementById("last-updated").textContent =
+          "Bijgewerkt: " + new Date(lu).toLocaleString("nl-NL");
+      }
+
+      const sites    = pv.sites    || [];
+      const formList = forms.forms || [];
+
+      if (!sites.length && !formList.length) {
+        app.innerHTML = `
+          <div class="empty">
+            Nog geen data. Voer de scraper eenmalig handmatig uit of wacht op de
+            eerste geplande run (dagelijks om 00:00 CEST).
+          </div>`;
+        return;
+      }
+
+      // HTML opbouwen
+      app.innerHTML =
+        renderSummary(pv, forms) +
+        renderAllSitesChart(sites) +
+        renderSiteCards(sites) +
+        renderFormsTable(formList);
+
+      // Grafieken pas initialiseren na DOM-insert
+      initAllSitesChart(sites);
+      initSiteCharts(sites);
+
+    } catch (err) {
+      app.innerHTML = `
+        <div class="error-banner">
+          <strong>Fout bij laden:</strong> ${err.message}<br>
+          <small>Open dit bestand via een webserver (bijv. GitHub Pages), niet rechtstreeks vanuit de bestandsbeheerder.</small>
+        </div>`;
+      console.error(err);
+    }
+  }
+
+  main();
+</script>
+</body>
+</html>

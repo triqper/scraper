@@ -1,0 +1,56 @@
+# Draait elke nacht om 00:00 CEST (22:00 UTC).
+# In de winter (CET, UTC+1) is dit 23:00 lokale tijd — dicht genoeg bij middernacht.
+#
+# Eerste keer instellen:
+#   1. Ga naar https://app.netlify.com/user/applications → Personal access tokens
+#      en maak een token aan.
+#   2. Voeg het toe als GitHub repository secret:
+#      Settings → Secrets and variables → Actions → New repository secret
+#      Naam: NETLIFY_TOKEN
+#   3. Activeer GitHub Pages:
+#      Settings → Pages → Source: "Deploy from a branch" → branch: main → / (root)
+#   4. Start de eerste run handmatig via:
+#      Actions → Daily Netlify Analytics → Run workflow
+#      (de eerste run haalt automatisch de laatste 7 dagen op)
+
+name: Daily Netlify Analytics
+
+on:
+  schedule:
+    - cron: "0 22 * * *"
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python instellen
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Afhankelijkheden installeren
+        run: pip install -r requirements.txt
+
+      - name: Scraper uitvoeren
+        env:
+          NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
+        run: python scraper.py
+
+      - name: Data opslaan en pushen
+        run: |
+          git config user.name  "Analytics Bot"
+          git config user.email "analytics-bot@users.noreply.github.com"
+          git add data/
+          git diff --staged --quiet \
+            && echo "Geen nieuwe data." \
+            || (
+              git commit -m "chore: analytics bijwerken $(date -u +%Y-%m-%d)" \
+              && git push
+            )
