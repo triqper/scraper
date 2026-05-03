@@ -1,11 +1,11 @@
 {
-  "last_updated": "2026-05-03T21:18:23.564796+00:00",
+  "last_updated": "2026-05-03T21:26:12.055729+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
       "name": "woonstroom-interesse-landing",
       "url": "https://woonstroom-interesse-landing.netlify.app",
-      "total_pageviews": 7,
+      "total_pageviews": 15,
       "daily": [
         {
           "date": "2026-04-26",
@@ -34,6 +34,10 @@
         {
           "date": "2026-05-02",
           "pageviews": 0
+        },
+        {
+          "date": "2026-05-03",
+          "pageviews": 8
         }
       ]
     },
@@ -41,7 +45,7 @@
       "id": "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5",
       "name": "woonstroom-woningwaarde-landing",
       "url": "https://woonstroom-woningwaarde-landing.netlify.app",
-      "total_pageviews": 18,
+      "total_pageviews": 19,
       "daily": [
         {
           "date": "2026-04-26",
@@ -70,6 +74,10 @@
         {
           "date": "2026-05-02",
           "pageviews": 0
+        },
+        {
+          "date": "2026-05-03",
+          "pageviews": 1
         }
       ]
     },
@@ -77,7 +85,7 @@
       "id": "3970cc41-10db-4747-b7b2-89ea7532c283",
       "name": "woonstroom-aanbod-landing",
       "url": "https://woonstroom-aanbod-landing.netlify.app",
-      "total_pageviews": 17,
+      "total_pageviews": 18,
       "daily": [
         {
           "date": "2026-04-26",
@@ -106,6 +114,10 @@
         {
           "date": "2026-05-02",
           "pageviews": 0
+        },
+        {
+          "date": "2026-05-03",
+          "pageviews": 1
         }
       ]
     },
@@ -141,6 +153,10 @@
         },
         {
           "date": "2026-05-02",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-05-03",
           "pageviews": 0
         }
       ]
@@ -178,6 +194,10 @@
         {
           "date": "2026-05-02",
           "pageviews": 0
+        },
+        {
+          "date": "2026-05-03",
+          "pageviews": 0
         }
       ]
     },
@@ -213,6 +233,10 @@
         },
         {
           "date": "2026-05-02",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-05-03",
           "pageviews": 0
         }
       ]
