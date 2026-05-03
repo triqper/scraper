@@ -1,23 +1,12 @@
-# Draait elke nacht om 00:00 CEST (22:00 UTC).
-# In de winter (CET, UTC+1) is dit 23:00 lokale tijd — dicht genoeg bij middernacht.
-#
-# Eerste keer instellen:
-#   1. Ga naar https://app.netlify.com/user/applications → Personal access tokens
-#      en maak een token aan.
-#   2. Voeg het toe als GitHub repository secret:
-#      Settings → Secrets and variables → Actions → New repository secret
-#      Naam: NETLIFY_TOKEN
-#   3. Activeer GitHub Pages:
-#      Settings → Pages → Source: "Deploy from a branch" → branch: main → / (root)
-#   4. Start de eerste run handmatig via:
-#      Actions → Daily Netlify Analytics → Run workflow
-#      (de eerste run haalt automatisch de laatste 7 dagen op)
+# Draait elk uur tussen 8:00 en 23:00 CEST (6:00-21:00 UTC, zomer).
+# In de winter (CET, UTC+1) is dit 7:00-22:00 lokale tijd — dicht genoeg.
+# ~17 runs/dag × 15 seconden ≈ 130 minuten/maand (ruim binnen de 2.000 gratis minuten).
 
-name: Daily Netlify Analytics
+name: Netlify Analytics
 
 on:
   schedule:
-    - cron: "0 22 * * *"
+    - cron: "0 6-21 * * *"   # Elk uur van 8-23 CEST
   workflow_dispatch:
 
 jobs:

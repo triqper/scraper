@@ -159,19 +159,25 @@ def update_pageviews() -> None:
         have = {d["date"] for d in entry["daily"]}
         analytics_available = True
 
-        # Netlify bewaart 7 dagen; we proberen elke ontbrekende dag op te halen
-        for days_ago in range(1, 8):
+        # Dagen 0 (vandaag) en 1 (gisteren) worden altijd ververst —
+        # vandaag groeit nog, gisteren kan laat-avond data missen.
+        # Oudere dagen worden overgeslagen als ze al opgeslagen zijn.
+        for days_ago in range(0, 7):
             target = today - timedelta(days=days_ago)
             ds = target.isoformat()
-            if ds in have or not analytics_available:
+            if ds in have and days_ago >= 2:
                 continue
+            if not analytics_available:
+                break
 
             count = fetch_pageviews_for_day(sid, target)
             if count is None:
                 print(f"    → analytics niet beschikbaar voor {name}")
                 analytics_available = False
             else:
-                print(f"    {ds}: {count} pageviews")
+                label = " (vandaag)" if days_ago == 0 else ""
+                print(f"    {ds}: {count} pageviews{label}")
+                entry["daily"] = [d for d in entry["daily"] if d["date"] != ds]
                 entry["daily"].append({"date": ds, "pageviews": count})
 
         entry["daily"].sort(key=lambda x: x["date"])
