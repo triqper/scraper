@@ -27,6 +27,16 @@ API_BASE = "https://api.netlify.com/api/v1"
 ANALYTICS_BASE = "https://analytics.services.netlify.com/v2"
 DATA_DIR = Path(__file__).parent / "data"
 
+# Alleen sites met Netlify Analytics ingeschakeld (de sites met een ster)
+ANALYTICS_SITES = {
+    "woonstroom-aanbod-landing",
+    "woonstroom-woningwaarde-landing",
+    "woonstroom-interesse-landing",
+    "woonstroom-interesse",
+    "woonstroom-woningwaarde",
+    "woonstroom-aanbod",
+}
+
 
 def _headers() -> dict:
     return {"Authorization": f"Bearer {NETLIFY_TOKEN}"}
@@ -128,6 +138,10 @@ def update_pageviews() -> None:
         sid = site["id"]
         name = site.get("name", sid)
         url = site.get("ssl_url") or site.get("url", "")
+
+        if name not in ANALYTICS_SITES:
+            continue
+
         print(f"  {name}")
 
         entry = sites_idx.setdefault(
@@ -179,6 +193,10 @@ def update_forms() -> None:
     for site in get_sites():
         sid = site["id"]
         sname = site.get("name", sid)
+
+        if sname not in ANALYTICS_SITES:
+            continue
+
         forms = get_forms(sid)
         if not forms:
             continue
