@@ -75,14 +75,21 @@ def get_sites() -> list:
     return sites
 
 
-def fetch_pageviews_for_day(site_id: str, target: date) -> int | None:
-    """Geeft het totaal pageviews voor één dag terug, of None als analytics niet beschikbaar."""
+def _analytics_ms_params(target: date) -> tuple[int, int]:
     from_dt = datetime(target.year, target.month, target.day, tzinfo=timezone.utc)
-    to_dt = from_dt + timedelta(days=1)
-    from_ms = int(from_dt.timestamp() * 1000)
-    to_ms = int(to_dt.timestamp() * 1000)
+    return int(from_dt.timestamp() * 1000), int((from_dt + timedelta(days=1)).timestamp() * 1000)
 
-    # Correct endpoint: /{site_id}/pageviews (zonder /sites/ tussenin)
+
+def _parse_data_array(items: list) -> int:
+    if not items:
+        return 0
+    if isinstance(items[0], (list, tuple)):
+        return sum(int(p[1]) for p in items)
+    return sum(item.get("count", item.get("quantity", item.get("pageviews", 0))) for item in items)
+
+
+def fetch_pageviews_for_day(site_id: str, target: date) -> int | None:
+    from_ms, to_ms = _analytics_ms_params(target)
     r = netlify_get(
         f"{ANALYTICS_BASE}/{site_id}/pageviews",
         {"from": from_ms, "to": to_ms, "timezone": "+0000", "resolution": "day"},
@@ -90,18 +97,50 @@ def fetch_pageviews_for_day(site_id: str, target: date) -> int | None:
     if r.status_code in (402, 404, 422):
         return None
     if r.status_code != 200:
-        print(f"    Onverwachte fout {r.status_code}: {r.text[:300]}")
+        print(f"    Fout {r.status_code}: {r.text[:200]}")
         return None
     d = r.json()
     if isinstance(d, dict) and "data" in d:
-        items = d["data"]
-        if items and isinstance(items[0], (list, tuple)):
-            # Formaat: [[timestamp_ms, count], ...]
-            return sum(int(pair[1]) for pair in items)
-        return sum(
-            item.get("count", item.get("quantity", item.get("pageviews", 0)))
-            for item in items
-        )
+        return _parse_data_array(d["data"])
+    if isinstance(d, dict) and "total" in d:
+        return int(d["total"])
+    return 0
+
+
+def fetch_nl_pageviews_for_day(site_id: str, target: date) -> int:
+    """Haalt NL-specifieke pageviews op via het landen-ranking endpoint."""
+    from_ms, to_ms = _analytics_ms_params(target)
+    r = netlify_get(
+        f"{ANALYTICS_BASE}/{site_id}/ranking/countries",
+        {"from": from_ms, "to": to_ms, "timezone": "+0000", "limit": 100},
+    )
+    if r.status_code != 200:
+        return 0
+    d = r.json()
+    items = d.get("data", []) if isinstance(d, dict) else []
+    for item in items:
+        if isinstance(item, dict):
+            code = item.get("path", item.get("country", item.get("code", "")))
+            if code in ("NL", "Netherlands"):
+                return int(item.get("count", item.get("pageviews", 0)))
+        elif isinstance(item, (list, tuple)) and len(item) >= 2:
+            if item[0] in ("NL", "Netherlands"):
+                return int(item[1])
+    return 0
+
+
+def fetch_visitors_for_day(site_id: str, target: date) -> int:
+    """Haalt het totaal unieke bezoekers op voor één dag."""
+    from_ms, to_ms = _analytics_ms_params(target)
+    r = netlify_get(
+        f"{ANALYTICS_BASE}/{site_id}/visitors",
+        {"from": from_ms, "to": to_ms, "timezone": "+0000", "resolution": "day"},
+    )
+    if r.status_code != 200:
+        return 0
+    d = r.json()
+    if isinstance(d, dict) and "data" in d:
+        return _parse_data_array(d["data"])
     if isinstance(d, dict) and "total" in d:
         return int(d["total"])
     return 0
@@ -156,16 +195,17 @@ def update_pageviews() -> None:
         entry["name"] = name
         entry["url"] = url
 
-        have = {d["date"] for d in entry["daily"]}
+        # Sla bestaande data op als dict voor snelle lookup
+        have = {d["date"]: d for d in entry["daily"]}
         analytics_available = True
 
-        # Dagen 0 (vandaag) en 1 (gisteren) worden altijd ververst —
-        # vandaag groeit nog, gisteren kan laat-avond data missen.
-        # Oudere dagen worden overgeslagen als ze al opgeslagen zijn.
         for days_ago in range(0, 7):
             target = today - timedelta(days=days_ago)
             ds = target.isoformat()
-            if ds in have and days_ago >= 2:
+
+            # Sla over als compleet opgeslagen (tenzij vandaag/gisteren)
+            existing = have.get(ds, {})
+            if days_ago >= 2 and "pageviews_nl" in existing and "visitors" in existing:
                 continue
             if not analytics_available:
                 break
@@ -174,14 +214,20 @@ def update_pageviews() -> None:
             if count is None:
                 print(f"    → analytics niet beschikbaar voor {name}")
                 analytics_available = False
-            else:
-                label = " (vandaag)" if days_ago == 0 else ""
-                print(f"    {ds}: {count} pageviews{label}")
-                entry["daily"] = [d for d in entry["daily"] if d["date"] != ds]
-                entry["daily"].append({"date": ds, "pageviews": count})
+                break
 
-        entry["daily"].sort(key=lambda x: x["date"])
+            nl_count = fetch_nl_pageviews_for_day(sid, target)
+            visitors = fetch_visitors_for_day(sid, target)
+
+            label = " (vandaag)" if days_ago == 0 else ""
+            print(f"    {ds}: {count} pageviews, {nl_count} NL, {visitors} bezoekers{label}")
+
+            have[ds] = {"date": ds, "pageviews": count, "pageviews_nl": nl_count, "visitors": visitors}
+
+        entry["daily"] = sorted(have.values(), key=lambda x: x["date"])
         entry["total_pageviews"] = sum(d["pageviews"] for d in entry["daily"])
+        entry["total_pageviews_nl"] = sum(d.get("pageviews_nl", 0) for d in entry["daily"])
+        entry["total_visitors"] = sum(d.get("visitors", 0) for d in entry["daily"])
 
     data["sites"] = list(sites_idx.values())
     data["last_updated"] = datetime.now(timezone.utc).isoformat()

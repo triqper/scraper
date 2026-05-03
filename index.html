@@ -238,28 +238,30 @@
   }
 
   // Data voor één site over de volledige tijdlijn (null = geen data die dag)
-  function siteDataset(site, dates) {
-    const map = Object.fromEntries((site.daily || []).map(d => [d.date, d.pageviews]));
+  function siteDataset(site, dates, field) {
+    const map = Object.fromEntries((site.daily || []).map(d => [d.date, d[field] ?? null]));
     return dates.map(d => (d in map ? map[d] : null));
   }
 
   // ── Samenvatting ────────────────────────────────────────────────────────
 
   function renderSummary(pv, forms) {
-    const totalPV    = (pv.sites   || []).reduce((s, x) => s + (x.total_pageviews   || 0), 0);
-    const totalForms = (forms.forms|| []).reduce((s, x) => s + (x.total_submissions || 0), 0);
+    const sites      = pv.sites || [];
+    const totalNL    = sites.reduce((s, x) => s + (x.total_pageviews_nl || 0), 0);
+    const totalVis   = sites.reduce((s, x) => s + (x.total_visitors     || 0), 0);
+    const totalForms = (forms.forms || []).reduce((s, x) => s + (x.total_submissions || 0), 0);
     return `
       <div class="section">
         <div class="stat-grid">
           <div class="stat-card">
-            <div class="stat-label">Totale paginaweergaven</div>
-            <div class="stat-value">${fmt(totalPV)}</div>
+            <div class="stat-label">NL paginaweergaven</div>
+            <div class="stat-value">${fmt(totalNL)}</div>
             <div class="stat-sub">alle websites samen</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Websites bijgehouden</div>
-            <div class="stat-value">${(pv.sites||[]).length}</div>
-            <div class="stat-sub">Netlify websites</div>
+            <div class="stat-label">Unieke bezoekers</div>
+            <div class="stat-value">${fmt(totalVis)}</div>
+            <div class="stat-sub">alle websites samen</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Formulierverzendingen</div>
@@ -267,21 +269,21 @@
             <div class="stat-sub">alle formulieren samen</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Formulieren bijgehouden</div>
-            <div class="stat-value">${(forms.forms||[]).length}</div>
-            <div class="stat-sub">Netlify formulieren</div>
+            <div class="stat-label">Websites bijgehouden</div>
+            <div class="stat-value">${sites.length}</div>
+            <div class="stat-sub">Netlify websites</div>
           </div>
         </div>
       </div>`;
   }
 
-  // ── Gecombineerde lijnengrafiek ─────────────────────────────────────────
+  // ── Gecombineerde lijnengrafiek (NL pageviews + bezoekers) ─────────────
 
   function renderAllSitesChart(sites) {
     if (!sites.length) return "";
     return `
       <div class="section">
-        <div class="section-title">Paginaweergaven over tijd</div>
+        <div class="section-title">NL paginaweergaven over tijd</div>
         <div class="chart-card">
           <div class="chart-wrap"><canvas id="chart-all"></canvas></div>
         </div>
@@ -290,19 +292,36 @@
 
   function initAllSitesChart(sites) {
     if (!sites.length) return;
-    const dates    = allDates(sites);
-    const labels   = dates.map(fmtDt);
-    const datasets = sites.map((site, i) => ({
-      label:           site.name,
-      data:            siteDataset(site, dates),
-      borderColor:     color(i),
-      backgroundColor: color(i) + "18",
-      fill:            true,
-      tension:         0.35,
-      pointRadius:     dates.length > 30 ? 2 : 4,
-      pointHoverRadius:6,
-      spanGaps:        false,
-    }));
+    const dates  = allDates(sites);
+    const labels = dates.map(fmtDt);
+
+    // Per site: NL pageviews (gevuld) + unieke bezoekers (gestippeld)
+    const datasets = sites.flatMap((site, i) => [
+      {
+        label:           site.name + " — NL views",
+        data:            siteDataset(site, dates, "pageviews_nl"),
+        borderColor:     color(i),
+        backgroundColor: color(i) + "18",
+        fill:            true,
+        tension:         0.35,
+        pointRadius:     dates.length > 30 ? 2 : 4,
+        pointHoverRadius:6,
+        spanGaps:        false,
+      },
+      {
+        label:           site.name + " — bezoekers",
+        data:            siteDataset(site, dates, "visitors"),
+        borderColor:     color(i),
+        borderDash:      [5, 4],
+        backgroundColor: "transparent",
+        fill:            false,
+        tension:         0.35,
+        pointRadius:     0,
+        pointHoverRadius:4,
+        spanGaps:        false,
+      },
+    ]);
+
     new Chart(document.getElementById("chart-all"), {
       type: "line",
       data: { labels, datasets },
@@ -330,13 +349,16 @@
             <div class="site-name">${site.name}</div>
             <div class="site-url">${site.url}</div>
           </div>
-          <div class="site-total">${fmt(site.total_pageviews || 0)}</div>
+          <div>
+            <div class="site-total">${fmt(site.total_pageviews_nl || 0)}</div>
+            <div class="site-url" style="text-align:right">${fmt(site.total_visitors || 0)} bezoekers</div>
+          </div>
         </div>
         <div class="chart-wrap small"><canvas id="chart-site-${i}"></canvas></div>
       </div>`).join("");
     return `
       <div class="section">
-        <div class="section-title">Per website</div>
+        <div class="section-title">Per website — NL views (balk) &amp; bezoekers (lijn)</div>
         <div class="site-grid">${cards}</div>
       </div>`;
   }
@@ -345,26 +367,39 @@
     sites.forEach((site, i) => {
       const canvas = document.getElementById(`chart-site-${i}`);
       if (!canvas) return;
-      const c   = color(i);
+      const c     = color(i);
       const daily = site.daily || [];
       new Chart(canvas, {
         type: "bar",
         data: {
           labels:   daily.map(d => fmtDt(d.date)),
-          datasets: [{
-            data:            daily.map(d => d.pageviews),
-            backgroundColor: c + "70",
-            borderColor:     c,
-            borderWidth:     1,
-            borderRadius:    2,
-          }],
+          datasets: [
+            {
+              type:            "bar",
+              label:           "NL pageviews",
+              data:            daily.map(d => d.pageviews_nl ?? d.pageviews),
+              backgroundColor: c + "70",
+              borderColor:     c,
+              borderWidth:     1,
+              borderRadius:    2,
+            },
+            {
+              type:        "line",
+              label:       "Bezoekers",
+              data:        daily.map(d => d.visitors ?? null),
+              borderColor: c,
+              borderWidth: 2,
+              pointRadius: 0,
+              fill:        false,
+              tension:     0.3,
+              yAxisID:     "y",
+            },
+          ],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: {
-            callbacks: { title: items => items[0].label, label: ctx => `${fmt(ctx.raw)} pageviews` }
-          }},
+          plugins: { legend: { display: false } },
           scales: {
             x: { display: false },
             y: { display: false, beginAtZero: true },
