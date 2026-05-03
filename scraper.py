@@ -79,27 +79,46 @@ def fetch_pageviews_for_day(site_id: str, target: date) -> int | None:
     """Geeft het totaal pageviews voor één dag terug, of None als analytics niet beschikbaar."""
     from_dt = datetime(target.year, target.month, target.day, tzinfo=timezone.utc)
     to_dt = from_dt + timedelta(days=1)
-    r = netlify_get(
-        f"{ANALYTICS_BASE}/sites/{site_id}/pageviews",
-        {
+    from_ms = int(from_dt.timestamp() * 1000)
+    to_ms = int(to_dt.timestamp() * 1000)
+
+    # Probeer meerdere bekende Netlify Analytics endpoints
+    attempts = [
+        (f"{ANALYTICS_BASE}/sites/{site_id}/pageviews", {
             "from": from_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "to": to_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "timezone": "UTC",
-        },
-    )
-    if r.status_code in (402, 404, 422):
-        return None
-    r.raise_for_status()
-    d = r.json()
-    if isinstance(d, dict):
-        if "total" in d:
-            return int(d["total"])
-        if "data" in d and isinstance(d["data"], list):
-            return sum(
-                item.get("count", item.get("quantity", item.get("pageviews", 0)))
-                for item in d["data"]
-            )
-    return 0
+        }),
+        (f"https://analytics.services.netlify.com/v1/sites/{site_id}/pageviews", {
+            "from": from_ms,
+            "to": to_ms,
+            "timezone": "UTC",
+        }),
+        (f"{API_BASE}/sites/{site_id}/analytics/range/pageviews", {
+            "from": from_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "to": to_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "timezone": "UTC",
+        }),
+    ]
+
+    for url, params in attempts:
+        r = netlify_get(url, params)
+        print(f"    [{r.status_code}] {url.split('/sites/')[0]}/.../pageviews")
+        if r.status_code == 200:
+            d = r.json()
+            if isinstance(d, dict):
+                if "total" in d:
+                    return int(d["total"])
+                if "data" in d and isinstance(d["data"], list):
+                    return sum(
+                        item.get("count", item.get("quantity", item.get("pageviews", 0)))
+                        for item in d["data"]
+                    )
+            return 0
+        if r.status_code not in (402, 404, 422):
+            print(f"    Onverwachte fout: {r.text[:300]}")
+
+    return None
 
 
 def get_forms(site_id: str) -> list:
