@@ -1,47 +1,221 @@
 {
-  "last_updated": "2026-05-03T20:41:33.548911+00:00",
+  "last_updated": "2026-05-03T20:45:46.700232+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
       "name": "woonstroom-interesse-landing",
       "url": "https://woonstroom-interesse-landing.netlify.app",
-      "total_pageviews": 0,
-      "daily": []
+      "total_pageviews": 7,
+      "daily": [
+        {
+          "date": "2026-04-26",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-27",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-28",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-29",
+          "pageviews": 5
+        },
+        {
+          "date": "2026-04-30",
+          "pageviews": 2
+        },
+        {
+          "date": "2026-05-01",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-05-02",
+          "pageviews": 0
+        }
+      ]
     },
     {
       "id": "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5",
       "name": "woonstroom-woningwaarde-landing",
       "url": "https://woonstroom-woningwaarde-landing.netlify.app",
-      "total_pageviews": 0,
-      "daily": []
+      "total_pageviews": 18,
+      "daily": [
+        {
+          "date": "2026-04-26",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-27",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-28",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-29",
+          "pageviews": 16
+        },
+        {
+          "date": "2026-04-30",
+          "pageviews": 2
+        },
+        {
+          "date": "2026-05-01",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-05-02",
+          "pageviews": 0
+        }
+      ]
     },
     {
       "id": "3970cc41-10db-4747-b7b2-89ea7532c283",
       "name": "woonstroom-aanbod-landing",
       "url": "https://woonstroom-aanbod-landing.netlify.app",
-      "total_pageviews": 0,
-      "daily": []
+      "total_pageviews": 17,
+      "daily": [
+        {
+          "date": "2026-04-26",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-27",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-28",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-29",
+          "pageviews": 11
+        },
+        {
+          "date": "2026-04-30",
+          "pageviews": 6
+        },
+        {
+          "date": "2026-05-01",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-05-02",
+          "pageviews": 0
+        }
+      ]
     },
     {
       "id": "60c23cf1-4c52-4e2a-9e3d-f3399176f47d",
       "name": "woonstroom-woningwaarde",
       "url": "https://woonstroom-woningwaarde.netlify.app",
-      "total_pageviews": 0,
-      "daily": []
+      "total_pageviews": 14,
+      "daily": [
+        {
+          "date": "2026-04-26",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-27",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-28",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-29",
+          "pageviews": 14
+        },
+        {
+          "date": "2026-04-30",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-05-01",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-05-02",
+          "pageviews": 0
+        }
+      ]
     },
     {
       "id": "82333e01-6c2b-48b2-a7ca-564ad851bf6b",
       "name": "woonstroom-aanbod",
       "url": "https://woonstroom-aanbod.netlify.app",
-      "total_pageviews": 0,
-      "daily": []
+      "total_pageviews": 14,
+      "daily": [
+        {
+          "date": "2026-04-26",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-27",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-28",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-29",
+          "pageviews": 10
+        },
+        {
+          "date": "2026-04-30",
+          "pageviews": 4
+        },
+        {
+          "date": "2026-05-01",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-05-02",
+          "pageviews": 0
+        }
+      ]
     },
     {
       "id": "49961024-5cc5-4b6c-b77e-636bc91d016c",
       "name": "woonstroom-interesse",
       "url": "https://woonstroom-interesse.netlify.app",
-      "total_pageviews": 0,
-      "daily": []
+      "total_pageviews": 8,
+      "daily": [
+        {
+          "date": "2026-04-26",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-27",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-28",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-04-29",
+          "pageviews": 7
+        },
+        {
+          "date": "2026-04-30",
+          "pageviews": 1
+        },
+        {
+          "date": "2026-05-01",
+          "pageviews": 0
+        },
+        {
+          "date": "2026-05-02",
+          "pageviews": 0
+        }
+      ]
     }
   ]
 }
