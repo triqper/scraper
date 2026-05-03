@@ -1,4 +1,54 @@
 {
-  "last_updated": null,
-  "forms": []
+  "last_updated": "2026-05-03T20:00:33.253174+00:00",
+  "forms": [
+    {
+      "id": "69f229ebc935e500086b5c26",
+      "name": "woonstroom",
+      "site_id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
+      "site_name": "woonstroom-interesse-landing",
+      "total_submissions": 0,
+      "last_submission_date": null,
+      "daily": []
+    },
+    {
+      "id": "69f229d3a7e77d0008da4617",
+      "name": "woonstroom",
+      "site_id": "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5",
+      "site_name": "woonstroom-woningwaarde-landing",
+      "total_submissions": 0,
+      "last_submission_date": null,
+      "daily": []
+    },
+    {
+      "id": "69f22588ced3d00008729374",
+      "name": "woonstroom",
+      "site_id": "3970cc41-10db-4747-b7b2-89ea7532c283",
+      "site_name": "woonstroom-aanbod-landing",
+      "total_submissions": 0,
+      "last_submission_date": null,
+      "daily": []
+    },
+    {
+      "id": "69dfeb57541b0400088a6a7e",
+      "name": "verkoopintentie",
+      "site_id": "64b8da79-b661-44f1-9d37-72d5f798a2f4",
+      "site_name": "woonradar",
+      "total_submissions": 3,
+      "last_submission_date": "2026-04-23",
+      "daily": [
+        {
+          "date": "2026-04-15",
+          "count": 1
+        },
+        {
+          "date": "2026-04-16",
+          "count": 1
+        },
+        {
+          "date": "2026-04-23",
+          "count": 1
+        }
+      ]
+    }
+  ]
 }
