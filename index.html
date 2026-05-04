@@ -630,24 +630,33 @@ function isNL(country) {
   return c === "nl" || c === "netherlands" || c === "nederland";
 }
 
+function viewHourKey(runHour) {
+  // Scraper detecteert pageviews ~1 uur na de echte view; verschuif terug
+  const t = new Date(new Date(runHour).getTime() - 3600000);
+  const y  = t.getUTCFullYear();
+  const mo = String(t.getUTCMonth() + 1).padStart(2, "0");
+  const d  = String(t.getUTCDate()).padStart(2, "0");
+  const h  = String(t.getUTCHours()).padStart(2, "0");
+  return `${y}-${mo}-${d}T${h}:00:00+00:00`;
+}
+
 function nlPerHour(site) {
-  // NL pageview deltas per run-uur binnen de geselecteerde range
   const result = {};
   for (const row of (site.country_hourly ?? [])) {
     if (!inRange(row.hour)) continue;
+    const key = viewHourKey(row.hour);
     for (const [c, v] of Object.entries(row.deltas ?? {})) {
-      if (isNL(c)) result[row.hour] = (result[row.hour] ?? 0) + v;
+      if (isNL(c)) result[key] = (result[key] ?? 0) + v;
     }
   }
   return result;
 }
 
 function nlPerDay(site) {
-  // NL pageview deltas per dag binnen de geselecteerde range
   const result = {};
   for (const row of (site.country_hourly ?? [])) {
     if (!inRange(row.hour)) continue;
-    const day = row.hour.slice(0, 10);
+    const day = viewHourKey(row.hour).slice(0, 10);
     for (const [c, v] of Object.entries(row.deltas ?? {})) {
       if (isNL(c)) result[day] = (result[day] ?? 0) + v;
     }
