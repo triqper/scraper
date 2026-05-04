@@ -526,42 +526,27 @@ function makeStackedChart(canvas, labels, datasets) {
 
 function getChartData(site) {
   if (nlOnly) {
-    // Deductie: trek niet-NL pageview deltas af van hourly/daily totalen
-    if (mode === "per-uur") {
-      const rows   = filteredHourly(site);
-      const lookup = Object.fromEntries(rows.map(r => [r.hour, r]));
-      const nonNL  = nonNLPerHour(site);
-      const fromMs = fromDt ? fromDt.getTime() : (rows.length ? new Date(rows[0].hour).getTime() : Date.now());
-      const toMs   = toDt   ? toDt.getTime()   : Date.now();
-      const allHours = generateHourlyRange(fromMs, toMs);
-      return {
-        type:    "bar",
-        labels:  allHours.map(h => shortHour(h)),
-        pvData:  allHours.map(h => Math.max(0, (lookup[h]?.pageviews ?? 0) - (nonNL[h] ?? 0))),
-        visData: allHours.map(h => Math.max(0, (lookup[h]?.visitors  ?? 0) - (nonNL[h] ?? 0))),
-      };
-    }
-    const rows   = filteredDaily(site);
-    const lookup = Object.fromEntries(rows.map(r => [r.date, r]));
-    const nonNL  = nonNLPerDay(site);
-    const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : (rows.length ? rows[0].date : new Date().toISOString().slice(0, 10));
+    // Gebruik country_hourly NL-deltas direct als databron (run-tijdstip ≈ view-tijdstip)
+    const fromMs   = fromDt ? fromDt.getTime() : Date.now();
+    const toMs     = toDt   ? toDt.getTime()   : Date.now();
+    const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
     const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+
+    if (mode === "per-uur") {
+      const nlHour   = nlPerHour(site);
+      const allHours = generateHourlyRange(fromMs, toMs);
+      const pvData   = allHours.map(h => nlHour[h] ?? 0);
+      return { type: "bar", labels: allHours.map(h => shortHour(h)), pvData, visData: pvData };
+    }
+    const nlDay    = nlPerDay(site);
     const allDates = generateDailyRange(fromDate, toDate);
     if (mode === "totaal") {
-      let pvSum = 0, visSum = 0;
-      return {
-        type:    "line",
-        labels:  allDates.map(d => shortDate(d)),
-        pvData:  allDates.map(d => { pvSum  += Math.max(0, (lookup[d]?.pageviews ?? 0) - (nonNL[d] ?? 0)); return pvSum;  }),
-        visData: allDates.map(d => { visSum += Math.max(0, (lookup[d]?.visitors  ?? 0) - (nonNL[d] ?? 0)); return visSum; }),
-      };
+      let s = 0;
+      const pvData = allDates.map(d => { s += nlDay[d] ?? 0; return s; });
+      return { type: "line", labels: allDates.map(d => shortDate(d)), pvData, visData: pvData };
     }
-    return {
-      type:    "bar",
-      labels:  allDates.map(d => shortDate(d)),
-      pvData:  allDates.map(d => Math.max(0, (lookup[d]?.pageviews ?? 0) - (nonNL[d] ?? 0))),
-      visData: allDates.map(d => Math.max(0, (lookup[d]?.visitors  ?? 0) - (nonNL[d] ?? 0))),
-    };
+    const pvData = allDates.map(d => nlDay[d] ?? 0);
+    return { type: "bar", labels: allDates.map(d => shortDate(d)), pvData, visData: pvData };
   }
 
   if (mode === "per-uur") {
@@ -639,51 +624,43 @@ function getFormChartData(form) {
   return { labels: allDates.map(d => shortDate(d)), values: allDates.map(d => lookup[d] ?? 0) };
 }
 
-/* ─── NL-only helpers (deductie: totaal min niet-NL) ──────── */
+/* ─── NL-only helpers ─────────────────────────────────────── */
 function isNL(country) {
   const c = (country ?? "").toLowerCase();
   return c === "nl" || c === "netherlands" || c === "nederland";
 }
-function nonNLPerHour(site) {
-  // Som van niet-NL pageview deltas per uur, binnen de geselecteerde range
+
+function nlPerHour(site) {
+  // NL pageview deltas per run-uur binnen de geselecteerde range
   const result = {};
   for (const row of (site.country_hourly ?? [])) {
     if (!inRange(row.hour)) continue;
-    const nonNL = Object.entries(row.deltas ?? {})
-      .filter(([c]) => !isNL(c))
-      .reduce((s, [, v]) => s + v, 0);
-    result[row.hour] = (result[row.hour] ?? 0) + nonNL;
+    for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      if (isNL(c)) result[row.hour] = (result[row.hour] ?? 0) + v;
+    }
   }
   return result;
 }
 
-function nonNLPerDay(site) {
-  const byHour = nonNLPerHour(site);
+function nlPerDay(site) {
+  // NL pageview deltas per dag binnen de geselecteerde range
   const result = {};
-  for (const [hour, count] of Object.entries(byHour)) {
-    const day = hour.slice(0, 10);
-    result[day] = (result[day] ?? 0) + count;
+  for (const row of (site.country_hourly ?? [])) {
+    if (!inRange(row.hour)) continue;
+    const day = row.hour.slice(0, 10);
+    for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      if (isNL(c)) result[day] = (result[day] ?? 0) + v;
+    }
   }
   return result;
 }
 
 function getTotals(site) {
   if (nlOnly) {
-    // Deductie: gebruik hourly/daily totalen en trek niet-NL eraf
-    if (mode === "per-uur") {
-      const rows  = filteredHourly(site);
-      const nonNL = nonNLPerHour(site);
-      return {
-        pv:  rows.reduce((s, r) => s + Math.max(0, r.pageviews - (nonNL[r.hour] ?? 0)), 0),
-        vis: rows.reduce((s, r) => s + Math.max(0, r.visitors  - (nonNL[r.hour] ?? 0)), 0),
-      };
-    }
-    const rows  = filteredDaily(site);
-    const nonNL = nonNLPerDay(site);
-    return {
-      pv:  rows.reduce((s, r) => s + Math.max(0, r.pageviews - (nonNL[r.date] ?? 0)), 0),
-      vis: rows.reduce((s, r) => s + Math.max(0, r.visitors  - (nonNL[r.date] ?? 0)), 0),
-    };
+    const pv = Object.values(
+      mode === "per-uur" ? nlPerHour(site) : nlPerDay(site)
+    ).reduce((s, v) => s + v, 0);
+    return { pv, vis: pv }; // bezoekers per land niet beschikbaar; NL pageviews als benadering
   }
   if (mode === "per-uur") {
     const rows = filteredHourly(site);
