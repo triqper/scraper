@@ -459,7 +459,6 @@ function renderSite(site) {
   card.innerHTML = `
     <div class="site-header">
       <h2>${esc(site.name)}</h2>
-      <a href="${esc(site.url)}" target="_blank" rel="noopener">${esc(site.url.replace(/^https?:\/\//, ""))} ↗</a>
     </div>
     <div class="summary-row">
       <div class="stat-box">
