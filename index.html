@@ -919,11 +919,12 @@ function renderSite(site) {
 }
 
 function updateAllCards() {
+  const el = id => document.getElementById(id);
+
   for (const site of siteData) {
     // Summary numbers
     const totals         = getTotals(site);
     const [pvLbl, visLbl] = statLabel();
-    const el = id => document.getElementById(id);
     if (el(`lbl-pv-${site.id}`))  el(`lbl-pv-${site.id}`).textContent  = pvLbl;
     if (el(`lbl-vis-${site.id}`)) el(`lbl-vis-${site.id}`).textContent = visLbl;
     if (el(`val-pv-${site.id}`))  el(`val-pv-${site.id}`).textContent  = fmt(totals.pv);
