@@ -313,6 +313,16 @@ const GROUPS = [
 ];
 const SITE_ORDER = GROUPS.flatMap(g => g.sites);
 
+const DISPLAY_NAMES = {
+  "woonstroom-aanbod":              "QR Flyer Aanbod",
+  "woonstroom-interesse":           "QR Flyer Interesse",
+  "woonstroom-woningwaarde":        "QR Flyer Woningwaarde",
+  "woonstroom-aanbod-landing":      "Aanbod Landing",
+  "woonstroom-interesse-landing":   "Interesse Landing",
+  "woonstroom-woningwaarde-landing":"Woningwaarde Landing",
+};
+function displayName(name) { return DISPLAY_NAMES[name] ?? name; }
+
 const COLORS = {
   pageviews: { line: "#0969da", fill: "rgba(9,105,218,0.10)", bar: "rgba(9,105,218,0.55)" },
   visitors:  { line: "#1a7f37", fill: "rgba(26,127,55,0.10)",  bar: "rgba(26,127,55,0.55)"  },
@@ -559,7 +569,7 @@ function renderCompare() {
       const site = siteData.find(s => s.name === siteName);
       if (!site) continue;
 
-      const label    = siteName.endsWith("-landing") ? "QR Flyer" : "Hoofd";
+      const label    = displayName(siteName);
       const { labels, pvData } = getChartData(site);
       const total    = getTotals(site).pv;
       const canvasId = `mini-${site.id}`;
@@ -649,7 +659,7 @@ function renderSite(site) {
 
   card.innerHTML = `
     <div class="site-header">
-      <h2>${esc(site.name)}</h2>
+      <h2>${esc(displayName(site.name))}</h2>
     </div>
     <div class="summary-row">
       <div class="stat-box">
