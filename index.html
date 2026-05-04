@@ -422,32 +422,42 @@ function getSources(site) {
 
 function getChartData(site) {
   if (mode === "per-uur") {
-    const rows = filteredHourly(site);
+    const rows   = filteredHourly(site);
+    const lookup = Object.fromEntries(rows.map(r => [r.hour, r]));
+    const fromMs = fromDt ? fromDt.getTime() : (rows.length ? new Date(rows[0].hour).getTime() : Date.now());
+    const toMs   = toDt   ? toDt.getTime()   : Date.now();
+    const allHours = generateHourlyRange(fromMs, toMs);
     return {
       type:    "bar",
-      labels:  rows.map(r => shortHour(r.hour)),
-      pvData:  rows.map(r => r.pageviews),
-      visData: rows.map(r => r.visitors),
+      labels:  allHours.map(h => shortHour(h)),
+      pvData:  allHours.map(h => (lookup[h] ?? {pageviews: 0}).pageviews),
+      visData: allHours.map(h => (lookup[h] ?? {visitors:  0}).visitors),
     };
   }
 
-  const rows = filteredDaily(site);
+  const rows   = filteredDaily(site);
+  const lookup = Object.fromEntries(rows.map(r => [r.date, r]));
+  const fromDate = fromDt ? fromDt.toISOString().slice(0, 10)
+                          : (rows.length ? rows[0].date : new Date().toISOString().slice(0, 10));
+  const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10)
+                          : new Date().toISOString().slice(0, 10);
+  const allDates = generateDailyRange(fromDate, toDate);
 
   if (mode === "totaal") {
     let pvSum = 0, visSum = 0;
     return {
       type:    "line",
-      labels:  rows.map(r => shortDate(r.date)),
-      pvData:  rows.map(r => { pvSum  += r.pageviews; return pvSum;  }),
-      visData: rows.map(r => { visSum += r.visitors;  return visSum; }),
+      labels:  allDates.map(d => shortDate(d)),
+      pvData:  allDates.map(d => { pvSum  += (lookup[d]?.pageviews ?? 0); return pvSum;  }),
+      visData: allDates.map(d => { visSum += (lookup[d]?.visitors  ?? 0); return visSum; }),
     };
   }
 
   return {
     type:    "bar",
-    labels:  rows.map(r => shortDate(r.date)),
-    pvData:  rows.map(r => r.pageviews),
-    visData: rows.map(r => r.visitors),
+    labels:  allDates.map(d => shortDate(d)),
+    pvData:  allDates.map(d => (lookup[d]?.pageviews ?? 0)),
+    visData: allDates.map(d => (lookup[d]?.visitors  ?? 0)),
   };
 }
 
@@ -479,7 +489,37 @@ function getTotals(site) {
   };
 }
 
-/* ─── Chart factory ───────────────────────────────────────── */
+/* ─── Range generators (vult ontbrekende dagen/uren op met 0) ── */
+function generateDailyRange(fromDate, toDate) {
+  const dates = [];
+  const cur = new Date(fromDate + "T00:00:00Z");
+  const end = new Date(toDate  + "T00:00:00Z");
+  while (cur <= end) {
+    const y  = cur.getUTCFullYear();
+    const mo = String(cur.getUTCMonth() + 1).padStart(2, "0");
+    const d  = String(cur.getUTCDate()).padStart(2, "0");
+    dates.push(`${y}-${mo}-${d}`);
+    cur.setUTCDate(cur.getUTCDate() + 1);
+  }
+  return dates;
+}
+
+function generateHourlyRange(fromMs, toMs) {
+  const hours = [];
+  const cur = new Date(fromMs);
+  cur.setUTCMinutes(0, 0, 0); // afronden naar heel uur
+  while (cur.getTime() <= toMs) {
+    const y  = cur.getUTCFullYear();
+    const mo = String(cur.getUTCMonth() + 1).padStart(2, "0");
+    const d  = String(cur.getUTCDate()).padStart(2, "0");
+    const h  = String(cur.getUTCHours()).padStart(2, "0");
+    hours.push(`${y}-${mo}-${d}T${h}:00:00+00:00`);
+    cur.setUTCHours(cur.getUTCHours() + 1);
+  }
+  return hours;
+}
+
+/* ─── Chart data ──────────────────────────────────────────────── */
 function makeChart(canvas, type, labels, values, color) {
   const isBar = type === "bar";
   return new Chart(canvas, {
