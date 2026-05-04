@@ -433,7 +433,7 @@ function getCountries(site) {
     ? Object.fromEntries((site.top_countries ?? []).map(r => [r.country, r.pageviews]))
     : aggregateHourlyDeltas(site.country_hourly ?? []);
   const entries = nlOnly
-    ? (agg.NL ? [["NL", agg.NL]] : [])
+    ? Object.entries(agg).filter(([c]) => isNL(c))
     : Object.entries(agg).sort((a, b) => b[1] - a[1]).slice(0, 10);
   return entries.map(([country, pageviews]) => ({ country, pageviews }));
 }
@@ -457,7 +457,7 @@ function getCountryChartData(site) {
   const totals = {};
   for (const row of hourly) {
     for (const [c, v] of Object.entries(row.deltas ?? {})) {
-      if (nlOnly && c !== "NL") continue;
+      if (nlOnly && !isNL(c)) continue;
       totals[c] = (totals[c] ?? 0) + v;
     }
   }
@@ -640,13 +640,17 @@ function getFormChartData(form) {
 }
 
 /* ─── NL-only helpers (deductie: totaal min niet-NL) ──────── */
+function isNL(country) {
+  const c = (country ?? "").toLowerCase();
+  return c === "nl" || c === "netherlands" || c === "nederland";
+}
 function nonNLPerHour(site) {
   // Som van niet-NL pageview deltas per uur, binnen de geselecteerde range
   const result = {};
   for (const row of (site.country_hourly ?? [])) {
     if (!inRange(row.hour)) continue;
     const nonNL = Object.entries(row.deltas ?? {})
-      .filter(([c]) => c !== "NL")
+      .filter(([c]) => !isNL(c))
       .reduce((s, [, v]) => s + v, 0);
     result[row.hour] = (result[row.hour] ?? 0) + nonNL;
   }
