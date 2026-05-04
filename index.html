@@ -15,7 +15,6 @@
       --text:    #1f2328;
       --muted:   #656d76;
       --accent:  #0969da;
-      --green:   #1a7f37;
       --radius:  6px;
     }
 
@@ -27,26 +26,91 @@
       line-height: 1.5;
     }
 
+    /* ── Header ─────────────────────────────────── */
     header {
       background: #24292f;
       padding: 0.75rem 1.5rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      flex-wrap: wrap;
     }
     header h1 { color: #fff; font-size: 1rem; font-weight: 600; }
-    header .updated { color: #8b949e; font-size: 0.8rem; margin-left: auto; }
+    .header-meta { color: #8b949e; font-size: 0.78rem; margin-left: auto; display: flex; gap: 1.25rem; flex-wrap: wrap; }
 
+    /* ── Controls bar ────────────────────────────── */
+    .controls {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.65rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .control-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    input[type="date"] {
+      font-size: 0.82rem;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+    }
+    input[type="date"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    .btn-reset {
+      font-size: 0.78rem;
+      padding: 0.28rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .btn-reset:hover { background: var(--bg); }
+
+    .mode-group {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .mode-btn {
+      font-size: 0.8rem;
+      padding: 0.3rem 0.75rem;
+      border: none;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .mode-btn:last-child { border-right: none; }
+    .mode-btn:hover { background: var(--bg); }
+    .mode-btn.active { background: var(--accent); color: #fff; }
+
+    /* ── Main layout ─────────────────────────────── */
     main {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 1.5rem 1rem;
+      padding: 1.25rem 1rem;
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 1.75rem;
     }
 
-    /* ── Site card ─────────────────────────────────────── */
+    /* ── Site card ───────────────────────────────── */
     .site-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -55,123 +119,117 @@
     }
 
     .site-header {
-      padding: 0.75rem 1rem;
+      padding: 0.65rem 1rem;
       border-bottom: 1px solid var(--border);
+      background: #f6f8fa;
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      background: #f6f8fa;
     }
-    .site-header h2 {
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-    .site-header a {
-      color: var(--muted);
-      font-size: 0.8rem;
-      text-decoration: none;
-      margin-left: auto;
-    }
+    .site-header h2 { font-size: 0.9rem; font-weight: 600; }
+    .site-header a { color: var(--muted); font-size: 0.78rem; text-decoration: none; margin-left: auto; }
     .site-header a:hover { color: var(--accent); }
 
-    /* ── Summary row ──────────────────────────────────── */
+    /* ── Summary ─────────────────────────────────── */
     .summary-row {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       border-bottom: 1px solid var(--border);
     }
     .stat-box {
-      padding: 1rem 1.25rem;
+      padding: 0.85rem 1.25rem;
       border-right: 1px solid var(--border);
     }
     .stat-box:last-child { border-right: none; }
-    .stat-label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
-    .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--text); }
+    .stat-label { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; }
 
-    /* ── Charts row ───────────────────────────────────── */
+    /* ── Charts ──────────────────────────────────── */
     .charts-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       border-bottom: 1px solid var(--border);
     }
     .chart-box {
-      padding: 1rem 1.25rem;
+      padding: 0.85rem 1.25rem;
       border-right: 1px solid var(--border);
+      min-width: 0;
     }
     .chart-box:last-child { border-right: none; }
-    .chart-title { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
-    .chart-box canvas { width: 100% !important; height: 120px !important; }
+    .chart-title { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
+    .chart-wrap { position: relative; height: 120px; }
+    .chart-wrap canvas { width: 100% !important; height: 100% !important; }
+    .chart-empty { color: var(--muted); font-size: 0.8rem; font-style: italic; padding: 1rem 0; }
 
-    /* ── Tables row ───────────────────────────────────── */
+    /* ── Tables ──────────────────────────────────── */
     .tables-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
     }
     .table-box {
-      padding: 1rem 1.25rem;
+      padding: 0.85rem 1.25rem;
       border-right: 1px solid var(--border);
+      min-width: 0;
     }
     .table-box:last-child { border-right: none; }
-    .table-title { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+    .table-title { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
 
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    thead th {
-      text-align: left;
-      color: var(--muted);
-      font-size: 0.75rem;
-      font-weight: 500;
-      padding: 0.25rem 0.5rem;
-      border-bottom: 1px solid var(--border);
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead th { text-align: left; color: var(--muted); font-size: 0.72rem; font-weight: 500; padding: 0.2rem 0.4rem; border-bottom: 1px solid var(--border); }
     thead th:last-child { text-align: right; }
-    tbody td {
-      padding: 0.4rem 0.5rem;
-      border-bottom: 1px solid #f0f0f0;
-      max-width: 220px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    tbody td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+    tbody td { padding: 0.35rem 0.4rem; border-bottom: 1px solid #f0f0f0; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    tbody td:last-child { text-align: right; font-variant-numeric: tabular-nums; min-width: 3rem; }
     tbody tr:last-child td { border-bottom: none; }
 
-    /* progress bar in table */
     .bar-cell { position: relative; }
-    .bar-bg {
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      background: #dbeafe;
-      border-radius: 2px;
-      z-index: 0;
-    }
+    .bar-bg { position: absolute; left: 0; top: 2px; bottom: 2px; background: #dbeafe; border-radius: 2px; z-index: 0; }
     .bar-text { position: relative; z-index: 1; }
 
-    /* ── Empty / loading state ────────────────────────── */
-    .empty { color: var(--muted); font-style: italic; padding: 0.5rem 0; font-size: 0.85rem; }
+    .empty { color: var(--muted); font-style: italic; font-size: 0.82rem; }
 
-    @media (max-width: 640px) {
+    @media (max-width: 600px) {
       .summary-row, .charts-row, .tables-row { grid-template-columns: 1fr; }
       .stat-box, .chart-box, .table-box { border-right: none; border-bottom: 1px solid var(--border); }
-      .tables-row .table-box:last-child { border-bottom: none; }
+      .charts-row .chart-box:last-child, .tables-row .table-box:last-child { border-bottom: none; }
+      .controls { gap: 0.75rem; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
-    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
   </svg>
   <h1>Netlify Analytics</h1>
-  <span class="updated" id="updated-at"></span>
-  <span class="updated" id="zero-point-at" style="margin-left:0"></span>
+  <div class="header-meta">
+    <span id="zero-point-at"></span>
+    <span id="updated-at"></span>
+  </div>
 </header>
+
+<div class="controls">
+  <div class="control-group">
+    <span class="control-label">Toon data vanaf</span>
+    <input type="date" id="from-date" />
+    <button class="btn-reset" id="reset-filter">Alles</button>
+  </div>
+  <div class="control-group" style="margin-left:auto">
+    <span class="control-label">Grafiek</span>
+    <div class="mode-group">
+      <button class="mode-btn active" data-mode="per-dag">Per dag</button>
+      <button class="mode-btn" data-mode="totaal">Totaal</button>
+      <button class="mode-btn" data-mode="per-uur">Per uur</button>
+    </div>
+  </div>
+</div>
 
 <main id="main">
   <p style="color:var(--muted)">Laden…</p>
 </main>
 
 <script>
+/* ── State ─────────────────────────────────────────────────── */
 const SITE_ORDER = [
   "woonstroom-aanbod-landing",
   "woonstroom-woningwaarde-landing",
@@ -181,181 +239,350 @@ const SITE_ORDER = [
   "woonstroom-interesse",
 ];
 
-const CHART_COLORS = {
-  pageviews: { line: "#0969da", fill: "rgba(9,105,218,0.12)" },
-  visitors:  { line: "#1a7f37", fill: "rgba(26,127,55,0.12)" },
+const COLORS = {
+  pageviews: { line: "#0969da", fill: "rgba(9,105,218,0.10)" },
+  visitors:  { line: "#1a7f37", fill: "rgba(26,127,55,0.10)" },
 };
 
-function fmt(n) {
-  return (n ?? 0).toLocaleString("nl-NL");
+let siteData    = [];
+let mode        = "per-dag";   // "per-dag" | "totaal" | "per-uur"
+let fromDate    = null;        // "YYYY-MM-DD" or null
+let chartRefs   = {};          // { siteId: { pv: Chart, vis: Chart } }
+
+/* ── Helpers ────────────────────────────────────────────────── */
+function fmt(n) { return (n ?? 0).toLocaleString("nl-NL"); }
+function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function shortDate(iso) {
+  return new Date(iso + "T00:00:00Z").toLocaleDateString("nl-NL",
+    { day: "numeric", month: "short", timeZone: "UTC" });
 }
 
-function makeChart(canvas, labels, values, color) {
-  new Chart(canvas, {
-    type: "line",
+function shortHour(isoStr) {
+  // "2026-05-04T10:00:00+00:00" → "4 mei 10:00"
+  return new Date(isoStr).toLocaleString("nl-NL",
+    { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
+      timeZone: "Europe/Amsterdam" });
+}
+
+/* ── Data selectors ─────────────────────────────────────────── */
+function filteredDaily(site) {
+  let d = site.daily ?? [];
+  if (fromDate) d = d.filter(r => r.date >= fromDate);
+  return d;
+}
+
+function filteredHourly(site) {
+  let h = site.hourly ?? [];
+  if (fromDate) h = h.filter(r => r.hour.slice(0, 10) >= fromDate);
+  return h;
+}
+
+function chartDataFor(site) {
+  if (mode === "per-uur") {
+    const rows = filteredHourly(site);
+    return {
+      labels:  rows.map(r => shortHour(r.hour)),
+      pvData:  rows.map(r => r.pageviews),
+      visData: rows.map(r => r.visitors),
+      type:    "bar",
+    };
+  }
+
+  const rows = filteredDaily(site);
+
+  if (mode === "totaal") {
+    let pvSum = 0, visSum = 0;
+    return {
+      labels:  rows.map(r => shortDate(r.date)),
+      pvData:  rows.map(r => { pvSum  += r.pageviews; return pvSum;  }),
+      visData: rows.map(r => { visSum += r.visitors;  return visSum; }),
+      type:    "line",
+    };
+  }
+
+  // per-dag (default)
+  return {
+    labels:  rows.map(r => shortDate(r.date)),
+    pvData:  rows.map(r => r.pageviews),
+    visData: rows.map(r => r.visitors),
+    type:    "bar",
+  };
+}
+
+function filteredTotals(site) {
+  if (mode === "per-uur") {
+    const rows = filteredHourly(site);
+    return {
+      pv:  rows.reduce((s, r) => s + r.pageviews, 0),
+      vis: rows.reduce((s, r) => s + r.visitors,  0),
+    };
+  }
+  const rows = filteredDaily(site);
+  return {
+    pv:  rows.reduce((s, r) => s + r.pageviews, 0),
+    vis: rows.reduce((s, r) => s + r.visitors,  0),
+  };
+}
+
+/* ── Chart factory ──────────────────────────────────────────── */
+function makeChart(canvas, type, labels, values, color) {
+  const isBar = type === "bar";
+  return new Chart(canvas, {
+    type,
     data: {
       labels,
       datasets: [{
         data: values,
-        borderColor: color.line,
-        backgroundColor: color.fill,
-        borderWidth: 2,
-        pointRadius: 3,
+        borderColor:     color.line,
+        backgroundColor: isBar ? color.fill.replace("0.10", "0.55") : color.fill,
+        borderWidth:     isBar ? 0 : 2,
+        borderRadius:    isBar ? 3 : 0,
+        pointRadius:     isBar ? 0 : 3,
         pointHoverRadius: 4,
-        fill: true,
+        fill:   !isBar,
         tension: 0.3,
       }],
     },
     options: {
-      responsive: false,
+      responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { mode: "index", intersect: false } },
+      animation: { duration: 200 },
+      plugins: {
+        legend: { display: false },
+        tooltip: { mode: "index", intersect: false },
+      },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 0, maxTicksLimit: 7 } },
-        y: { beginAtZero: true, grid: { color: "#f0f0f0" }, ticks: { font: { size: 10 }, precision: 0 } },
+        x: {
+          grid: { display: false },
+          ticks: {
+            font: { size: 10 },
+            maxRotation: 0,
+            maxTicksLimit: mode === "per-uur" ? 8 : 7,
+          },
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: "#f0f0f0" },
+          ticks: { font: { size: 10 }, precision: 0 },
+        },
       },
     },
   });
 }
 
-function barTable(rows, colA, colB, valueKey) {
+/* ── Bar table ──────────────────────────────────────────────── */
+function barTable(rows, labelKey, valueKey, colA, colB) {
   if (!rows || rows.length === 0) return `<p class="empty">Geen data</p>`;
   const max = Math.max(...rows.map(r => r[valueKey] ?? 0), 1);
-  let html = `<table>
-    <thead><tr><th>${colA}</th><th>${colB}</th></tr></thead>
-    <tbody>`;
+  let html = `<table><thead><tr><th>${colA}</th><th>${colB}</th></tr></thead><tbody>`;
   for (const row of rows) {
     const val = row[valueKey] ?? 0;
     const pct = Math.round((val / max) * 100);
-    const label = Object.values(row).find((v, i) => i === 0) ?? "";
     html += `<tr>
       <td class="bar-cell">
         <div class="bar-bg" style="width:${pct}%"></div>
-        <span class="bar-text">${escHtml(String(label))}</span>
+        <span class="bar-text">${esc(String(row[labelKey] ?? ""))}</span>
       </td>
       <td>${fmt(val)}</td>
     </tr>`;
   }
-  html += `</tbody></table>`;
-  return html;
+  return html + `</tbody></table>`;
 }
 
-function escHtml(s) {
-  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-function shortDate(iso) {
-  // "2026-05-04" → "4 mei"
-  const d = new Date(iso + "T00:00:00Z");
-  return d.toLocaleDateString("nl-NL", { day: "numeric", month: "short", timeZone: "UTC" });
-}
-
+/* ── Per-site render ────────────────────────────────────────── */
 function renderSite(site) {
   const card = document.createElement("div");
   card.className = "site-card";
+  card.id = `card-${site.id}`;
 
-  const daily = site.daily ?? [];
-  const labels = daily.map(d => shortDate(d.date));
-  const pvData  = daily.map(d => d.pageviews ?? 0);
-  const visData = daily.map(d => d.visitors ?? 0);
+  const totals = filteredTotals(site);
+  const { labels, pvData, visData, type } = chartDataFor(site);
 
-  const chartId1 = `pv-${site.id}`;
-  const chartId2 = `vis-${site.id}`;
+  const pvId  = `pv-${site.id}`;
+  const visId = `vis-${site.id}`;
 
-  const countryHtml = barTable(site.top_countries, "Land", "Pageviews", "pageviews");
-  const sourceHtml  = barTable(site.top_sources,   "Bron", "Verwijzingen", "referrals");
+  const countryHtml = barTable(site.top_countries, "country", "pageviews", "Land",  "Pageviews");
+  const sourceHtml  = barTable(site.top_sources,   "source",  "referrals", "Bron", "Verwijzingen");
+
+  const pvLabel  = mode === "totaal" ? "Totaal pageviews" : mode === "per-uur" ? "Pageviews (uur)" : "Pageviews (7 d)";
+  const visLabel = mode === "totaal" ? "Totaal bezoekers" : mode === "per-uur" ? "Bezoekers (uur)" : "Bezoekers (7 d)";
+
+  const hasHourly = (site.hourly ?? []).length > 0;
+  const pvEmpty   = mode === "per-uur" && !hasHourly
+    ? `<p class="chart-empty">Nog geen uurdata — beschikbaar na de volgende scraper-run.</p>`
+    : (labels.length === 0 ? `<p class="chart-empty">Geen data in deze periode.</p>` : "");
 
   card.innerHTML = `
     <div class="site-header">
-      <h2>${escHtml(site.name)}</h2>
-      <a href="${escHtml(site.url)}" target="_blank" rel="noopener">${escHtml(site.url.replace(/^https?:\/\//, ""))} ↗</a>
+      <h2>${esc(site.name)}</h2>
+      <a href="${esc(site.url)}" target="_blank" rel="noopener">${esc(site.url.replace(/^https?:\/\//, ""))} ↗</a>
     </div>
     <div class="summary-row">
       <div class="stat-box">
-        <div class="stat-label">Pageviews (7 dagen)</div>
-        <div class="stat-value">${fmt(site.total_pageviews)}</div>
+        <div class="stat-label" id="lbl-pv-${site.id}">${esc(pvLabel)}</div>
+        <div class="stat-value" id="val-pv-${site.id}">${fmt(totals.pv)}</div>
       </div>
       <div class="stat-box">
-        <div class="stat-label">Unieke bezoekers (7 dagen)</div>
-        <div class="stat-value">${fmt(site.total_visitors)}</div>
+        <div class="stat-label" id="lbl-vis-${site.id}">${esc(visLabel)}</div>
+        <div class="stat-value" id="val-vis-${site.id}">${fmt(totals.vis)}</div>
       </div>
     </div>
     <div class="charts-row">
       <div class="chart-box">
-        <div class="chart-title">Pageviews per dag</div>
-        <canvas id="${chartId1}" height="120"></canvas>
+        <div class="chart-title">Pageviews</div>
+        <div class="chart-wrap" id="wrap-pv-${site.id}">
+          ${pvEmpty || `<canvas id="${pvId}"></canvas>`}
+        </div>
       </div>
       <div class="chart-box">
-        <div class="chart-title">Unieke bezoekers per dag</div>
-        <canvas id="${chartId2}" height="120"></canvas>
+        <div class="chart-title">Unieke bezoekers</div>
+        <div class="chart-wrap" id="wrap-vis-${site.id}">
+          ${pvEmpty || `<canvas id="${visId}"></canvas>`}
+        </div>
       </div>
     </div>
     <div class="tables-row">
       <div class="table-box">
-        <div class="table-title">Top landen</div>
+        <div class="table-title">Top landen <span style="font-weight:400;text-transform:none">(totaal since nulpunt)</span></div>
         ${countryHtml}
       </div>
       <div class="table-box">
-        <div class="table-title">Top bronnen</div>
+        <div class="table-title">Top bronnen <span style="font-weight:400;text-transform:none">(totaal since nulpunt)</span></div>
         ${sourceHtml}
       </div>
     </div>
   `;
 
-  // Charts must be created after the canvas elements are in the DOM
-  requestAnimationFrame(() => {
-    const c1 = card.querySelector(`#${chartId1}`);
-    const c2 = card.querySelector(`#${chartId2}`);
-    if (c1 && labels.length) makeChart(c1, labels, pvData,  CHART_COLORS.pageviews);
-    if (c2 && labels.length) makeChart(c2, labels, visData, CHART_COLORS.visitors);
-  });
+  if (!pvEmpty && labels.length > 0) {
+    requestAnimationFrame(() => {
+      const c1 = card.querySelector(`#${pvId}`);
+      const c2 = card.querySelector(`#${visId}`);
+      const pv  = c1 ? makeChart(c1,  type, labels, pvData,  COLORS.pageviews) : null;
+      const vis = c2 ? makeChart(c2,  type, labels, visData, COLORS.visitors)  : null;
+      chartRefs[site.id] = { pv, vis };
+    });
+  }
 
   return card;
 }
 
-async function load() {
-  const bust = Date.now();
-  const [pvRes] = await Promise.all([
-    fetch(`./data/analytics.json?v=${bust}`, { cache: "no-store" }),
-  ]);
+/* ── Update existing cards ──────────────────────────────────── */
+function updateAllCards() {
+  for (const site of siteData) {
+    // Totals
+    const totals = filteredTotals(site);
+    const pvLabel  = mode === "totaal" ? "Totaal pageviews" : mode === "per-uur" ? "Pageviews (uur)" : "Pageviews (7 d)";
+    const visLabel = mode === "totaal" ? "Totaal bezoekers" : mode === "per-uur" ? "Bezoekers (uur)" : "Bezoekers (7 d)";
+    const lblPv  = document.getElementById(`lbl-pv-${site.id}`);
+    const lblVis = document.getElementById(`lbl-vis-${site.id}`);
+    const valPv  = document.getElementById(`val-pv-${site.id}`);
+    const valVis = document.getElementById(`val-vis-${site.id}`);
+    if (lblPv)  lblPv.textContent  = pvLabel;
+    if (lblVis) lblVis.textContent = visLabel;
+    if (valPv)  valPv.textContent  = fmt(totals.pv);
+    if (valVis) valVis.textContent = fmt(totals.vis);
 
+    // Charts: destroy old, create new (type may change)
+    const refs = chartRefs[site.id] ?? {};
+    if (refs.pv)  { refs.pv.destroy();  refs.pv  = null; }
+    if (refs.vis) { refs.vis.destroy(); refs.vis = null; }
+
+    const { labels, pvData, visData, type } = chartDataFor(site);
+    const hasHourly = (site.hourly ?? []).length > 0;
+    const noData = mode === "per-uur" ? !hasHourly : labels.length === 0;
+
+    const wrapPv  = document.getElementById(`wrap-pv-${site.id}`);
+    const wrapVis = document.getElementById(`wrap-vis-${site.id}`);
+
+    if (noData || labels.length === 0) {
+      const msg = mode === "per-uur" && !hasHourly
+        ? "Nog geen uurdata — beschikbaar na de volgende scraper-run."
+        : "Geen data in deze periode.";
+      if (wrapPv)  wrapPv.innerHTML  = `<p class="chart-empty">${msg}</p>`;
+      if (wrapVis) wrapVis.innerHTML = `<p class="chart-empty">${msg}</p>`;
+      chartRefs[site.id] = { pv: null, vis: null };
+      continue;
+    }
+
+    if (wrapPv)  wrapPv.innerHTML  = `<canvas id="pv-${site.id}"></canvas>`;
+    if (wrapVis) wrapVis.innerHTML = `<canvas id="vis-${site.id}"></canvas>`;
+
+    const c1 = document.getElementById(`pv-${site.id}`);
+    const c2 = document.getElementById(`vis-${site.id}`);
+    chartRefs[site.id] = {
+      pv:  c1 ? makeChart(c1, type, labels, pvData,  COLORS.pageviews) : null,
+      vis: c2 ? makeChart(c2, type, labels, visData, COLORS.visitors)  : null,
+    };
+  }
+}
+
+/* ── Controls wiring ────────────────────────────────────────── */
+document.getElementById("from-date").addEventListener("change", e => {
+  fromDate = e.target.value || null;
+  updateAllCards();
+});
+
+document.getElementById("reset-filter").addEventListener("click", () => {
+  fromDate = null;
+  document.getElementById("from-date").value = "";
+  updateAllCards();
+});
+
+document.querySelectorAll(".mode-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    mode = btn.dataset.mode;
+    document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    updateAllCards();
+  });
+});
+
+/* ── Load ───────────────────────────────────────────────────── */
+async function load() {
+  const res = await fetch(`./data/analytics.json?v=${Date.now()}`, { cache: "no-store" });
   const main = document.getElementById("main");
   main.innerHTML = "";
 
-  if (!pvRes.ok) {
-    main.innerHTML = `<p style="color:red">Kon analytics.json niet laden (${pvRes.status}). Controleer of de scraper al gedraaid heeft.</p>`;
+  if (!res.ok) {
+    main.innerHTML = `<p style="color:red">Kon analytics.json niet laden (${res.status}).</p>`;
     return;
   }
 
-  const data = await pvRes.json();
+  const data = await res.json();
 
-  const updEl = document.getElementById("updated-at");
   if (data.last_updated) {
     const d = new Date(data.last_updated);
-    updEl.textContent = `Bijgewerkt: ${d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}`;
+    document.getElementById("updated-at").textContent =
+      "Bijgewerkt: " + d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" });
   }
-  const zpEl = document.getElementById("zero-point-at");
   if (data.zero_point) {
     const d = new Date(data.zero_point);
-    zpEl.textContent = `Nulpunt: ${d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}`;
+    document.getElementById("zero-point-at").textContent =
+      "Nulpunt: " + d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" });
+
+    // Stel min-datum van de datepicker in op de nulpunt-dag
+    const minDate = data.zero_point.slice(0, 10);
+    const picker = document.getElementById("from-date");
+    picker.min = minDate;
+    picker.max = new Date().toISOString().slice(0, 10);
   }
 
-  const sites = (data.sites ?? []).sort((a, b) => {
-    const ai = SITE_ORDER.indexOf(a.name);
-    const bi = SITE_ORDER.indexOf(b.name);
+  siteData = (data.sites ?? []).sort((a, b) => {
+    const ai = SITE_ORDER.indexOf(a.name), bi = SITE_ORDER.indexOf(b.name);
     if (ai === -1 && bi === -1) return a.name.localeCompare(b.name);
-    if (ai === -1) return 1;
-    if (bi === -1) return -1;
-    return ai - bi;
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
   });
 
-  if (sites.length === 0) {
-    const zp = data.zero_point ? new Date(data.zero_point).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" }) : "onbekend";
+  if (siteData.length === 0) {
+    const zp = data.zero_point
+      ? new Date(data.zero_point).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })
+      : "onbekend";
     main.innerHTML = `<p style="color:var(--muted)">Nulpunt ingesteld op ${zp}. Wacht op de volgende scraper-run voor nieuwe data.</p>`;
     return;
   }
 
-  for (const site of sites) {
+  for (const site of siteData) {
     main.appendChild(renderSite(site));
   }
 }

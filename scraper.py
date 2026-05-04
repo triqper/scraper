@@ -70,69 +70,96 @@ def get_sites() -> list:
     return sites
 
 
-def _ms_range(from_date: date, to_date: date) -> tuple[int, int]:
-    f = datetime(from_date.year, from_date.month, from_date.day, tzinfo=timezone.utc)
-    t = datetime(to_date.year, to_date.month, to_date.day, tzinfo=timezone.utc)
-    return int(f.timestamp() * 1000), int(t.timestamp() * 1000)
+def _ms(dt: datetime) -> int:
+    return int(dt.timestamp() * 1000)
+
+
+def _day_ms(d: date) -> int:
+    return _ms(datetime(d.year, d.month, d.day, tzinfo=timezone.utc))
 
 
 def fetch_pageviews_daily(site_id: str, from_date: date, to_date: date) -> list[dict]:
-    from_ms, to_ms = _ms_range(from_date, to_date)
     r = netlify_get(
         f"{ANALYTICS_BASE}/{site_id}/pageviews",
-        {"from": from_ms, "to": to_ms, "timezone": "+0000", "resolution": "day"},
+        {"from": _day_ms(from_date), "to": _day_ms(to_date), "timezone": "+0000", "resolution": "day"},
     )
     if r.status_code in (402, 404, 422):
         return []
     if r.status_code != 200:
         print(f"    Fout pageviews {r.status_code}: {r.text[:200]}")
         return []
-    d = r.json()
-    items = d.get("data", []) if isinstance(d, dict) else []
-    result = []
-    for item in items:
-        if isinstance(item, (list, tuple)) and len(item) >= 2:
-            day = datetime.fromtimestamp(item[0] / 1000, tz=timezone.utc).date().isoformat()
-            result.append({"date": day, "pageviews": int(item[1])})
-        elif isinstance(item, dict):
-            day = (item.get("date") or item.get("timestamp") or "")[:10]
-            if day:
-                result.append({"date": day, "pageviews": int(item.get("count", item.get("pageviews", 0)))})
-    return result
+    return _parse_timeseries(r.json(), "pageviews")
 
 
 def fetch_visitors_daily(site_id: str, from_date: date, to_date: date) -> list[dict]:
-    from_ms, to_ms = _ms_range(from_date, to_date)
     r = netlify_get(
         f"{ANALYTICS_BASE}/{site_id}/visitors",
-        {"from": from_ms, "to": to_ms, "timezone": "+0000", "resolution": "day"},
+        {"from": _day_ms(from_date), "to": _day_ms(to_date), "timezone": "+0000", "resolution": "day"},
     )
     if r.status_code != 200:
         return []
-    d = r.json()
-    items = d.get("data", []) if isinstance(d, dict) else []
+    return _parse_timeseries(r.json(), "visitors")
+
+
+def fetch_pageviews_hourly(site_id: str, from_dt: datetime, to_dt: datetime) -> list[dict]:
+    r = netlify_get(
+        f"{ANALYTICS_BASE}/{site_id}/pageviews",
+        {"from": _ms(from_dt), "to": _ms(to_dt), "timezone": "+0000", "resolution": "hour"},
+    )
+    if r.status_code in (402, 404, 422):
+        return []
+    if r.status_code != 200:
+        return []
+    return _parse_timeseries_hourly(r.json(), "pageviews")
+
+
+def fetch_visitors_hourly(site_id: str, from_dt: datetime, to_dt: datetime) -> list[dict]:
+    r = netlify_get(
+        f"{ANALYTICS_BASE}/{site_id}/visitors",
+        {"from": _ms(from_dt), "to": _ms(to_dt), "timezone": "+0000", "resolution": "hour"},
+    )
+    if r.status_code != 200:
+        return []
+    return _parse_timeseries_hourly(r.json(), "visitors")
+
+
+def _parse_timeseries(raw: dict | list, key: str) -> list[dict]:
+    items = raw.get("data", []) if isinstance(raw, dict) else []
     result = []
     for item in items:
         if isinstance(item, (list, tuple)) and len(item) >= 2:
             day = datetime.fromtimestamp(item[0] / 1000, tz=timezone.utc).date().isoformat()
-            result.append({"date": day, "visitors": int(item[1])})
+            result.append({"date": day, key: int(item[1])})
         elif isinstance(item, dict):
             day = (item.get("date") or item.get("timestamp") or "")[:10]
             if day:
-                result.append({"date": day, "visitors": int(item.get("count", item.get("visitors", 0)))})
+                result.append({"date": day, key: int(item.get("count", item.get(key, 0)))})
+    return result
+
+
+def _parse_timeseries_hourly(raw: dict | list, key: str) -> list[dict]:
+    items = raw.get("data", []) if isinstance(raw, dict) else []
+    result = []
+    for item in items:
+        if isinstance(item, (list, tuple)) and len(item) >= 2:
+            dt = datetime.fromtimestamp(item[0] / 1000, tz=timezone.utc)
+            hour_str = dt.strftime("%Y-%m-%dT%H:00:00+00:00")
+            result.append({"hour": hour_str, key: int(item[1])})
+        elif isinstance(item, dict):
+            hour_str = (item.get("timestamp") or item.get("hour") or "")
+            if hour_str:
+                result.append({"hour": hour_str[:19] + "+00:00", key: int(item.get("count", item.get(key, 0)))})
     return result
 
 
 def fetch_top_countries(site_id: str, from_date: date, to_date: date, limit: int = 20) -> list[dict]:
-    from_ms, to_ms = _ms_range(from_date, to_date)
     r = netlify_get(
         f"{ANALYTICS_BASE}/{site_id}/ranking/countries",
-        {"from": from_ms, "to": to_ms, "timezone": "+0000", "limit": limit},
+        {"from": _day_ms(from_date), "to": _day_ms(to_date), "timezone": "+0000", "limit": limit},
     )
     if r.status_code != 200:
         return []
-    d = r.json()
-    items = d.get("data", []) if isinstance(d, dict) else []
+    items = (r.json().get("data", []) if isinstance(r.json(), dict) else [])
     result = []
     for item in items:
         if isinstance(item, dict):
@@ -145,16 +172,14 @@ def fetch_top_countries(site_id: str, from_date: date, to_date: date, limit: int
 
 
 def fetch_top_sources(site_id: str, from_date: date, to_date: date, limit: int = 20) -> list[dict]:
-    from_ms, to_ms = _ms_range(from_date, to_date)
     r = netlify_get(
         f"{ANALYTICS_BASE}/{site_id}/ranking/sources",
-        {"from": from_ms, "to": to_ms, "timezone": "+0000", "limit": limit},
+        {"from": _day_ms(from_date), "to": _day_ms(to_date), "timezone": "+0000", "limit": limit},
     )
     if r.status_code != 200:
         print(f"    [sources {r.status_code}]")
         return []
-    d = r.json()
-    items = d.get("data", []) if isinstance(d, dict) else []
+    items = (r.json().get("data", []) if isinstance(r.json(), dict) else [])
     result = []
     for item in items:
         if isinstance(item, dict):
@@ -194,14 +219,17 @@ def get_form_submissions(form_id: str, per_page: int = 100, page: int = 1) -> li
 def initialize_zero_point() -> dict:
     """
     Leg de huidige Netlify-stand vast als nulpunt.
-    Alles wat hierna binnenkomt, wordt als delta getoond.
+    Alles wat hierna binnenkomt wordt als delta getoond.
     """
     now = datetime.now(timezone.utc)
     today = now.date()
+    # Uurdata start bij het VOLGENDE volle uur zodat we geen halve-uur-correctie nodig hebben
+    next_hour = (now + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
 
     zp: dict = {
         "created_at": now.isoformat(),
         "date": today.isoformat(),
+        "hour": next_hour.isoformat(),
         "sites": {},
     }
 
@@ -213,23 +241,22 @@ def initialize_zero_point() -> dict:
 
         print(f"  {name}")
 
-        # Haal de HUIDIGE stand op voor vandaag (van middernacht t/m nu)
-        pv_today = fetch_pageviews_daily(sid, today, today + timedelta(days=1))
-        vis_today = fetch_visitors_daily(sid, today, today + timedelta(days=1))
+        pv_today       = fetch_pageviews_daily(sid, today, today + timedelta(days=1))
+        vis_today      = fetch_visitors_daily(sid, today, today + timedelta(days=1))
         countries_today = fetch_top_countries(sid, today, today + timedelta(days=1))
-        sources_today = fetch_top_sources(sid, today, today + timedelta(days=1))
+        sources_today   = fetch_top_sources(sid, today, today + timedelta(days=1))
 
-        baseline_pv = next((d["pageviews"] for d in pv_today if d["date"] == today.isoformat()), 0)
-        baseline_vis = next((d["visitors"] for d in vis_today if d["date"] == today.isoformat()), 0)
+        baseline_pv  = next((d["pageviews"] for d in pv_today  if d["date"] == today.isoformat()), 0)
+        baseline_vis = next((d["visitors"]  for d in vis_today if d["date"] == today.isoformat()), 0)
 
         zp["sites"][sid] = {
             "name": name,
             "today_pageviews": baseline_pv,
-            "today_visitors": baseline_vis,
+            "today_visitors":  baseline_vis,
             "today_countries": {c["country"]: c["pageviews"] for c in countries_today},
-            "today_sources": {s["source"]: s["referrals"] for s in sources_today},
+            "today_sources":   {s["source"]:  s["referrals"] for s in sources_today},
         }
-        print(f"    baseline: {baseline_pv} pv, {baseline_vis} viz")
+        print(f"    baseline: {baseline_pv} pv, {baseline_vis} viz — uurdata start {next_hour.strftime('%H:%M')} UTC")
 
     save_json(DATA_DIR / "zero_point.json", zp)
     print(f"\n  ✓ Nulpunt vastgelegd op {now.strftime('%Y-%m-%d %H:%M')} UTC")
@@ -249,12 +276,17 @@ def update_analytics(zero_point: dict) -> None:
 
     sites_idx = {s["id"]: s for s in data["sites"]}
     zp_date = date.fromisoformat(zero_point["date"])
-    today = datetime.now(timezone.utc).date()
+    today   = datetime.now(timezone.utc).date()
+    now_dt  = datetime.now(timezone.utc)
+
+    # Uurdata-startpunt (datetime object)
+    zp_hour_str = zero_point.get("hour")
+    zp_hour_dt  = datetime.fromisoformat(zp_hour_str) if zp_hour_str else None
 
     for site in get_sites():
-        sid = site["id"]
+        sid  = site["id"]
         name = site.get("name", sid)
-        url = site.get("ssl_url") or site.get("url", "")
+        url  = site.get("ssl_url") or site.get("url", "")
 
         if name not in ANALYTICS_SITES:
             continue
@@ -264,19 +296,19 @@ def update_analytics(zero_point: dict) -> None:
         entry = sites_idx.setdefault(sid, {
             "id": sid, "name": name, "url": url,
             "total_pageviews": 0, "total_visitors": 0,
-            "daily": [], "top_countries": [], "top_sources": [],
+            "daily": [], "hourly": [],
+            "top_countries": [], "top_sources": [],
         })
         entry["name"] = name
-        entry["url"] = url
+        entry["url"]  = url
 
-        zp_site = zero_point["sites"].get(sid, {})
-        baseline_pv  = zp_site.get("today_pageviews", 0)
-        baseline_vis = zp_site.get("today_visitors", 0)
+        zp_site          = zero_point["sites"].get(sid, {})
+        baseline_pv      = zp_site.get("today_pageviews", 0)
+        baseline_vis     = zp_site.get("today_visitors", 0)
         baseline_countries: dict[str, int] = zp_site.get("today_countries", {})
-        baseline_sources: dict[str, int]   = zp_site.get("today_sources", {})
+        baseline_sources:   dict[str, int] = zp_site.get("today_sources", {})
 
-        # ── Dagelijkse pageviews + bezoekers ──────────────────────────
-        # Query loopt van nulpunt-datum t/m vandaag (groeit elke dag)
+        # ── Dagelijkse data ──────────────────────────────────────────
         pv_list  = fetch_pageviews_daily(sid, zp_date, today + timedelta(days=1))
         vis_list = fetch_visitors_daily(sid, zp_date, today + timedelta(days=1))
 
@@ -285,21 +317,29 @@ def update_analytics(zero_point: dict) -> None:
         else:
             pv_map  = {d["date"]: d["pageviews"] for d in pv_list}
             vis_map = {d["date"]: d["visitors"]  for d in vis_list}
-
-            daily = []
+            daily   = []
             for ds in sorted(set(pv_map) | set(vis_map)):
                 pv  = pv_map.get(ds, 0)
                 vis = vis_map.get(ds, 0)
-                # Op de nulpunt-dag trekken we de baseline eraf
                 if ds == zero_point["date"]:
                     pv  = max(0, pv  - baseline_pv)
                     vis = max(0, vis - baseline_vis)
                 daily.append({"date": ds, "pageviews": pv, "visitors": vis})
-
             entry["daily"] = daily
 
-        # ── Top landen ────────────────────────────────────────────────
-        # Haal de gecumuleerde periode op en trek baseline eraf
+        # ── Uurlijkse data (start bij volgend heel uur na nulpunt) ──
+        if zp_hour_dt and zp_hour_dt < now_dt:
+            pv_hourly  = fetch_pageviews_hourly(sid, zp_hour_dt, now_dt)
+            vis_hourly = fetch_visitors_hourly(sid, zp_hour_dt, now_dt)
+            pv_h  = {h["hour"]: h["pageviews"] for h in pv_hourly}
+            vis_h = {h["hour"]: h["visitors"]  for h in vis_hourly}
+            all_hours = sorted(set(pv_h) | set(vis_h))
+            entry["hourly"] = [
+                {"hour": h, "pageviews": pv_h.get(h, 0), "visitors": vis_h.get(h, 0)}
+                for h in all_hours
+            ]
+
+        # ── Top landen ───────────────────────────────────────────────
         countries = fetch_top_countries(sid, zp_date, today + timedelta(days=1))
         country_delta: dict[str, int] = {}
         for c in countries:
@@ -311,7 +351,7 @@ def update_analytics(zero_point: dict) -> None:
             key=lambda x: x["pageviews"], reverse=True,
         )
 
-        # ── Top bronnen ───────────────────────────────────────────────
+        # ── Top bronnen ──────────────────────────────────────────────
         sources = fetch_top_sources(sid, zp_date, today + timedelta(days=1))
         source_delta: dict[str, int] = {}
         for s in sources:
@@ -325,10 +365,11 @@ def update_analytics(zero_point: dict) -> None:
 
         entry["total_pageviews"] = sum(d["pageviews"] for d in entry["daily"])
         entry["total_visitors"]  = sum(d["visitors"]  for d in entry["daily"])
-        print(f"    {entry['total_pageviews']} pv, {entry['total_visitors']} viz (sinds nulpunt)")
+        print(f"    {entry['total_pageviews']} pv, {entry['total_visitors']} viz — "
+              f"{len(entry.get('hourly', []))} uurpunten")
 
     data["sites"] = list(sites_idx.values())
-    data["last_updated"] = datetime.now(timezone.utc).isoformat()
+    data["last_updated"] = now_dt.isoformat()
     save_json(path, data)
     print(f"  ✓ {len(data['sites'])} website(s) opgeslagen")
 
@@ -346,7 +387,7 @@ def update_forms() -> None:
     forms_idx = {f["id"]: f for f in data["forms"]}
 
     for site in get_sites():
-        sid = site["id"]
+        sid   = site["id"]
         sname = site.get("name", sid)
 
         if sname not in ANALYTICS_SITES:
@@ -357,27 +398,22 @@ def update_forms() -> None:
             continue
 
         for form in forms:
-            fid = form["id"]
-            fname = form.get("name", fid)
+            fid          = form["id"]
+            fname        = form.get("name", fid)
             netlify_total = int(form.get("submission_count", 0) or 0)
 
-            entry = forms_idx.setdefault(
-                fid,
-                {
-                    "id": fid,
-                    "name": fname,
-                    "site_id": sid,
-                    "site_name": sname,
-                    "total_submissions": 0,
-                    "last_submission_date": None,
-                    "daily": [],
-                },
-            )
-            entry["name"] = fname
+            entry = forms_idx.setdefault(fid, {
+                "id": fid, "name": fname,
+                "site_id": sid, "site_name": sname,
+                "total_submissions": 0,
+                "last_submission_date": None,
+                "daily": [],
+            })
+            entry["name"]      = fname
             entry["site_name"] = sname
 
             stored_total = int(entry.get("total_submissions", 0) or 0)
-            delta = netlify_total - stored_total
+            delta        = netlify_total - stored_total
 
             if delta <= 0:
                 print(f"  {sname} / {fname}: geen nieuwe verzendingen")
@@ -415,11 +451,11 @@ def update_forms() -> None:
                 [{"date": k, "count": v} for k, v in dmap.items()],
                 key=lambda x: x["date"],
             )
-            entry["total_submissions"] = netlify_total
+            entry["total_submissions"]    = netlify_total
             if latest:
                 entry["last_submission_date"] = latest
 
-    data["forms"] = list(forms_idx.values())
+    data["forms"]        = list(forms_idx.values())
     data["last_updated"] = datetime.now(timezone.utc).isoformat()
     save_json(path, data)
     print(f"  ✓ {len(data['forms'])} formulier(en) opgeslagen")
@@ -444,9 +480,8 @@ def main() -> None:
     else:
         print("Geen nulpunt gevonden — nulpunt initialiseren:")
         zero_point = initialize_zero_point()
-        # Sla lege analytics op zodat het dashboard direct iets heeft
         save_json(DATA_DIR / "analytics.json", {
-            "zero_point": zero_point["created_at"],
+            "zero_point":   zero_point["created_at"],
             "last_updated": zero_point["created_at"],
             "sites": [],
         })
