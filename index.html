@@ -179,11 +179,11 @@
     .table-box:last-child { border-right: none; }
     .table-title { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
 
-    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-    thead th { text-align: left; color: var(--muted); font-size: 0.7rem; font-weight: 500; padding: 0.18rem 0.4rem; border-bottom: 1px solid var(--border); }
-    thead th:last-child { text-align: right; }
-    tbody td { padding: 0.32rem 0.4rem; border-bottom: 1px solid #f0f0f0; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    tbody td:last-child { text-align: right; font-variant-numeric: tabular-nums; min-width: 3rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; table-layout: fixed; }
+    thead th { text-align: left; color: var(--muted); font-size: 0.7rem; font-weight: 500; padding: 0.18rem 0.4rem; border-bottom: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    thead th:last-child { text-align: right; width: 4.5rem; }
+    tbody td { padding: 0.32rem 0.4rem; border-bottom: 1px solid #f0f0f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    tbody td:last-child { text-align: right; font-variant-numeric: tabular-nums; width: 4.5rem; }
     tbody tr:last-child td { border-bottom: none; }
     .bar-cell { position: relative; }
     .bar-bg { position: absolute; left: 0; top: 2px; bottom: 2px; background: #dbeafe; border-radius: 2px; z-index: 0; }
