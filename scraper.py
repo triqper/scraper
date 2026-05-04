@@ -120,15 +120,15 @@ def fetch_nl_pageviews_for_day(site_id: str, target: date) -> int:
     d = r.json()
     # Debug: toon de eerste items zodat we het formaat zien
     items = d.get("data", []) if isinstance(d, dict) else []
-    if items:
-        print(f"    [countries formaat] {items[:3]}")
     for item in items:
         if isinstance(item, dict):
-            code = item.get("path", item.get("country", item.get("code", item.get("name", ""))))
-            if code in ("NL", "Netherlands", "The Netherlands"):
+            # Netlify gebruikt 'resource' als ISO-landcode, 'country_name' als volledige naam
+            code = item.get("resource") or item.get("path") or item.get("code") or item.get("country") or item.get("name") or ""
+            name = item.get("country_name", "")
+            if code in ("NL",) or name in ("Netherlands", "The Netherlands"):
                 return int(item.get("count", item.get("pageviews", item.get("quantity", 0))))
         elif isinstance(item, (list, tuple)) and len(item) >= 2:
-            if item[0] in ("NL", "Netherlands", "The Netherlands"):
+            if item[0] in ("NL", "Netherlands"):
                 return int(item[1])
     return 0
 
