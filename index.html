@@ -377,7 +377,7 @@
             {
               type:            "bar",
               label:           "NL pageviews",
-              data:            daily.map(d => d.pageviews_nl ?? d.pageviews),
+              data:            daily.map(d => d.pageviews_nl ?? null),
               backgroundColor: c + "70",
               borderColor:     c,
               borderWidth:     1,
