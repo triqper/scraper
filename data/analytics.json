@@ -1,24 +1,28 @@
 {
   "zero_point": "2026-05-04T07:52:59.540654+00:00",
-  "last_updated": "2026-05-04T18:00:39.919903+00:00",
+  "last_updated": "2026-05-04T18:08:52.738201+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
       "name": "woonstroom-interesse-landing",
       "url": "https://woonstroom-interesse-landing.netlify.app",
-      "total_pageviews": 6,
-      "total_visitors": 3,
+      "total_pageviews": 7,
+      "total_visitors": 4,
       "daily": [
         {
           "date": "2026-05-04",
-          "pageviews": 6,
-          "visitors": 3
+          "pageviews": 7,
+          "visitors": 4
         }
       ],
       "top_countries": [
         {
           "country": "Netherlands",
           "pageviews": 5
+        },
+        {
+          "country": "Norway",
+          "pageviews": 1
         },
         {
           "country": "Canada",
@@ -28,7 +32,7 @@
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 4
+          "referrals": 5
         },
         {
           "source": "woonstroom-interesse.netlify.app",
@@ -63,7 +67,8 @@
         {
           "hour": "2026-05-04T18:00:00+00:00",
           "deltas": {
-            "Netherlands": 1
+            "Netherlands": 1,
+            "Norway": 1
           }
         }
       ],
@@ -96,7 +101,7 @@
         {
           "hour": "2026-05-04T18:00:00+00:00",
           "deltas": {
-            "Direct traffic": 1
+            "Direct traffic": 2
           }
         }
       ],
@@ -123,8 +128,8 @@
         },
         {
           "hour": "2026-05-04T17:00:00+00:00",
-          "pageviews": 1,
-          "visitors": 1
+          "pageviews": 2,
+          "visitors": 2
         }
       ]
     },
