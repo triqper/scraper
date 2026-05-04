@@ -289,7 +289,16 @@ def update_analytics(zero_point: dict) -> None:
     run_hour   = now_dt.replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%dT%H:00:00+00:00")
 
     zp_hour_str = zero_point.get("hour")
-    zp_hour_dt  = datetime.fromisoformat(zp_hour_str) if zp_hour_str else None
+    # Fallback: als hour ontbreekt of null is, bereken vanuit created_at
+    if not zp_hour_str and zero_point.get("created_at"):
+        created    = datetime.fromisoformat(zero_point["created_at"])
+        next_hour  = (created + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+        zp_hour_str = next_hour.isoformat()
+        # Sla de gecorrigeerde waarde op zodat volgende runs het ook hebben
+        zero_point["hour"] = zp_hour_str
+        save_json(DATA_DIR / "zero_point.json", zero_point)
+        print(f"  (hour-veld hersteld: {zp_hour_str})")
+    zp_hour_dt = datetime.fromisoformat(zp_hour_str) if zp_hour_str else None
 
     for site in get_sites():
         sid  = site["id"]
