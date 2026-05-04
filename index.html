@@ -42,53 +42,57 @@
     .controls {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 0.65rem 1.5rem;
+      padding: 0.6rem 1.25rem;
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 1rem;
       flex-wrap: wrap;
     }
-    .control-group {
+
+    .ctrl-group {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
-    .control-label {
-      font-size: 0.8rem;
+    .ctrl-label {
+      font-size: 0.78rem;
       color: var(--muted);
       white-space: nowrap;
     }
-    input[type="date"] {
-      font-size: 0.82rem;
-      padding: 0.3rem 0.5rem;
+    input[type="datetime-local"] {
+      font-size: 0.8rem;
+      padding: 0.28rem 0.45rem;
       border: 1px solid var(--border);
       border-radius: var(--radius);
       background: var(--bg);
       color: var(--text);
       cursor: pointer;
     }
-    input[type="date"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    input[type="datetime-local"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    .ctrl-sep { color: var(--border); padding: 0 0.1rem; }
 
     .btn-reset {
       font-size: 0.78rem;
-      padding: 0.28rem 0.6rem;
+      padding: 0.28rem 0.65rem;
       border: 1px solid var(--border);
       border-radius: var(--radius);
       background: var(--surface);
       color: var(--muted);
       cursor: pointer;
     }
-    .btn-reset:hover { background: var(--bg); }
+    .btn-reset:hover { background: var(--bg); color: var(--text); }
 
     .mode-group {
       display: flex;
       border: 1px solid var(--border);
       border-radius: var(--radius);
       overflow: hidden;
+      margin-left: auto;
     }
     .mode-btn {
-      font-size: 0.8rem;
-      padding: 0.3rem 0.75rem;
+      font-size: 0.78rem;
+      padding: 0.28rem 0.7rem;
       border: none;
       border-right: 1px solid var(--border);
       background: var(--surface);
@@ -119,79 +123,73 @@
     }
 
     .site-header {
-      padding: 0.65rem 1rem;
+      padding: 0.6rem 1rem;
       border-bottom: 1px solid var(--border);
       background: #f6f8fa;
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
-    .site-header h2 { font-size: 0.9rem; font-weight: 600; }
-    .site-header a { color: var(--muted); font-size: 0.78rem; text-decoration: none; margin-left: auto; }
+    .site-header h2 { font-size: 0.88rem; font-weight: 600; }
+    .site-header a { color: var(--muted); font-size: 0.76rem; text-decoration: none; margin-left: auto; }
     .site-header a:hover { color: var(--accent); }
 
-    /* ── Summary ─────────────────────────────────── */
     .summary-row {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       border-bottom: 1px solid var(--border);
     }
     .stat-box {
-      padding: 0.85rem 1.25rem;
+      padding: 0.8rem 1.25rem;
       border-right: 1px solid var(--border);
     }
     .stat-box:last-child { border-right: none; }
-    .stat-label { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; }
-    .stat-value { font-size: 1.6rem; font-weight: 700; }
+    .stat-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.15rem; }
+    .stat-value { font-size: 1.55rem; font-weight: 700; }
 
-    /* ── Charts ──────────────────────────────────── */
     .charts-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       border-bottom: 1px solid var(--border);
     }
     .chart-box {
-      padding: 0.85rem 1.25rem;
+      padding: 0.8rem 1.25rem;
       border-right: 1px solid var(--border);
       min-width: 0;
     }
     .chart-box:last-child { border-right: none; }
-    .chart-title { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
+    .chart-title { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
     .chart-wrap { position: relative; height: 120px; }
     .chart-wrap canvas { width: 100% !important; height: 100% !important; }
-    .chart-empty { color: var(--muted); font-size: 0.8rem; font-style: italic; padding: 1rem 0; }
+    .chart-note { color: var(--muted); font-size: 0.78rem; font-style: italic; padding-top: 0.5rem; }
 
-    /* ── Tables ──────────────────────────────────── */
     .tables-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
     }
     .table-box {
-      padding: 0.85rem 1.25rem;
+      padding: 0.8rem 1.25rem;
       border-right: 1px solid var(--border);
       min-width: 0;
     }
     .table-box:last-child { border-right: none; }
-    .table-title { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
+    .table-title { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
 
     table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-    thead th { text-align: left; color: var(--muted); font-size: 0.72rem; font-weight: 500; padding: 0.2rem 0.4rem; border-bottom: 1px solid var(--border); }
+    thead th { text-align: left; color: var(--muted); font-size: 0.7rem; font-weight: 500; padding: 0.18rem 0.4rem; border-bottom: 1px solid var(--border); }
     thead th:last-child { text-align: right; }
-    tbody td { padding: 0.35rem 0.4rem; border-bottom: 1px solid #f0f0f0; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    tbody td { padding: 0.32rem 0.4rem; border-bottom: 1px solid #f0f0f0; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     tbody td:last-child { text-align: right; font-variant-numeric: tabular-nums; min-width: 3rem; }
     tbody tr:last-child td { border-bottom: none; }
-
     .bar-cell { position: relative; }
     .bar-bg { position: absolute; left: 0; top: 2px; bottom: 2px; background: #dbeafe; border-radius: 2px; z-index: 0; }
     .bar-text { position: relative; z-index: 1; }
-
-    .empty { color: var(--muted); font-style: italic; font-size: 0.82rem; }
+    .empty { color: var(--muted); font-style: italic; font-size: 0.8rem; }
 
     @media (max-width: 600px) {
       .summary-row, .charts-row, .tables-row { grid-template-columns: 1fr; }
       .stat-box, .chart-box, .table-box { border-right: none; border-bottom: 1px solid var(--border); }
-      .charts-row .chart-box:last-child, .tables-row .table-box:last-child { border-bottom: none; }
-      .controls { gap: 0.75rem; }
+      .mode-group { margin-left: 0; }
     }
   </style>
 </head>
@@ -209,18 +207,19 @@
 </header>
 
 <div class="controls">
-  <div class="control-group">
-    <span class="control-label">Toon data vanaf</span>
-    <input type="date" id="from-date" />
-    <button class="btn-reset" id="reset-filter">Alles</button>
+  <div class="ctrl-group">
+    <span class="ctrl-label">Van</span>
+    <input type="datetime-local" id="from-dt" />
   </div>
-  <div class="control-group" style="margin-left:auto">
-    <span class="control-label">Grafiek</span>
-    <div class="mode-group">
-      <button class="mode-btn active" data-mode="per-dag">Per dag</button>
-      <button class="mode-btn" data-mode="totaal">Totaal</button>
-      <button class="mode-btn" data-mode="per-uur">Per uur</button>
-    </div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">Tot</span>
+    <input type="datetime-local" id="to-dt" />
+  </div>
+  <button class="btn-reset" id="reset-filter">Alles tonen</button>
+  <div class="mode-group">
+    <button class="mode-btn active" data-mode="per-dag">Per dag</button>
+    <button class="mode-btn" data-mode="totaal">Totaal</button>
+    <button class="mode-btn" data-mode="per-uur">Per uur</button>
   </div>
 </div>
 
@@ -229,7 +228,7 @@
 </main>
 
 <script>
-/* ── State ─────────────────────────────────────────────────── */
+/* ─── State ───────────────────────────────────────────────── */
 const SITE_ORDER = [
   "woonstroom-aanbod-landing",
   "woonstroom-woningwaarde-landing",
@@ -238,54 +237,102 @@ const SITE_ORDER = [
   "woonstroom-woningwaarde",
   "woonstroom-interesse",
 ];
-
 const COLORS = {
-  pageviews: { line: "#0969da", fill: "rgba(9,105,218,0.10)" },
-  visitors:  { line: "#1a7f37", fill: "rgba(26,127,55,0.10)" },
+  pageviews: { line: "#0969da", fill: "rgba(9,105,218,0.10)", bar: "rgba(9,105,218,0.55)" },
+  visitors:  { line: "#1a7f37", fill: "rgba(26,127,55,0.10)",  bar: "rgba(26,127,55,0.55)"  },
 };
 
-let siteData    = [];
-let mode        = "per-dag";   // "per-dag" | "totaal" | "per-uur"
-let fromDate    = null;        // "YYYY-MM-DD" or null
-let chartRefs   = {};          // { siteId: { pv: Chart, vis: Chart } }
+let siteData  = [];
+let mode      = "per-dag";   // "per-dag" | "totaal" | "per-uur"
+let fromDt    = null;        // Date object (local time input) or null
+let toDt      = null;        // Date object or null
+let chartRefs = {};          // { siteId: { pv: Chart|null, vis: Chart|null } }
 
-/* ── Helpers ────────────────────────────────────────────────── */
+/* ─── Helpers ─────────────────────────────────────────────── */
 function fmt(n) { return (n ?? 0).toLocaleString("nl-NL"); }
 function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 function shortDate(iso) {
-  return new Date(iso + "T00:00:00Z").toLocaleDateString("nl-NL",
-    { day: "numeric", month: "short", timeZone: "UTC" });
+  return new Date(iso + "T00:00:00Z")
+    .toLocaleDateString("nl-NL", { day: "numeric", month: "short", timeZone: "UTC" });
 }
-
 function shortHour(isoStr) {
-  // "2026-05-04T10:00:00+00:00" → "4 mei 10:00"
-  return new Date(isoStr).toLocaleString("nl-NL",
-    { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
-      timeZone: "Europe/Amsterdam" });
+  return new Date(isoStr).toLocaleString("nl-NL", {
+    day: "numeric", month: "short",
+    hour: "2-digit", minute: "2-digit",
+    timeZone: "Europe/Amsterdam",
+  });
 }
 
-/* ── Data selectors ─────────────────────────────────────────── */
-function filteredDaily(site) {
-  let d = site.daily ?? [];
-  if (fromDate) d = d.filter(r => r.date >= fromDate);
-  return d;
+/* ─── Data selectors ──────────────────────────────────────── */
+
+function inRange(dtStr) {
+  // dtStr is an ISO string with timezone (hour entries) or "YYYY-MM-DD" (day entries)
+  const t = new Date(dtStr.length === 10 ? dtStr + "T00:00:00Z" : dtStr);
+  if (fromDt && t < fromDt) return false;
+  if (toDt   && t >= toDt)  return false;
+  return true;
 }
 
 function filteredHourly(site) {
-  let h = site.hourly ?? [];
-  if (fromDate) h = h.filter(r => r.hour.slice(0, 10) >= fromDate);
-  return h;
+  return (site.hourly ?? []).filter(r => inRange(r.hour));
 }
 
-function chartDataFor(site) {
+function filteredDaily(site) {
+  if (!fromDt && !toDt) return site.daily ?? [];
+  // Derive date strings from the datetime boundaries
+  const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : null;
+  // For "to", include the day if toDt is after midnight of that day
+  const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : null;
+  return (site.daily ?? []).filter(r =>
+    (!fromDate || r.date >= fromDate) &&
+    (!toDate   || r.date <= toDate)
+  );
+}
+
+// Aggregate country_hourly / source_hourly within the selected range
+function aggregateHourlyDeltas(rows) {
+  const agg = {};
+  for (const row of rows) {
+    if (!inRange(row.hour)) continue;
+    for (const [k, v] of Object.entries(row.deltas ?? {})) {
+      agg[k] = (agg[k] ?? 0) + v;
+    }
+  }
+  return agg;
+}
+
+function getCountries(site) {
+  if (!fromDt && !toDt) {
+    // No filter → show full aggregate since zero point
+    return site.top_countries ?? [];
+  }
+  const agg = aggregateHourlyDeltas(site.country_hourly ?? []);
+  return Object.entries(agg)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([country, pageviews]) => ({ country, pageviews }));
+}
+
+function getSources(site) {
+  if (!fromDt && !toDt) {
+    return site.top_sources ?? [];
+  }
+  const agg = aggregateHourlyDeltas(site.source_hourly ?? []);
+  return Object.entries(agg)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([source, referrals]) => ({ source, referrals }));
+}
+
+function getChartData(site) {
   if (mode === "per-uur") {
     const rows = filteredHourly(site);
     return {
+      type:    "bar",
       labels:  rows.map(r => shortHour(r.hour)),
       pvData:  rows.map(r => r.pageviews),
       visData: rows.map(r => r.visitors),
-      type:    "bar",
     };
   }
 
@@ -294,23 +341,22 @@ function chartDataFor(site) {
   if (mode === "totaal") {
     let pvSum = 0, visSum = 0;
     return {
+      type:    "line",
       labels:  rows.map(r => shortDate(r.date)),
       pvData:  rows.map(r => { pvSum  += r.pageviews; return pvSum;  }),
       visData: rows.map(r => { visSum += r.visitors;  return visSum; }),
-      type:    "line",
     };
   }
 
-  // per-dag (default)
   return {
+    type:    "bar",
     labels:  rows.map(r => shortDate(r.date)),
     pvData:  rows.map(r => r.pageviews),
     visData: rows.map(r => r.visitors),
-    type:    "bar",
   };
 }
 
-function filteredTotals(site) {
+function getTotals(site) {
   if (mode === "per-uur") {
     const rows = filteredHourly(site);
     return {
@@ -325,7 +371,7 @@ function filteredTotals(site) {
   };
 }
 
-/* ── Chart factory ──────────────────────────────────────────── */
+/* ─── Chart factory ───────────────────────────────────────── */
 function makeChart(canvas, type, labels, values, color) {
   const isBar = type === "bar";
   return new Chart(canvas, {
@@ -334,20 +380,20 @@ function makeChart(canvas, type, labels, values, color) {
       labels,
       datasets: [{
         data: values,
-        borderColor:     color.line,
-        backgroundColor: isBar ? color.fill.replace("0.10", "0.55") : color.fill,
-        borderWidth:     isBar ? 0 : 2,
-        borderRadius:    isBar ? 3 : 0,
-        pointRadius:     isBar ? 0 : 3,
+        borderColor:      isBar ? color.bar  : color.line,
+        backgroundColor:  isBar ? color.bar  : color.fill,
+        borderWidth:      isBar ? 0 : 2,
+        borderRadius:     isBar ? 3 : 0,
+        pointRadius:      isBar ? 0 : 3,
         pointHoverRadius: 4,
-        fill:   !isBar,
+        fill:    !isBar,
         tension: 0.3,
       }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: { duration: 200 },
+      animation: { duration: 150 },
       plugins: {
         legend: { display: false },
         tooltip: { mode: "index", intersect: false },
@@ -355,11 +401,7 @@ function makeChart(canvas, type, labels, values, color) {
       scales: {
         x: {
           grid: { display: false },
-          ticks: {
-            font: { size: 10 },
-            maxRotation: 0,
-            maxTicksLimit: mode === "per-uur" ? 8 : 7,
-          },
+          ticks: { font: { size: 10 }, maxRotation: 0, maxTicksLimit: mode === "per-uur" ? 6 : 7 },
         },
         y: {
           beginAtZero: true,
@@ -371,9 +413,9 @@ function makeChart(canvas, type, labels, values, color) {
   });
 }
 
-/* ── Bar table ──────────────────────────────────────────────── */
+/* ─── Bar table ───────────────────────────────────────────── */
 function barTable(rows, labelKey, valueKey, colA, colB) {
-  if (!rows || rows.length === 0) return `<p class="empty">Geen data</p>`;
+  if (!rows || rows.length === 0) return `<p class="empty">Geen data in deze periode.</p>`;
   const max = Math.max(...rows.map(r => r[valueKey] ?? 0), 1);
   let html = `<table><thead><tr><th>${colA}</th><th>${colB}</th></tr></thead><tbody>`;
   for (const row of rows) {
@@ -390,28 +432,25 @@ function barTable(rows, labelKey, valueKey, colA, colB) {
   return html + `</tbody></table>`;
 }
 
-/* ── Per-site render ────────────────────────────────────────── */
+/* ─── Render / update ─────────────────────────────────────── */
+function statLabel() {
+  if (mode === "per-uur") return ["Pageviews (gefilterd)", "Bezoekers (gefilterd)"];
+  if (mode === "totaal")  return ["Totaal pageviews",      "Totaal bezoekers"];
+  return ["Pageviews", "Bezoekers"];
+}
+
 function renderSite(site) {
   const card = document.createElement("div");
   card.className = "site-card";
-  card.id = `card-${site.id}`;
 
-  const totals = filteredTotals(site);
-  const { labels, pvData, visData, type } = chartDataFor(site);
-
-  const pvId  = `pv-${site.id}`;
-  const visId = `vis-${site.id}`;
-
-  const countryHtml = barTable(site.top_countries, "country", "pageviews", "Land",  "Pageviews");
-  const sourceHtml  = barTable(site.top_sources,   "source",  "referrals", "Bron", "Verwijzingen");
-
-  const pvLabel  = mode === "totaal" ? "Totaal pageviews" : mode === "per-uur" ? "Pageviews (uur)" : "Pageviews (7 d)";
-  const visLabel = mode === "totaal" ? "Totaal bezoekers" : mode === "per-uur" ? "Bezoekers (uur)" : "Bezoekers (7 d)";
-
+  const totals = getTotals(site);
+  const { type, labels, pvData, visData } = getChartData(site);
+  const [pvLbl, visLbl] = statLabel();
   const hasHourly = (site.hourly ?? []).length > 0;
-  const pvEmpty   = mode === "per-uur" && !hasHourly
-    ? `<p class="chart-empty">Nog geen uurdata — beschikbaar na de volgende scraper-run.</p>`
-    : (labels.length === 0 ? `<p class="chart-empty">Geen data in deze periode.</p>` : "");
+  const noChart   = mode === "per-uur" ? (!hasHourly || labels.length === 0) : labels.length === 0;
+  const noteMsg   = mode === "per-uur" && !hasHourly
+    ? "Nog geen uurdata — beschikbaar na de volgende scraper-run."
+    : "Geen data in deze periode.";
 
   card.innerHTML = `
     <div class="site-header">
@@ -420,11 +459,11 @@ function renderSite(site) {
     </div>
     <div class="summary-row">
       <div class="stat-box">
-        <div class="stat-label" id="lbl-pv-${site.id}">${esc(pvLabel)}</div>
+        <div class="stat-label" id="lbl-pv-${site.id}">${esc(pvLbl)}</div>
         <div class="stat-value" id="val-pv-${site.id}">${fmt(totals.pv)}</div>
       </div>
       <div class="stat-box">
-        <div class="stat-label" id="lbl-vis-${site.id}">${esc(visLabel)}</div>
+        <div class="stat-label" id="lbl-vis-${site.id}">${esc(visLbl)}</div>
         <div class="stat-value" id="val-vis-${site.id}">${fmt(totals.vis)}</div>
       </div>
     </div>
@@ -432,84 +471,88 @@ function renderSite(site) {
       <div class="chart-box">
         <div class="chart-title">Pageviews</div>
         <div class="chart-wrap" id="wrap-pv-${site.id}">
-          ${pvEmpty || `<canvas id="${pvId}"></canvas>`}
+          ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="pv-${site.id}"></canvas>`}
         </div>
       </div>
       <div class="chart-box">
         <div class="chart-title">Unieke bezoekers</div>
         <div class="chart-wrap" id="wrap-vis-${site.id}">
-          ${pvEmpty || `<canvas id="${visId}"></canvas>`}
+          ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="vis-${site.id}"></canvas>`}
         </div>
       </div>
     </div>
     <div class="tables-row">
       <div class="table-box">
-        <div class="table-title">Top landen <span style="font-weight:400;text-transform:none">(totaal since nulpunt)</span></div>
-        ${countryHtml}
+        <div class="table-title">Top landen</div>
+        <div id="tbl-ctry-${site.id}">${barTable(getCountries(site), "country", "pageviews", "Land", "Pageviews")}</div>
       </div>
       <div class="table-box">
-        <div class="table-title">Top bronnen <span style="font-weight:400;text-transform:none">(totaal since nulpunt)</span></div>
-        ${sourceHtml}
+        <div class="table-title">Top bronnen</div>
+        <div id="tbl-src-${site.id}">${barTable(getSources(site), "source", "referrals", "Bron", "Verwijzingen")}</div>
       </div>
     </div>
   `;
 
-  if (!pvEmpty && labels.length > 0) {
+  if (!noChart) {
     requestAnimationFrame(() => {
-      const c1 = card.querySelector(`#${pvId}`);
-      const c2 = card.querySelector(`#${visId}`);
-      const pv  = c1 ? makeChart(c1,  type, labels, pvData,  COLORS.pageviews) : null;
-      const vis = c2 ? makeChart(c2,  type, labels, visData, COLORS.visitors)  : null;
-      chartRefs[site.id] = { pv, vis };
+      const c1 = card.querySelector(`#pv-${site.id}`);
+      const c2 = card.querySelector(`#vis-${site.id}`);
+      chartRefs[site.id] = {
+        pv:  c1 ? makeChart(c1, type, labels, pvData,  COLORS.pageviews) : null,
+        vis: c2 ? makeChart(c2, type, labels, visData, COLORS.visitors)  : null,
+      };
     });
+  } else {
+    chartRefs[site.id] = { pv: null, vis: null };
   }
 
   return card;
 }
 
-/* ── Update existing cards ──────────────────────────────────── */
 function updateAllCards() {
   for (const site of siteData) {
-    // Totals
-    const totals = filteredTotals(site);
-    const pvLabel  = mode === "totaal" ? "Totaal pageviews" : mode === "per-uur" ? "Pageviews (uur)" : "Pageviews (7 d)";
-    const visLabel = mode === "totaal" ? "Totaal bezoekers" : mode === "per-uur" ? "Bezoekers (uur)" : "Bezoekers (7 d)";
-    const lblPv  = document.getElementById(`lbl-pv-${site.id}`);
-    const lblVis = document.getElementById(`lbl-vis-${site.id}`);
-    const valPv  = document.getElementById(`val-pv-${site.id}`);
-    const valVis = document.getElementById(`val-vis-${site.id}`);
-    if (lblPv)  lblPv.textContent  = pvLabel;
-    if (lblVis) lblVis.textContent = visLabel;
-    if (valPv)  valPv.textContent  = fmt(totals.pv);
-    if (valVis) valVis.textContent = fmt(totals.vis);
+    // Summary numbers
+    const totals         = getTotals(site);
+    const [pvLbl, visLbl] = statLabel();
+    const el = id => document.getElementById(id);
+    if (el(`lbl-pv-${site.id}`))  el(`lbl-pv-${site.id}`).textContent  = pvLbl;
+    if (el(`lbl-vis-${site.id}`)) el(`lbl-vis-${site.id}`).textContent = visLbl;
+    if (el(`val-pv-${site.id}`))  el(`val-pv-${site.id}`).textContent  = fmt(totals.pv);
+    if (el(`val-vis-${site.id}`)) el(`val-vis-${site.id}`).textContent = fmt(totals.vis);
 
-    // Charts: destroy old, create new (type may change)
+    // Tables
+    const ctryEl = el(`tbl-ctry-${site.id}`);
+    const srcEl  = el(`tbl-src-${site.id}`);
+    if (ctryEl) ctryEl.innerHTML = barTable(getCountries(site), "country", "pageviews", "Land", "Pageviews");
+    if (srcEl)  srcEl.innerHTML  = barTable(getSources(site),   "source",  "referrals", "Bron", "Verwijzingen");
+
+    // Charts: destroy old, recreate
     const refs = chartRefs[site.id] ?? {};
     if (refs.pv)  { refs.pv.destroy();  refs.pv  = null; }
     if (refs.vis) { refs.vis.destroy(); refs.vis = null; }
+    chartRefs[site.id] = { pv: null, vis: null };
 
-    const { labels, pvData, visData, type } = chartDataFor(site);
     const hasHourly = (site.hourly ?? []).length > 0;
-    const noData = mode === "per-uur" ? !hasHourly : labels.length === 0;
+    const { type, labels, pvData, visData } = getChartData(site);
+    const noChart = mode === "per-uur" ? (!hasHourly || labels.length === 0) : labels.length === 0;
+    const noteMsg = mode === "per-uur" && !hasHourly
+      ? "Nog geen uurdata — beschikbaar na de volgende scraper-run."
+      : "Geen data in deze periode.";
 
-    const wrapPv  = document.getElementById(`wrap-pv-${site.id}`);
-    const wrapVis = document.getElementById(`wrap-vis-${site.id}`);
+    const wPv  = el(`wrap-pv-${site.id}`);
+    const wVis = el(`wrap-vis-${site.id}`);
 
-    if (noData || labels.length === 0) {
-      const msg = mode === "per-uur" && !hasHourly
-        ? "Nog geen uurdata — beschikbaar na de volgende scraper-run."
-        : "Geen data in deze periode.";
-      if (wrapPv)  wrapPv.innerHTML  = `<p class="chart-empty">${msg}</p>`;
-      if (wrapVis) wrapVis.innerHTML = `<p class="chart-empty">${msg}</p>`;
-      chartRefs[site.id] = { pv: null, vis: null };
+    if (noChart) {
+      if (wPv)  wPv.innerHTML  = `<p class="chart-note">${noteMsg}</p>`;
+      if (wVis) wVis.innerHTML = `<p class="chart-note">${noteMsg}</p>`;
       continue;
     }
 
-    if (wrapPv)  wrapPv.innerHTML  = `<canvas id="pv-${site.id}"></canvas>`;
-    if (wrapVis) wrapVis.innerHTML = `<canvas id="vis-${site.id}"></canvas>`;
+    if (wPv)  wPv.innerHTML  = `<canvas id="pv-${site.id}"></canvas>`;
+    if (wVis) wVis.innerHTML = `<canvas id="vis-${site.id}"></canvas>`;
 
-    const c1 = document.getElementById(`pv-${site.id}`);
-    const c2 = document.getElementById(`vis-${site.id}`);
+    const c1 = el(`pv-${site.id}`);
+    const c2 = el(`vis-${site.id}`);
     chartRefs[site.id] = {
       pv:  c1 ? makeChart(c1, type, labels, pvData,  COLORS.pageviews) : null,
       vis: c2 ? makeChart(c2, type, labels, visData, COLORS.visitors)  : null,
@@ -517,15 +560,23 @@ function updateAllCards() {
   }
 }
 
-/* ── Controls wiring ────────────────────────────────────────── */
-document.getElementById("from-date").addEventListener("change", e => {
-  fromDate = e.target.value || null;
+/* ─── Controls wiring ─────────────────────────────────────── */
+function readInputs() {
+  const fv = document.getElementById("from-dt").value;
+  const tv = document.getElementById("to-dt").value;
+  fromDt = fv ? new Date(fv) : null;
+  toDt   = tv ? new Date(tv) : null;
   updateAllCards();
-});
+}
+
+document.getElementById("from-dt").addEventListener("change", readInputs);
+document.getElementById("to-dt").addEventListener("change", readInputs);
 
 document.getElementById("reset-filter").addEventListener("click", () => {
-  fromDate = null;
-  document.getElementById("from-date").value = "";
+  document.getElementById("from-dt").value = "";
+  document.getElementById("to-dt").value   = "";
+  fromDt = null;
+  toDt   = null;
   updateAllCards();
 });
 
@@ -538,9 +589,9 @@ document.querySelectorAll(".mode-btn").forEach(btn => {
   });
 });
 
-/* ── Load ───────────────────────────────────────────────────── */
+/* ─── Load ────────────────────────────────────────────────── */
 async function load() {
-  const res = await fetch(`./data/analytics.json?v=${Date.now()}`, { cache: "no-store" });
+  const res  = await fetch(`./data/analytics.json?v=${Date.now()}`, { cache: "no-store" });
   const main = document.getElementById("main");
   main.innerHTML = "";
 
@@ -556,22 +607,32 @@ async function load() {
     document.getElementById("updated-at").textContent =
       "Bijgewerkt: " + d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" });
   }
+
   if (data.zero_point) {
     const d = new Date(data.zero_point);
     document.getElementById("zero-point-at").textContent =
       "Nulpunt: " + d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" });
 
-    // Stel min-datum van de datepicker in op de nulpunt-dag
-    const minDate = data.zero_point.slice(0, 10);
-    const picker = document.getElementById("from-date");
-    picker.min = minDate;
-    picker.max = new Date().toISOString().slice(0, 10);
+    // Stel datepicker-grenzen in
+    const zpLocal = new Date(data.zero_point);
+    // datetime-local wants "YYYY-MM-DDTHH:MM" in LOCAL time
+    const pad = n => String(n).padStart(2, "0");
+    const localStr = dt =>
+      `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+
+    const minStr = localStr(zpLocal);
+    const maxStr = localStr(new Date());
+
+    for (const id of ["from-dt", "to-dt"]) {
+      const el = document.getElementById(id);
+      el.min = minStr;
+      el.max = maxStr;
+    }
   }
 
   siteData = (data.sites ?? []).sort((a, b) => {
     const ai = SITE_ORDER.indexOf(a.name), bi = SITE_ORDER.indexOf(b.name);
-    if (ai === -1 && bi === -1) return a.name.localeCompare(b.name);
-    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+    return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
   });
 
   if (siteData.length === 0) {
