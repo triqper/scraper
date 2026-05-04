@@ -248,6 +248,13 @@
     .mini-chart-wrap { height: 50px; position: relative; }
     .mini-chart-wrap canvas { width: 100% !important; height: 100% !important; }
 
+    /* ── Group layout ────────────────────────────── */
+    .group-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
     /* ── Group header between full cards ─────────── */
     .group-header {
       font-size: 1rem;
@@ -265,6 +272,7 @@
       .forms-section { grid-template-columns: 1fr; }
       .form-stat { border-right: none; border-bottom: 1px solid var(--border); }
       #compare { grid-template-columns: 1fr; }
+      .group-cards { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -928,9 +936,12 @@ async function load() {
     header.textContent = group.title;
     main.appendChild(header);
 
+    const row = document.createElement("div");
+    row.className = "group-cards";
     for (const site of groupSites) {
-      main.appendChild(renderSite(site));
+      row.appendChild(renderSite(site));
     }
+    main.appendChild(row);
   }
 }
 
