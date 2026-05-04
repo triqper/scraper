@@ -190,6 +190,13 @@
     .bar-text { position: relative; z-index: 1; }
     .empty { color: var(--muted); font-style: italic; font-size: 0.8rem; }
 
+    /* ── Landen over tijd ────────────────────────── */
+    .country-chart-section {
+      border-top: 1px solid var(--border);
+      padding: 0.8rem 1.25rem;
+    }
+    .chart-wrap--country { height: 160px; }
+
     /* ── Forms section ───────────────────────────── */
     .forms-section {
       border-top: 1px solid var(--border);
@@ -334,14 +341,23 @@ const COLORS = {
   visitors:  { line: "#1a7f37", fill: "rgba(26,127,55,0.10)",  bar: "rgba(26,127,55,0.55)"  },
 };
 
-let siteData      = [];
-let formsData     = [];      // array of form entries from forms.json
-let mode          = "per-dag";
-let fromDt        = null;
-let toDt          = null;
-let chartRefs     = {};      // { siteId: { pv: Chart|null, vis: Chart|null } }
-let formChartRefs = {};      // { formId: Chart|null }
-let miniChartRefs = {};      // { siteId: Chart|null }
+const COUNTRY_COLORS = [
+  "rgba(9,105,218,0.7)",
+  "rgba(26,127,55,0.7)",
+  "rgba(207,79,8,0.7)",
+  "rgba(130,50,180,0.7)",
+  "rgba(191,15,52,0.7)",
+];
+
+let siteData         = [];
+let formsData        = [];
+let mode             = "per-dag";
+let fromDt           = null;
+let toDt             = null;
+let chartRefs        = {};   // { siteId: { pv: Chart|null, vis: Chart|null } }
+let formChartRefs    = {};   // { formId: Chart|null }
+let miniChartRefs    = {};
+let countryChartRefs = {};   // { siteId: Chart|null }
 
 /* ─── Helpers ─────────────────────────────────────────────── */
 function fmt(n) { return (n ?? 0).toLocaleString("nl-NL"); }
@@ -418,6 +434,80 @@ function getSources(site) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
     .map(([source, referrals]) => ({ source, referrals }));
+}
+
+function getCountryChartData(site) {
+  const hourly = (site.country_hourly ?? []).filter(r => inRange(r.hour));
+  if (hourly.length === 0) return null;
+
+  // Top 5 landen op basis van totaal in gefilterde periode
+  const totals = {};
+  for (const row of hourly) {
+    for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      totals[c] = (totals[c] ?? 0) + v;
+    }
+  }
+  const topCountries = Object.entries(totals)
+    .sort((a, b) => b[1] - a[1]).slice(0, 5).map(([c]) => c);
+  if (topCountries.length === 0) return null;
+
+  // Per tijdseenheid aggregeren
+  const buckets = {};
+  for (const row of hourly) {
+    const key = mode === "per-uur" ? row.hour : row.hour.slice(0, 10);
+    if (!buckets[key]) buckets[key] = {};
+    for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      buckets[key][c] = (buckets[key][c] ?? 0) + v;
+    }
+  }
+
+  let allKeys;
+  if (mode === "per-uur") {
+    const fromMs = fromDt ? fromDt.getTime() : new Date(hourly[0].hour).getTime();
+    const toMs   = toDt   ? toDt.getTime()   : Date.now();
+    allKeys = generateHourlyRange(fromMs, toMs);
+  } else {
+    const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : hourly[0].hour.slice(0, 10);
+    const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    allKeys = generateDailyRange(fromDate, toDate);
+  }
+
+  return {
+    labels: allKeys.map(k => mode === "per-uur" ? shortHour(k) : shortDate(k)),
+    datasets: topCountries.map((country, i) => ({
+      label: country,
+      data:  allKeys.map(k => (buckets[k] ?? {})[country] ?? 0),
+      backgroundColor: COUNTRY_COLORS[i % COUNTRY_COLORS.length],
+    })),
+  };
+}
+
+function makeStackedChart(canvas, labels, datasets) {
+  return new Chart(canvas, {
+    type: "bar",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "bottom", labels: { font: { size: 10 }, padding: 8, boxWidth: 12 } },
+        tooltip: { mode: "index", intersect: false },
+      },
+      scales: {
+        x: {
+          stacked: true,
+          ticks: { font: { size: 10 }, maxRotation: 0, maxTicksLimit: mode === "per-uur" ? 6 : 7 },
+          grid: { display: false },
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          ticks: { font: { size: 10 }, precision: 0 },
+          grid: { color: "rgba(0,0,0,0.05)" },
+        },
+      },
+    },
+  });
 }
 
 function getChartData(site) {
@@ -741,6 +831,12 @@ function renderSite(site) {
         <div id="tbl-src-${site.id}">${barTable(getSources(site), "source", "referrals", "Bron", "Verwijzingen")}</div>
       </div>
     </div>
+    <div class="country-chart-section">
+      <div class="table-title">Landen over tijd</div>
+      <div class="chart-wrap chart-wrap--country" id="wrap-ctry-chart-${site.id}">
+        <p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>
+      </div>
+    </div>
     ${siteForms.map(f => `
     <div class="forms-section">
       <div class="form-stat">
@@ -771,6 +867,20 @@ function renderSite(site) {
   } else {
     chartRefs[site.id] = { pv: null, vis: null };
   }
+
+  // Landen-over-tijd grafiek
+  requestAnimationFrame(() => {
+    const wrap = card.querySelector(`#wrap-ctry-chart-${site.id}`);
+    if (!wrap) return;
+    const ctryData = getCountryChartData(site);
+    if (!ctryData) return;
+    wrap.innerHTML = `<canvas id="ctry-chart-${site.id}"></canvas>`;
+    const canvas = wrap.querySelector(`#ctry-chart-${site.id}`);
+    if (canvas) {
+      if (countryChartRefs[site.id]) { countryChartRefs[site.id].destroy(); }
+      countryChartRefs[site.id] = makeStackedChart(canvas, ctryData.labels, ctryData.datasets);
+    }
+  });
 
   // Formuliergrafieken
   requestAnimationFrame(() => {
@@ -807,7 +917,21 @@ function updateAllCards() {
     if (ctryEl) ctryEl.innerHTML = barTable(getCountries(site), "country", "pageviews", "Land", "Pageviews");
     if (srcEl)  srcEl.innerHTML  = barTable(getSources(site),   "source",  "referrals", "Bron", "Verwijzingen");
 
-    // Charts: destroy old, recreate
+    // Landen-over-tijd grafiek
+    if (countryChartRefs[site.id]) { countryChartRefs[site.id].destroy(); countryChartRefs[site.id] = null; }
+    const wCtry = el(`wrap-ctry-chart-${site.id}`);
+    if (wCtry) {
+      const ctryData = getCountryChartData(site);
+      if (ctryData) {
+        wCtry.innerHTML = `<canvas id="ctry-chart-${site.id}"></canvas>`;
+        const ctryCanvas = el(`ctry-chart-${site.id}`);
+        if (ctryCanvas) countryChartRefs[site.id] = makeStackedChart(ctryCanvas, ctryData.labels, ctryData.datasets);
+      } else {
+        wCtry.innerHTML = `<p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>`;
+      }
+    }
+
+    // Pageviews / bezoekers grafieken: destroy old, recreate
     const refs = chartRefs[site.id] ?? {};
     if (refs.pv)  { refs.pv.destroy();  refs.pv  = null; }
     if (refs.vis) { refs.vis.destroy(); refs.vis = null; }
