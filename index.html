@@ -190,10 +190,26 @@
     .bar-text { position: relative; z-index: 1; }
     .empty { color: var(--muted); font-style: italic; font-size: 0.8rem; }
 
+    /* ── Forms section ───────────────────────────── */
+    .forms-section {
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 180px 1fr;
+    }
+    .form-stat {
+      padding: 0.8rem 1.25rem;
+      border-right: 1px solid var(--border);
+    }
+    .form-stat .stat-value { font-size: 1.3rem; }
+    .form-stat .sub-label { color: var(--muted); font-size: 0.7rem; margin-top: 0.1rem; }
+    .form-chart-box { padding: 0.8rem 1.25rem; min-width: 0; }
+
     @media (max-width: 600px) {
       .summary-row, .charts-row, .tables-row { grid-template-columns: 1fr; }
       .stat-box, .chart-box, .table-box { border-right: none; border-bottom: 1px solid var(--border); }
       .mode-group { margin-left: 0; }
+      .forms-section { grid-template-columns: 1fr; }
+      .form-stat { border-right: none; border-bottom: 1px solid var(--border); }
     }
   </style>
 </head>
@@ -246,11 +262,13 @@ const COLORS = {
   visitors:  { line: "#1a7f37", fill: "rgba(26,127,55,0.10)",  bar: "rgba(26,127,55,0.55)"  },
 };
 
-let siteData  = [];
-let mode      = "per-dag";   // "per-dag" | "totaal" | "per-uur"
-let fromDt    = null;        // Date object (local time input) or null
-let toDt      = null;        // Date object or null
-let chartRefs = {};          // { siteId: { pv: Chart|null, vis: Chart|null } }
+let siteData      = [];
+let formsData     = [];      // array of form entries from forms.json
+let mode          = "per-dag";
+let fromDt        = null;
+let toDt          = null;
+let chartRefs     = {};      // { siteId: { pv: Chart|null, vis: Chart|null } }
+let formChartRefs = {};      // { formId: Chart|null }
 
 /* ─── Helpers ─────────────────────────────────────────────── */
 function fmt(n) { return (n ?? 0).toLocaleString("nl-NL"); }
@@ -360,6 +378,19 @@ function getChartData(site) {
   };
 }
 
+function filteredFormDaily(form) {
+  const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : null;
+  const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : null;
+  return (form.daily ?? []).filter(d =>
+    (!fromDate || d.date >= fromDate) &&
+    (!toDate   || d.date <= toDate)
+  );
+}
+
+function filteredFormTotal(form) {
+  return filteredFormDaily(form).reduce((s, d) => s + d.count, 0);
+}
+
 function getTotals(site) {
   if (mode === "per-uur") {
     const rows = filteredHourly(site);
@@ -447,6 +478,7 @@ function renderSite(site) {
   const card = document.createElement("div");
   card.className = "site-card";
 
+  const siteForms = formsData.filter(f => f.site_name === site.name);
   const totals = getTotals(site);
   const { type, labels, pvData, visData } = getChartData(site);
   const [pvLbl, visLbl] = statLabel();
@@ -494,6 +526,22 @@ function renderSite(site) {
         <div id="tbl-src-${site.id}">${barTable(getSources(site), "source", "referrals", "Bron", "Verwijzingen")}</div>
       </div>
     </div>
+    ${siteForms.map(f => `
+    <div class="forms-section">
+      <div class="form-stat">
+        <div class="stat-label">Formulier: ${esc(f.name)}</div>
+        <div class="stat-value" id="form-val-${f.id}">${fmt(filteredFormTotal(f))}</div>
+        <div class="sub-label">verzendingen in periode</div>
+      </div>
+      <div class="form-chart-box">
+        <div class="chart-title">Verzendingen per dag</div>
+        <div class="chart-wrap" id="form-wrap-${f.id}">
+          ${filteredFormDaily(f).length === 0
+            ? `<p class="chart-note">Geen verzendingen in deze periode.</p>`
+            : `<canvas id="form-chart-${f.id}"></canvas>`}
+        </div>
+      </div>
+    </div>`).join("")}
   `;
 
   if (!noChart) {
@@ -508,6 +556,21 @@ function renderSite(site) {
   } else {
     chartRefs[site.id] = { pv: null, vis: null };
   }
+
+  // Formuliergrafieken
+  requestAnimationFrame(() => {
+    for (const f of siteForms) {
+      const canvas = card.querySelector(`#form-chart-${f.id}`);
+      if (!canvas) continue;
+      const rows   = filteredFormDaily(f);
+      const labels = rows.map(r => shortDate(r.date));
+      const values = rows.map(r => r.count);
+      if (formChartRefs[f.id]) { formChartRefs[f.id].destroy(); }
+      formChartRefs[f.id] = makeChart(canvas, "bar", labels, values, {
+        line: "#7c3aed", fill: "rgba(124,58,237,0.10)", bar: "rgba(124,58,237,0.55)",
+      });
+    }
+  });
 
   return card;
 }
@@ -561,6 +624,30 @@ function updateAllCards() {
       vis: c2 ? makeChart(c2, type, labels, visData, COLORS.visitors)  : null,
     };
   }
+
+  // Formulieren bijwerken
+  for (const f of formsData) {
+    const valEl  = el(`form-val-${f.id}`);
+    const wrapEl = el(`form-wrap-${f.id}`);
+    if (valEl) valEl.textContent = fmt(filteredFormTotal(f));
+    if (!wrapEl) continue;
+
+    if (formChartRefs[f.id]) { formChartRefs[f.id].destroy(); formChartRefs[f.id] = null; }
+
+    const rows = filteredFormDaily(f);
+    if (rows.length === 0) {
+      wrapEl.innerHTML = `<p class="chart-note">Geen verzendingen in deze periode.</p>`;
+      continue;
+    }
+    wrapEl.innerHTML = `<canvas id="form-chart-${f.id}"></canvas>`;
+    const canvas = el(`form-chart-${f.id}`);
+    if (canvas) {
+      formChartRefs[f.id] = makeChart(canvas, "bar",
+        rows.map(r => shortDate(r.date)), rows.map(r => r.count),
+        { line: "#7c3aed", fill: "rgba(124,58,237,0.10)", bar: "rgba(124,58,237,0.55)" }
+      );
+    }
+  }
 }
 
 /* ─── Controls wiring ─────────────────────────────────────── */
@@ -594,16 +681,25 @@ document.querySelectorAll(".mode-btn").forEach(btn => {
 
 /* ─── Load ────────────────────────────────────────────────── */
 async function load() {
-  const res  = await fetch(`./data/analytics.json?v=${Date.now()}`, { cache: "no-store" });
+  const bust = Date.now();
+  const [analyticsRes, formsRes] = await Promise.all([
+    fetch(`./data/analytics.json?v=${bust}`, { cache: "no-store" }),
+    fetch(`./data/forms.json?v=${bust}`,     { cache: "no-store" }),
+  ]);
+
   const main = document.getElementById("main");
   main.innerHTML = "";
 
-  if (!res.ok) {
-    main.innerHTML = `<p style="color:red">Kon analytics.json niet laden (${res.status}).</p>`;
+  if (!analyticsRes.ok) {
+    main.innerHTML = `<p style="color:red">Kon analytics.json niet laden (${analyticsRes.status}).</p>`;
     return;
   }
 
-  const data = await res.json();
+  const data = await analyticsRes.json();
+  if (formsRes.ok) {
+    const formsJson = await formsRes.json();
+    formsData = formsJson.forms ?? [];
+  }
 
   if (data.last_updated) {
     const d = new Date(data.last_updated);
