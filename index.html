@@ -47,6 +47,10 @@
       align-items: center;
       gap: 1rem;
       flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
 
     .ctrl-group {
@@ -613,21 +617,28 @@ async function load() {
     document.getElementById("zero-point-at").textContent =
       "Nulpunt: " + d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" });
 
-    // Stel datepicker-grenzen in
+    // Stel datepicker-grenzen en standaardwaarden in
     const zpLocal = new Date(data.zero_point);
-    // datetime-local wants "YYYY-MM-DDTHH:MM" in LOCAL time
     const pad = n => String(n).padStart(2, "0");
     const localStr = dt =>
       `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 
     const minStr = localStr(zpLocal);
-    const maxStr = localStr(new Date());
+    const nowStr = localStr(new Date());
 
-    for (const id of ["from-dt", "to-dt"]) {
-      const el = document.getElementById(id);
-      el.min = minStr;
-      el.max = maxStr;
-    }
+    const fromEl = document.getElementById("from-dt");
+    const toEl   = document.getElementById("to-dt");
+
+    fromEl.min = minStr;
+    toEl.min   = minStr;
+    fromEl.max = nowStr;
+    toEl.max   = nowStr;
+
+    // Standaard: van = nulpunt, tot = nu
+    fromEl.value = minStr;
+    toEl.value   = nowStr;
+    fromDt = zpLocal;
+    toDt   = new Date();
   }
 
   siteData = (data.sites ?? []).sort((a, b) => {
