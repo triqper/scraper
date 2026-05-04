@@ -1,37 +1,50 @@
 {
-  "last_updated": "2026-05-04T19:00:50.534749+00:00",
+  "last_updated": "2026-05-04T20:00:45.791230+00:00",
   "forms": [
     {
       "id": "69f229ebc935e500086b5c26",
       "name": "woonstroom",
       "site_id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
       "site_name": "woonstroom-interesse-landing",
-      "total_submissions": 1,
-      "last_submission_date": "2026-05-03",
+      "total_submissions": 2,
+      "last_submission_date": "2026-05-04",
       "daily": [
         {
           "date": "2026-05-03",
           "count": 1
+        },
+        {
+          "date": "2026-05-04",
+          "count": 1
         }
       ],
-      "hourly": []
+      "hourly": [
+        {
+          "hour": "2026-05-04T20:00:00+00:00",
+          "count": 1
+        }
+      ]
     },
     {
       "id": "69f229d3a7e77d0008da4617",
       "name": "woonstroom",
       "site_id": "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5",
       "site_name": "woonstroom-woningwaarde-landing",
-      "total_submissions": 2,
+      "total_submissions": 3,
       "last_submission_date": "2026-05-04",
       "daily": [
         {
           "date": "2026-05-04",
-          "count": 2
+          "count": 3
         }
       ],
       "hourly": [
         {
           "hour": "2026-05-04T18:00:00+00:00",
+          "count": 1
+        },
+        {
+          "hour": "2026-05-04T20:00:00+00:00",
           "count": 1
         }
       ]
@@ -41,10 +54,20 @@
       "name": "woonstroom",
       "site_id": "3970cc41-10db-4747-b7b2-89ea7532c283",
       "site_name": "woonstroom-aanbod-landing",
-      "total_submissions": 0,
-      "last_submission_date": null,
-      "daily": [],
-      "hourly": []
+      "total_submissions": 1,
+      "last_submission_date": "2026-05-04",
+      "daily": [
+        {
+          "date": "2026-05-04",
+          "count": 1
+        }
+      ],
+      "hourly": [
+        {
+          "hour": "2026-05-04T20:00:00+00:00",
+          "count": 1
+        }
+      ]
     }
   ]
 }
