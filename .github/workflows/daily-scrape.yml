@@ -1,11 +1,11 @@
-# Draait elk uur tussen 8:00 en 23:00 CEST (6:00-21:00 UTC).
-# ~17 runs/dag × 15 seconden ≈ 130 minuten/maand (ruim binnen 2.000 gratis minuten).
+# Draait elk uur, 24/7.
+# ~24 runs/dag × 15 seconden ≈ 180 minuten/maand (binnen 2.000 gratis minuten).
 
 name: Netlify Analytics
 
 on:
   schedule:
-    - cron: "0 6-21 * * *"
+    - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
       reset:
