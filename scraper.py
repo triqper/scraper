@@ -2,13 +2,10 @@
 """
 Netlify Analytics Scraper
 
-Hoe het delta-systeem werkt:
-  Pageviews:  Netlify toont de afgelopen 7 dagen. Elke dag halen we
-              gisteren op als een nieuw dagrecord. Al opgeslagen data
-              wordt overgeslagen — volledig idempotent.
-  Formulieren: We vergelijken submission_count (Netlify) met ons opgeslagen
-               totaal. Alleen het verschil (delta) wordt opgehaald en per
-               datum verdeeld.
+Haalt per site op voor de afgelopen 7 dagen:
+  - Dagelijkse pageviews en unieke bezoekers
+  - Top landen (ranking/countries)
+  - Top bronnen (ranking/sources)
 
 Vereiste omgevingsvariabele: NETLIFY_TOKEN
 """
@@ -16,7 +13,6 @@ Vereiste omgevingsvariabele: NETLIFY_TOKEN
 import os
 import json
 import sys
-from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
@@ -27,7 +23,6 @@ API_BASE = "https://api.netlify.com/api/v1"
 ANALYTICS_BASE = "https://analytics.services.netlify.com/v2"
 DATA_DIR = Path(__file__).parent / "data"
 
-# Alleen sites met Netlify Analytics ingeschakeld (de sites met een ster)
 ANALYTICS_SITES = {
     "woonstroom-aanbod-landing",
     "woonstroom-woningwaarde-landing",
@@ -75,79 +70,109 @@ def get_sites() -> list:
     return sites
 
 
-def _analytics_ms_params(target: date) -> tuple[int, int]:
-    from_dt = datetime(target.year, target.month, target.day, tzinfo=timezone.utc)
-    return int(from_dt.timestamp() * 1000), int((from_dt + timedelta(days=1)).timestamp() * 1000)
+def _ms_range(from_date: date, to_date: date) -> tuple[int, int]:
+    """Millisecond timestamps for a date range [from_date, to_date)."""
+    f = datetime(from_date.year, from_date.month, from_date.day, tzinfo=timezone.utc)
+    t = datetime(to_date.year, to_date.month, to_date.day, tzinfo=timezone.utc)
+    return int(f.timestamp() * 1000), int(t.timestamp() * 1000)
 
 
-def _parse_data_array(items: list) -> int:
-    if not items:
-        return 0
-    if isinstance(items[0], (list, tuple)):
-        return sum(int(p[1]) for p in items)
-    return sum(item.get("count", item.get("quantity", item.get("pageviews", 0))) for item in items)
-
-
-def fetch_pageviews_for_day(site_id: str, target: date) -> int | None:
-    from_ms, to_ms = _analytics_ms_params(target)
+def fetch_pageviews_daily(site_id: str, from_date: date, to_date: date) -> list[dict]:
+    """Returns list of {date, pageviews} for each day in range."""
+    from_ms, to_ms = _ms_range(from_date, to_date)
     r = netlify_get(
         f"{ANALYTICS_BASE}/{site_id}/pageviews",
         {"from": from_ms, "to": to_ms, "timezone": "+0000", "resolution": "day"},
     )
     if r.status_code in (402, 404, 422):
-        return None
+        return []
     if r.status_code != 200:
-        print(f"    Fout {r.status_code}: {r.text[:200]}")
-        return None
+        print(f"    Fout pageviews {r.status_code}: {r.text[:200]}")
+        return []
     d = r.json()
-    if isinstance(d, dict) and "data" in d:
-        return _parse_data_array(d["data"])
-    if isinstance(d, dict) and "total" in d:
-        return int(d["total"])
-    return 0
-
-
-def fetch_nl_pageviews_for_day(site_id: str, target: date) -> int:
-    """Haalt NL-specifieke pageviews op via het landen-ranking endpoint."""
-    from_ms, to_ms = _analytics_ms_params(target)
-    r = netlify_get(
-        f"{ANALYTICS_BASE}/{site_id}/ranking/countries",
-        {"from": from_ms, "to": to_ms, "timezone": "+0000", "limit": 100},
-    )
-    if r.status_code != 200:
-        print(f"    [countries {r.status_code}] {r.text[:200]}")
-        return 0
-    d = r.json()
-    # Debug: toon de eerste items zodat we het formaat zien
     items = d.get("data", []) if isinstance(d, dict) else []
+    result = []
     for item in items:
-        if isinstance(item, dict):
-            # Netlify gebruikt 'resource' als ISO-landcode, 'country_name' als volledige naam
-            code = item.get("resource") or item.get("path") or item.get("code") or item.get("country") or item.get("name") or ""
-            name = item.get("country_name", "")
-            if code in ("NL",) or name in ("Netherlands", "The Netherlands"):
-                return int(item.get("count", item.get("pageviews", item.get("quantity", 0))))
-        elif isinstance(item, (list, tuple)) and len(item) >= 2:
-            if item[0] in ("NL", "Netherlands"):
-                return int(item[1])
-    return 0
+        if isinstance(item, (list, tuple)) and len(item) >= 2:
+            ts_ms, count = item[0], item[1]
+            day = datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc).date().isoformat()
+            result.append({"date": day, "pageviews": int(count)})
+        elif isinstance(item, dict):
+            day = (item.get("date") or item.get("timestamp") or "")[:10]
+            count = int(item.get("count", item.get("pageviews", 0)))
+            if day:
+                result.append({"date": day, "pageviews": count})
+    return result
 
 
-def fetch_visitors_for_day(site_id: str, target: date) -> int:
-    """Haalt het totaal unieke bezoekers op voor één dag."""
-    from_ms, to_ms = _analytics_ms_params(target)
+def fetch_visitors_daily(site_id: str, from_date: date, to_date: date) -> list[dict]:
+    """Returns list of {date, visitors} for each day in range."""
+    from_ms, to_ms = _ms_range(from_date, to_date)
     r = netlify_get(
         f"{ANALYTICS_BASE}/{site_id}/visitors",
         {"from": from_ms, "to": to_ms, "timezone": "+0000", "resolution": "day"},
     )
     if r.status_code != 200:
-        return 0
+        return []
     d = r.json()
-    if isinstance(d, dict) and "data" in d:
-        return _parse_data_array(d["data"])
-    if isinstance(d, dict) and "total" in d:
-        return int(d["total"])
-    return 0
+    items = d.get("data", []) if isinstance(d, dict) else []
+    result = []
+    for item in items:
+        if isinstance(item, (list, tuple)) and len(item) >= 2:
+            ts_ms, count = item[0], item[1]
+            day = datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc).date().isoformat()
+            result.append({"date": day, "visitors": int(count)})
+        elif isinstance(item, dict):
+            day = (item.get("date") or item.get("timestamp") or "")[:10]
+            count = int(item.get("count", item.get("visitors", 0)))
+            if day:
+                result.append({"date": day, "visitors": count})
+    return result
+
+
+def fetch_top_countries(site_id: str, from_date: date, to_date: date) -> list[dict]:
+    """Returns list of {country, pageviews} sorted by pageviews desc."""
+    from_ms, to_ms = _ms_range(from_date, to_date)
+    r = netlify_get(
+        f"{ANALYTICS_BASE}/{site_id}/ranking/countries",
+        {"from": from_ms, "to": to_ms, "timezone": "+0000", "limit": 10},
+    )
+    if r.status_code != 200:
+        return []
+    d = r.json()
+    items = d.get("data", []) if isinstance(d, dict) else []
+    result = []
+    for item in items:
+        if isinstance(item, dict):
+            name = item.get("country_name") or item.get("resource") or item.get("name") or "Onbekend"
+            count = int(item.get("count", item.get("pageviews", item.get("quantity", 0))))
+            result.append({"country": name, "pageviews": count})
+        elif isinstance(item, (list, tuple)) and len(item) >= 2:
+            result.append({"country": str(item[0]), "pageviews": int(item[1])})
+    return sorted(result, key=lambda x: x["pageviews"], reverse=True)
+
+
+def fetch_top_sources(site_id: str, from_date: date, to_date: date) -> list[dict]:
+    """Returns list of {source, referrals} sorted by referrals desc."""
+    from_ms, to_ms = _ms_range(from_date, to_date)
+    r = netlify_get(
+        f"{ANALYTICS_BASE}/{site_id}/ranking/sources",
+        {"from": from_ms, "to": to_ms, "timezone": "+0000", "limit": 10},
+    )
+    if r.status_code != 200:
+        print(f"    [sources {r.status_code}]")
+        return []
+    d = r.json()
+    items = d.get("data", []) if isinstance(d, dict) else []
+    result = []
+    for item in items:
+        if isinstance(item, dict):
+            source = item.get("resource") or item.get("source") or item.get("path") or item.get("name") or "Direct"
+            count = int(item.get("count", item.get("referrals", item.get("quantity", 0))))
+            result.append({"source": source, "referrals": count})
+        elif isinstance(item, (list, tuple)) and len(item) >= 2:
+            result.append({"source": str(item[0]), "referrals": int(item[1])})
+    return sorted(result, key=lambda x: x["referrals"], reverse=True)
 
 
 def get_forms(site_id: str) -> list:
@@ -170,17 +195,19 @@ def get_form_submissions(form_id: str, per_page: int = 100, page: int = 1) -> li
 
 
 # ---------------------------------------------------------------------------
-# Pageviews update
+# Analytics update (pageviews + visitors + countries + sources)
 # ---------------------------------------------------------------------------
 
 
-def update_pageviews() -> None:
-    path = DATA_DIR / "pageviews.json"
+def update_analytics() -> None:
+    path = DATA_DIR / "analytics.json"
     data = load_json(path)
     data.setdefault("sites", [])
 
     sites_idx = {s["id"]: s for s in data["sites"]}
     today = datetime.now(timezone.utc).date()
+    # Collect data for last 7 days (today inclusive)
+    from_date = today - timedelta(days=6)
 
     for site in get_sites():
         sid = site["id"]
@@ -194,44 +221,51 @@ def update_pageviews() -> None:
 
         entry = sites_idx.setdefault(
             sid,
-            {"id": sid, "name": name, "url": url, "total_pageviews": 0, "daily": []},
+            {
+                "id": sid,
+                "name": name,
+                "url": url,
+                "daily": [],
+                "top_countries": [],
+                "top_sources": [],
+            },
         )
         entry["name"] = name
         entry["url"] = url
 
-        # Sla bestaande data op als dict voor snelle lookup
-        have = {d["date"]: d for d in entry["daily"]}
-        analytics_available = True
+        # Build merged daily data (pageviews + visitors per day)
+        pv_list = fetch_pageviews_daily(sid, from_date, today + timedelta(days=1))
+        if not pv_list and entry["daily"]:
+            print(f"    → analytics niet beschikbaar, bestaande data behouden")
+        else:
+            vis_list = fetch_visitors_daily(sid, from_date, today + timedelta(days=1))
 
-        for days_ago in range(0, 7):
-            target = today - timedelta(days=days_ago)
-            ds = target.isoformat()
+            pv_map = {d["date"]: d["pageviews"] for d in pv_list}
+            vis_map = {d["date"]: d["visitors"] for d in vis_list}
 
-            # Sla over als compleet opgeslagen (tenzij vandaag/gisteren)
-            existing = have.get(ds, {})
-            if days_ago >= 2 and "pageviews_nl" in existing and "visitors" in existing:
-                continue
-            if not analytics_available:
-                break
+            all_dates = sorted(set(pv_map) | set(vis_map))
+            entry["daily"] = [
+                {
+                    "date": ds,
+                    "pageviews": pv_map.get(ds, 0),
+                    "visitors": vis_map.get(ds, 0),
+                }
+                for ds in all_dates
+            ]
 
-            count = fetch_pageviews_for_day(sid, target)
-            if count is None:
-                print(f"    → analytics niet beschikbaar voor {name}")
-                analytics_available = False
-                break
+            total_pv = sum(d["pageviews"] for d in entry["daily"])
+            total_vis = sum(d["visitors"] for d in entry["daily"])
+            print(f"    {total_pv} pageviews, {total_vis} bezoekers (7 dagen)")
 
-            nl_count = fetch_nl_pageviews_for_day(sid, target)
-            visitors = fetch_visitors_for_day(sid, target)
+        # Top countries and sources — always refresh
+        countries = fetch_top_countries(sid, from_date, today + timedelta(days=1))
+        sources = fetch_top_sources(sid, from_date, today + timedelta(days=1))
 
-            label = " (vandaag)" if days_ago == 0 else ""
-            print(f"    {ds}: {count} pageviews, {nl_count} NL, {visitors} bezoekers{label}")
+        entry["top_countries"] = countries
+        entry["top_sources"] = sources
 
-            have[ds] = {"date": ds, "pageviews": count, "pageviews_nl": nl_count, "visitors": visitors}
-
-        entry["daily"] = sorted(have.values(), key=lambda x: x["date"])
         entry["total_pageviews"] = sum(d["pageviews"] for d in entry["daily"])
-        entry["total_pageviews_nl"] = sum(d.get("pageviews_nl", 0) for d in entry["daily"])
-        entry["total_visitors"] = sum(d.get("visitors", 0) for d in entry["daily"])
+        entry["total_visitors"] = sum(d["visitors"] for d in entry["daily"])
 
     data["sites"] = list(sites_idx.values())
     data["last_updated"] = datetime.now(timezone.utc).isoformat()
@@ -245,6 +279,8 @@ def update_pageviews() -> None:
 
 
 def update_forms() -> None:
+    from collections import defaultdict
+
     path = DATA_DIR / "forms.json"
     data = load_json(path)
     data.setdefault("forms", [])
@@ -289,7 +325,6 @@ def update_forms() -> None:
                 print(f"  {sname} / {fname}: geen nieuwe verzendingen")
                 continue
 
-            # Begrens de eerste ophaal bij 1000 om de API niet te overbelasten
             fetch_limit = min(delta, 1000)
             if delta > 1000:
                 print(f"  {sname} / {fname}: {delta} nieuw (max 1000 opgehaald)")
@@ -308,7 +343,6 @@ def update_forms() -> None:
 
             subs = subs[:fetch_limit]
 
-            # Groepeer per datum
             by_date: dict[str, int] = defaultdict(int)
             latest: str | None = None
             for sub in subs:
@@ -318,7 +352,6 @@ def update_forms() -> None:
                     if not latest or dt > latest:
                         latest = dt
 
-            # Samenvoegen met bestaande dagtelling
             dmap = {d["date"]: d["count"] for d in entry["daily"]}
             for dt, cnt in by_date.items():
                 dmap[dt] = dmap.get(dt, 0) + cnt
@@ -351,8 +384,8 @@ def main() -> None:
     print(
         f"Netlify Analytics Scraper — {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')} UTC\n"
     )
-    print("Paginaweergaven ophalen:")
-    update_pageviews()
+    print("Analytics ophalen:")
+    update_analytics()
     print("\nFormulieren ophalen:")
     update_forms()
     print("\nKlaar!")
