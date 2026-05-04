@@ -1,11 +1,9 @@
-# Draait elk uur, 24/7.
+# Getriggerd via cron-job.org (elk uur) met workflow_dispatch.
 # ~24 runs/dag × 15 seconden ≈ 180 minuten/maand (binnen 2.000 gratis minuten).
 
 name: Netlify Analytics
 
 on:
-  schedule:
-    - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
       reset:
