@@ -539,6 +539,13 @@ function renderCompare() {
   const el = document.getElementById("compare");
   el.innerHTML = "";
 
+  // Verwijder oude mini-chart instanties
+  for (const id of Object.keys(miniChartRefs)) {
+    if (miniChartRefs[id]) { miniChartRefs[id].destroy(); miniChartRefs[id] = null; }
+  }
+
+  const toChart = []; // na DOM-insert in één rAF renderen
+
   for (const group of GROUPS) {
     const col = document.createElement("div");
     col.className = "compare-group";
@@ -552,7 +559,7 @@ function renderCompare() {
       const site = siteData.find(s => s.name === siteName);
       if (!site) continue;
 
-      const label    = siteName.endsWith("-landing") ? "Landing" : "Hoofd";
+      const label    = siteName.endsWith("-landing") ? "QR Flyer" : "Hoofd";
       const { labels, pvData } = getChartData(site);
       const total    = getTotals(site).pv;
       const canvasId = `mini-${site.id}`;
@@ -566,7 +573,9 @@ function renderCompare() {
           <span class="mini-card-total">${fmt(total)} pv</span>
         </div>
         <div class="mini-chart-wrap">
-          ${labels.length ? `<canvas id="${canvasId}"></canvas>` : `<span style="font-size:0.7rem;color:var(--muted);font-style:italic">Geen data</span>`}
+          ${labels.length
+            ? `<canvas id="${canvasId}"></canvas>`
+            : `<span style="font-size:0.7rem;color:var(--muted);font-style:italic">Geen data</span>`}
         </div>
       `;
       card.addEventListener("click", () => {
@@ -576,32 +585,24 @@ function renderCompare() {
       col.appendChild(card);
 
       if (labels.length) {
-        requestAnimationFrame(() => {
-          const canvas = document.getElementById(canvasId);
-          if (!canvas) return;
-          if (miniChartRefs[site.id]) miniChartRefs[site.id].destroy();
-          miniChartRefs[site.id] = makeMiniChart(canvas, labels, pvData);
-        });
+        toChart.push({ canvasId, labels, pvData, siteId: site.id });
       }
     }
 
-    el.appendChild(col);
+    el.appendChild(col); // kolom in DOM vóór charts renderen
   }
+
+  // Alle kolommen staan nu in de DOM; render charts in één frame
+  requestAnimationFrame(() => {
+    for (const { canvasId, labels, pvData, siteId } of toChart) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) continue;
+      miniChartRefs[siteId] = makeMiniChart(canvas, labels, pvData);
+    }
+  });
 }
 
 function updateMiniCharts() {
-  for (const group of GROUPS) {
-    for (const siteName of group.sites) {
-      const site = siteData.find(s => s.name === siteName);
-      if (!site) continue;
-
-      // Update total label
-      const card = document.querySelector(`#compare .mini-card[data-id="${site.id}"]`);
-      // Re-render the whole compare section (it's fast and keeps code simple)
-      break;
-    }
-    break;
-  }
   renderCompare();
 }
 
