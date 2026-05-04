@@ -204,12 +204,67 @@
     .form-stat .sub-label { color: var(--muted); font-size: 0.7rem; margin-top: 0.1rem; }
     .form-chart-box { padding: 0.8rem 1.25rem; min-width: 0; }
 
+    /* ── Compare section ─────────────────────────── */
+    #compare {
+      max-width: 1100px;
+      margin: 1.25rem auto 0;
+      padding: 0 1rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .compare-group {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .compare-group-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      padding: 0.45rem 0.75rem;
+      background: #f6f8fa;
+      border-bottom: 1px solid var(--border);
+    }
+    .mini-card {
+      padding: 0.5rem 0.75rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .mini-card:last-child { border-bottom: none; }
+    .mini-card:hover { background: #eef2ff; }
+    .mini-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.3rem;
+    }
+    .mini-card-name { font-size: 0.72rem; color: var(--text); font-weight: 500; }
+    .mini-card-total { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .mini-chart-wrap { height: 50px; position: relative; }
+    .mini-chart-wrap canvas { width: 100% !important; height: 100% !important; }
+
+    /* ── Group header between full cards ─────────── */
+    .group-header {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      padding: 0.25rem 0 0.1rem;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: -0.5rem;
+    }
+
     @media (max-width: 600px) {
       .summary-row, .charts-row, .tables-row { grid-template-columns: 1fr; }
       .stat-box, .chart-box, .table-box { border-right: none; border-bottom: 1px solid var(--border); }
       .mode-group { margin-left: 0; }
       .forms-section { grid-template-columns: 1fr; }
       .form-stat { border-right: none; border-bottom: 1px solid var(--border); }
+      #compare { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -243,20 +298,21 @@
   </div>
 </div>
 
+<div id="compare"></div>
+
 <main id="main">
   <p style="color:var(--muted)">Laden…</p>
 </main>
 
 <script>
 /* ─── State ───────────────────────────────────────────────── */
-const SITE_ORDER = [
-  "woonstroom-aanbod-landing",
-  "woonstroom-woningwaarde-landing",
-  "woonstroom-interesse-landing",
-  "woonstroom-aanbod",
-  "woonstroom-woningwaarde",
-  "woonstroom-interesse",
+const GROUPS = [
+  { title: "Aanbod",       sites: ["woonstroom-aanbod",       "woonstroom-aanbod-landing"]       },
+  { title: "Interesse",    sites: ["woonstroom-interesse",    "woonstroom-interesse-landing"]    },
+  { title: "Woningwaarde", sites: ["woonstroom-woningwaarde", "woonstroom-woningwaarde-landing"] },
 ];
+const SITE_ORDER = GROUPS.flatMap(g => g.sites);
+
 const COLORS = {
   pageviews: { line: "#0969da", fill: "rgba(9,105,218,0.10)", bar: "rgba(9,105,218,0.55)" },
   visitors:  { line: "#1a7f37", fill: "rgba(26,127,55,0.10)",  bar: "rgba(26,127,55,0.55)"  },
@@ -269,6 +325,7 @@ let fromDt        = null;
 let toDt          = null;
 let chartRefs     = {};      // { siteId: { pv: Chart|null, vis: Chart|null } }
 let formChartRefs = {};      // { formId: Chart|null }
+let miniChartRefs = {};      // { siteId: Chart|null }
 
 /* ─── Helpers ─────────────────────────────────────────────── */
 function fmt(n) { return (n ?? 0).toLocaleString("nl-NL"); }
@@ -448,6 +505,106 @@ function makeChart(canvas, type, labels, values, color) {
   });
 }
 
+/* ─── Mini chart (sparkline) ──────────────────────────────── */
+function makeMiniChart(canvas, labels, values) {
+  return new Chart(canvas, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        borderColor: COLORS.pageviews.line,
+        backgroundColor: COLORS.pageviews.fill,
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.4,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 150 },
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: { display: false },
+        y: { display: false, beginAtZero: true },
+      },
+    },
+  });
+}
+
+/* ─── Compare section ─────────────────────────────────────── */
+function renderCompare() {
+  const el = document.getElementById("compare");
+  el.innerHTML = "";
+
+  for (const group of GROUPS) {
+    const col = document.createElement("div");
+    col.className = "compare-group";
+
+    const titleEl = document.createElement("div");
+    titleEl.className = "compare-group-title";
+    titleEl.textContent = group.title;
+    col.appendChild(titleEl);
+
+    for (const siteName of group.sites) {
+      const site = siteData.find(s => s.name === siteName);
+      if (!site) continue;
+
+      const label    = siteName.endsWith("-landing") ? "Landing" : "Hoofd";
+      const { labels, pvData } = getChartData(site);
+      const total    = getTotals(site).pv;
+      const canvasId = `mini-${site.id}`;
+
+      const card = document.createElement("div");
+      card.className = "mini-card";
+      card.title     = `Ga naar ${site.name}`;
+      card.innerHTML = `
+        <div class="mini-card-header">
+          <span class="mini-card-name">${esc(label)}</span>
+          <span class="mini-card-total">${fmt(total)} pv</span>
+        </div>
+        <div class="mini-chart-wrap">
+          ${labels.length ? `<canvas id="${canvasId}"></canvas>` : `<span style="font-size:0.7rem;color:var(--muted);font-style:italic">Geen data</span>`}
+        </div>
+      `;
+      card.addEventListener("click", () => {
+        document.getElementById(`card-${site.id}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      col.appendChild(card);
+
+      if (labels.length) {
+        requestAnimationFrame(() => {
+          const canvas = document.getElementById(canvasId);
+          if (!canvas) return;
+          if (miniChartRefs[site.id]) miniChartRefs[site.id].destroy();
+          miniChartRefs[site.id] = makeMiniChart(canvas, labels, pvData);
+        });
+      }
+    }
+
+    el.appendChild(col);
+  }
+}
+
+function updateMiniCharts() {
+  for (const group of GROUPS) {
+    for (const siteName of group.sites) {
+      const site = siteData.find(s => s.name === siteName);
+      if (!site) continue;
+
+      // Update total label
+      const card = document.querySelector(`#compare .mini-card[data-id="${site.id}"]`);
+      // Re-render the whole compare section (it's fast and keeps code simple)
+      break;
+    }
+    break;
+  }
+  renderCompare();
+}
+
 /* ─── Bar table ───────────────────────────────────────────── */
 function barTable(rows, labelKey, valueKey, colA, colB) {
   if (!rows || rows.length === 0) return `<p class="empty">Geen data in deze periode.</p>`;
@@ -477,6 +634,7 @@ function statLabel() {
 function renderSite(site) {
   const card = document.createElement("div");
   card.className = "site-card";
+  card.id = `card-${site.id}`;
 
   const siteForms = formsData.filter(f => f.site_name === site.name);
   const totals = getTotals(site);
@@ -625,6 +783,9 @@ function updateAllCards() {
     };
   }
 
+  // Mini-grafieken bijwerken
+  updateMiniCharts();
+
   // Formulieren bijwerken
   for (const f of formsData) {
     const valEl  = el(`form-val-${f.id}`);
@@ -749,8 +910,24 @@ async function load() {
     return;
   }
 
-  for (const site of siteData) {
-    main.appendChild(renderSite(site));
+  // Vergelijkpaneel bovenin
+  renderCompare();
+
+  // Volledige cards gegroepeerd met groepstitels
+  for (const group of GROUPS) {
+    const groupSites = group.sites
+      .map(name => siteData.find(s => s.name === name))
+      .filter(Boolean);
+    if (groupSites.length === 0) continue;
+
+    const header = document.createElement("div");
+    header.className = "group-header";
+    header.textContent = group.title;
+    main.appendChild(header);
+
+    for (const site of groupSites) {
+      main.appendChild(renderSite(site));
+    }
   }
 }
 
