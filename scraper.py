@@ -115,16 +115,20 @@ def fetch_nl_pageviews_for_day(site_id: str, target: date) -> int:
         {"from": from_ms, "to": to_ms, "timezone": "+0000", "limit": 100},
     )
     if r.status_code != 200:
+        print(f"    [countries {r.status_code}] {r.text[:200]}")
         return 0
     d = r.json()
+    # Debug: toon de eerste items zodat we het formaat zien
     items = d.get("data", []) if isinstance(d, dict) else []
+    if items:
+        print(f"    [countries formaat] {items[:3]}")
     for item in items:
         if isinstance(item, dict):
-            code = item.get("path", item.get("country", item.get("code", "")))
-            if code in ("NL", "Netherlands"):
-                return int(item.get("count", item.get("pageviews", 0)))
+            code = item.get("path", item.get("country", item.get("code", item.get("name", ""))))
+            if code in ("NL", "Netherlands", "The Netherlands"):
+                return int(item.get("count", item.get("pageviews", item.get("quantity", 0))))
         elif isinstance(item, (list, tuple)) and len(item) >= 2:
-            if item[0] in ("NL", "Netherlands"):
+            if item[0] in ("NL", "Netherlands", "The Netherlands"):
                 return int(item[1])
     return 0
 
