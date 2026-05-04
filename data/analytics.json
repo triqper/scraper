@@ -1,6 +1,6 @@
 {
   "zero_point": "2026-05-04T07:52:59.540654+00:00",
-  "last_updated": "2026-05-04T13:20:15.861853+00:00",
+  "last_updated": "2026-05-04T13:38:41.779025+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
@@ -58,6 +58,18 @@
           "deltas": {
             "woonstroom-interesse.netlify.app": 1
           }
+        }
+      ],
+      "hourly": [
+        {
+          "hour": "2026-05-04T08:00:00+00:00",
+          "pageviews": 2,
+          "visitors": 2
+        },
+        {
+          "hour": "2026-05-04T12:00:00+00:00",
+          "pageviews": 1,
+          "visitors": 1
         }
       ]
     },
@@ -118,6 +130,18 @@
             "Direct traffic": 1
           }
         }
+      ],
+      "hourly": [
+        {
+          "hour": "2026-05-04T08:00:00+00:00",
+          "pageviews": 2,
+          "visitors": 1
+        },
+        {
+          "hour": "2026-05-04T12:00:00+00:00",
+          "pageviews": 1,
+          "visitors": 1
+        }
       ]
     },
     {
@@ -170,6 +194,13 @@
             "woonstroom-aanbod.netlify.app": 1
           }
         }
+      ],
+      "hourly": [
+        {
+          "hour": "2026-05-04T08:00:00+00:00",
+          "pageviews": 3,
+          "visitors": 2
+        }
       ]
     },
     {
@@ -211,6 +242,13 @@
           "deltas": {
             "Direct traffic": 1
           }
+        }
+      ],
+      "hourly": [
+        {
+          "hour": "2026-05-04T08:00:00+00:00",
+          "pageviews": 1,
+          "visitors": 1
         }
       ]
     },
@@ -254,6 +292,13 @@
             "Direct traffic": 1
           }
         }
+      ],
+      "hourly": [
+        {
+          "hour": "2026-05-04T08:00:00+00:00",
+          "pageviews": 1,
+          "visitors": 1
+        }
       ]
     },
     {
@@ -295,6 +340,13 @@
           "deltas": {
             "Direct traffic": 2
           }
+        }
+      ],
+      "hourly": [
+        {
+          "hour": "2026-05-04T08:00:00+00:00",
+          "pageviews": 2,
+          "visitors": 2
         }
       ]
     }
