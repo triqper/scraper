@@ -423,6 +423,7 @@ def update_forms() -> None:
     data.setdefault("forms", [])
 
     forms_idx = {f["id"]: f for f in data["forms"]}
+    run_hour  = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0).strftime("%Y-%m-%dT%H:00:00+00:00")
 
     for site in get_sites():
         sid   = site["id"]
@@ -446,9 +447,11 @@ def update_forms() -> None:
                 "total_submissions": 0,
                 "last_submission_date": None,
                 "daily": [],
+                "hourly": [],
             })
             entry["name"]      = fname
             entry["site_name"] = sname
+            entry.setdefault("hourly", [])
 
             stored_total = int(entry.get("total_submissions", 0) or 0)
             delta        = netlify_total - stored_total
@@ -489,6 +492,16 @@ def update_forms() -> None:
                 [{"date": k, "count": v} for k, v in dmap.items()],
                 key=lambda x: x["date"],
             )
+
+            # Hourly delta: tel delta op bij het huidige uur
+            hourly = entry["hourly"]
+            for rec in hourly:
+                if rec["hour"] == run_hour:
+                    rec["count"] = rec.get("count", 0) + delta
+                    break
+            else:
+                hourly.append({"hour": run_hour, "count": delta})
+
             entry["total_submissions"]    = netlify_total
             if latest:
                 entry["last_submission_date"] = latest

@@ -560,8 +560,30 @@ function filteredFormDaily(form) {
   );
 }
 
+function filteredFormHourly(form) {
+  return (form.hourly ?? []).filter(r => inRange(r.hour));
+}
+
 function filteredFormTotal(form) {
+  if (mode === "per-uur") return filteredFormHourly(form).reduce((s, r) => s + r.count, 0);
   return filteredFormDaily(form).reduce((s, d) => s + d.count, 0);
+}
+
+function getFormChartData(form) {
+  if (mode === "per-uur") {
+    const rows   = filteredFormHourly(form);
+    const lookup = Object.fromEntries(rows.map(r => [r.hour, r.count]));
+    const fromMs = fromDt ? fromDt.getTime() : (rows.length ? new Date(rows[0].hour).getTime() : Date.now());
+    const toMs   = toDt   ? toDt.getTime()   : Date.now();
+    const allHours = generateHourlyRange(fromMs, toMs);
+    return { labels: allHours.map(h => shortHour(h)), values: allHours.map(h => lookup[h] ?? 0) };
+  }
+  const rows     = filteredFormDaily(form);
+  const lookup   = Object.fromEntries(rows.map(r => [r.date, r.count]));
+  const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : (rows.length ? rows[0].date : new Date().toISOString().slice(0, 10));
+  const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+  const allDates = generateDailyRange(fromDate, toDate);
+  return { labels: allDates.map(d => shortDate(d)), values: allDates.map(d => lookup[d] ?? 0) };
 }
 
 function getTotals(site) {
@@ -845,11 +867,9 @@ function renderSite(site) {
         <div class="sub-label">verzendingen in periode</div>
       </div>
       <div class="form-chart-box">
-        <div class="chart-title">Verzendingen per dag</div>
+        <div class="chart-title" id="form-chart-title-${f.id}">${mode === "per-uur" ? "Verzendingen per uur" : "Verzendingen per dag"}</div>
         <div class="chart-wrap" id="form-wrap-${f.id}">
-          ${filteredFormDaily(f).length === 0
-            ? `<p class="chart-note">Geen verzendingen in deze periode.</p>`
-            : `<canvas id="form-chart-${f.id}"></canvas>`}
+          ${(() => { const d = getFormChartData(f); return d.values.every(v => v === 0) ? `<p class="chart-note">Geen verzendingen in deze periode.</p>` : `<canvas id="form-chart-${f.id}"></canvas>`; })()}
         </div>
       </div>
     </div>`).join("")}
@@ -887,9 +907,7 @@ function renderSite(site) {
     for (const f of siteForms) {
       const canvas = card.querySelector(`#form-chart-${f.id}`);
       if (!canvas) continue;
-      const rows   = filteredFormDaily(f);
-      const labels = rows.map(r => shortDate(r.date));
-      const values = rows.map(r => r.count);
+      const { labels, values } = getFormChartData(f);
       if (formChartRefs[f.id]) { formChartRefs[f.id].destroy(); }
       formChartRefs[f.id] = makeChart(canvas, "bar", labels, values, {
         line: "#7c3aed", fill: "rgba(124,58,237,0.10)", bar: "rgba(124,58,237,0.55)",
@@ -966,23 +984,24 @@ function updateAllCards() {
 
   // Formulieren bijwerken
   for (const f of formsData) {
-    const valEl  = el(`form-val-${f.id}`);
-    const wrapEl = el(`form-wrap-${f.id}`);
-    if (valEl) valEl.textContent = fmt(filteredFormTotal(f));
+    const valEl   = el(`form-val-${f.id}`);
+    const wrapEl  = el(`form-wrap-${f.id}`);
+    const titleEl = el(`form-chart-title-${f.id}`);
+    if (valEl)   valEl.textContent   = fmt(filteredFormTotal(f));
+    if (titleEl) titleEl.textContent = mode === "per-uur" ? "Verzendingen per uur" : "Verzendingen per dag";
     if (!wrapEl) continue;
 
     if (formChartRefs[f.id]) { formChartRefs[f.id].destroy(); formChartRefs[f.id] = null; }
 
-    const rows = filteredFormDaily(f);
-    if (rows.length === 0) {
+    const { labels, values } = getFormChartData(f);
+    if (values.every(v => v === 0)) {
       wrapEl.innerHTML = `<p class="chart-note">Geen verzendingen in deze periode.</p>`;
       continue;
     }
     wrapEl.innerHTML = `<canvas id="form-chart-${f.id}"></canvas>`;
     const canvas = el(`form-chart-${f.id}`);
     if (canvas) {
-      formChartRefs[f.id] = makeChart(canvas, "bar",
-        rows.map(r => shortDate(r.date)), rows.map(r => r.count),
+      formChartRefs[f.id] = makeChart(canvas, "bar", labels, values,
         { line: "#7c3aed", fill: "rgba(124,58,237,0.10)", bar: "rgba(124,58,237,0.55)" }
       );
     }
