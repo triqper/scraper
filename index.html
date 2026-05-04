@@ -87,6 +87,19 @@
     }
     .btn-reset:hover { background: var(--bg); color: var(--text); }
 
+    .btn-nl-toggle {
+      font-size: 0.78rem;
+      padding: 0.28rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn-nl-toggle:hover  { background: var(--bg); color: var(--text); }
+    .btn-nl-toggle.active { background: #1a7f37; color: #fff; border-color: #1a7f37; }
+
     .mode-group {
       display: flex;
       border: 1px solid var(--border);
@@ -306,6 +319,7 @@
     <input type="datetime-local" id="to-dt" />
   </div>
   <button class="btn-reset" id="reset-filter">Alles tonen</button>
+  <button class="btn-nl-toggle" id="nl-toggle">Alleen NL</button>
   <div class="mode-group">
     <button class="mode-btn active" data-mode="per-dag">Per dag</button>
     <button class="mode-btn" data-mode="totaal">Totaal</button>
@@ -354,6 +368,7 @@ let formsData        = [];
 let mode             = "per-dag";
 let fromDt           = null;
 let toDt             = null;
+let nlOnly           = false;
 let chartRefs        = {};   // { siteId: { pv: Chart|null, vis: Chart|null } }
 let formChartRefs    = {};   // { formId: Chart|null }
 let miniChartRefs    = {};
@@ -414,15 +429,13 @@ function aggregateHourlyDeltas(rows) {
 }
 
 function getCountries(site) {
-  if (!fromDt && !toDt) {
-    // No filter → show full aggregate since zero point
-    return site.top_countries ?? [];
-  }
-  const agg = aggregateHourlyDeltas(site.country_hourly ?? []);
-  return Object.entries(agg)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .map(([country, pageviews]) => ({ country, pageviews }));
+  const agg = (!fromDt && !toDt && !nlOnly)
+    ? Object.fromEntries((site.top_countries ?? []).map(r => [r.country, r.pageviews]))
+    : aggregateHourlyDeltas(site.country_hourly ?? []);
+  const entries = nlOnly
+    ? (agg.NL ? [["NL", agg.NL]] : [])
+    : Object.entries(agg).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  return entries.map(([country, pageviews]) => ({ country, pageviews }));
 }
 
 function getSources(site) {
@@ -511,6 +524,29 @@ function makeStackedChart(canvas, labels, datasets) {
 }
 
 function getChartData(site) {
+  if (nlOnly) {
+    // Gebruik country_hourly NL-deltas als databron
+    if (mode === "per-uur") {
+      const nlHour = nlPageviewsPerHour(site);
+      const fromMs = fromDt ? fromDt.getTime() : Date.now();
+      const toMs   = toDt   ? toDt.getTime()   : Date.now();
+      const allHours = generateHourlyRange(fromMs, toMs);
+      const pvData = allHours.map(h => nlHour[h] ?? 0);
+      return { type: "bar", labels: allHours.map(h => shortHour(h)), pvData, visData: pvData };
+    }
+    const nlDay = nlPageviewsPerDay(site);
+    const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const allDates = generateDailyRange(fromDate, toDate);
+    if (mode === "totaal") {
+      let pvSum = 0;
+      const pvData = allDates.map(d => { pvSum += (nlDay[d] ?? 0); return pvSum; });
+      return { type: "line", labels: allDates.map(d => shortDate(d)), pvData, visData: pvData };
+    }
+    const pvData = allDates.map(d => nlDay[d] ?? 0);
+    return { type: "bar", labels: allDates.map(d => shortDate(d)), pvData, visData: pvData };
+  }
+
   if (mode === "per-uur") {
     const rows   = filteredHourly(site);
     const lookup = Object.fromEntries(rows.map(r => [r.hour, r]));
@@ -586,7 +622,35 @@ function getFormChartData(form) {
   return { labels: allDates.map(d => shortDate(d)), values: allDates.map(d => lookup[d] ?? 0) };
 }
 
+/* ─── NL-only helpers ─────────────────────────────────────── */
+function nlPageviewsPerHour(site) {
+  // { "2026-05-04T08:00:00+00:00": N }
+  const result = {};
+  for (const row of (site.country_hourly ?? [])) {
+    if (!inRange(row.hour)) continue;
+    result[row.hour] = (result[row.hour] ?? 0) + (row.deltas?.NL ?? 0);
+  }
+  return result;
+}
+
+function nlPageviewsPerDay(site) {
+  // { "2026-05-04": N }
+  const result = {};
+  for (const row of (site.country_hourly ?? [])) {
+    if (!inRange(row.hour)) continue;
+    const day = row.hour.slice(0, 10);
+    result[day] = (result[day] ?? 0) + (row.deltas?.NL ?? 0);
+  }
+  return result;
+}
+
 function getTotals(site) {
+  if (nlOnly) {
+    const pv = Object.values(
+      mode === "per-uur" ? nlPageviewsPerHour(site) : nlPageviewsPerDay(site)
+    ).reduce((s, v) => s + v, 0);
+    return { pv, vis: null };
+  }
   if (mode === "per-uur") {
     const rows = filteredHourly(site);
     return {
@@ -795,10 +859,13 @@ function barTable(rows, labelKey, valueKey, colA, colB) {
 
 /* ─── Render / update ─────────────────────────────────────── */
 function statLabel() {
-  if (mode === "per-uur") return ["Pageviews (gefilterd)", "Bezoekers (gefilterd)"];
-  if (mode === "totaal")  return ["Totaal pageviews",      "Totaal bezoekers"];
-  return ["Pageviews", "Bezoekers"];
+  const nl = nlOnly ? " (NL)" : "";
+  if (mode === "per-uur") return [`Pageviews (gefilterd)${nl}`, nlOnly ? "Bezoekers (n.b.)" : "Bezoekers (gefilterd)"];
+  if (mode === "totaal")  return [`Totaal pageviews${nl}`,      nlOnly ? "Bezoekers (n.b.)" : "Totaal bezoekers"];
+  return [`Pageviews${nl}`, nlOnly ? "Bezoekers (n.b.)" : "Bezoekers"];
 }
+
+function fmtStat(n) { return n === null ? "—" : fmt(n); }
 
 function renderSite(site) {
   const card = document.createElement("div");
@@ -822,11 +889,11 @@ function renderSite(site) {
     <div class="summary-row">
       <div class="stat-box">
         <div class="stat-label" id="lbl-pv-${site.id}">${esc(pvLbl)}</div>
-        <div class="stat-value" id="val-pv-${site.id}">${fmt(totals.pv)}</div>
+        <div class="stat-value" id="val-pv-${site.id}">${fmtStat(totals.pv)}</div>
       </div>
       <div class="stat-box">
         <div class="stat-label" id="lbl-vis-${site.id}">${esc(visLbl)}</div>
-        <div class="stat-value" id="val-vis-${site.id}">${fmt(totals.vis)}</div>
+        <div class="stat-value" id="val-vis-${site.id}">${fmtStat(totals.vis)}</div>
       </div>
     </div>
     <div class="charts-row">
@@ -927,8 +994,8 @@ function updateAllCards() {
     const [pvLbl, visLbl] = statLabel();
     if (el(`lbl-pv-${site.id}`))  el(`lbl-pv-${site.id}`).textContent  = pvLbl;
     if (el(`lbl-vis-${site.id}`)) el(`lbl-vis-${site.id}`).textContent = visLbl;
-    if (el(`val-pv-${site.id}`))  el(`val-pv-${site.id}`).textContent  = fmt(totals.pv);
-    if (el(`val-vis-${site.id}`)) el(`val-vis-${site.id}`).textContent = fmt(totals.vis);
+    if (el(`val-pv-${site.id}`))  el(`val-pv-${site.id}`).textContent  = fmtStat(totals.pv);
+    if (el(`val-vis-${site.id}`)) el(`val-vis-${site.id}`).textContent = fmtStat(totals.vis);
 
     // Tables
     const ctryEl = el(`tbl-ctry-${site.id}`);
@@ -1036,6 +1103,12 @@ document.querySelectorAll(".mode-btn").forEach(btn => {
     btn.classList.add("active");
     updateAllCards();
   });
+});
+
+document.getElementById("nl-toggle").addEventListener("click", () => {
+  nlOnly = !nlOnly;
+  document.getElementById("nl-toggle").classList.toggle("active", nlOnly);
+  updateAllCards();
 });
 
 /* ─── Load ────────────────────────────────────────────────── */
