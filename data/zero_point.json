@@ -1,0 +1,52 @@
+{
+  "created_at": "2026-05-04T07:52:59.540654+00:00",
+  "date": "2026-05-04",
+  "sites": {
+    "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6": {
+      "name": "woonstroom-interesse-landing",
+      "today_pageviews": 0,
+      "today_visitors": 0,
+      "today_countries": {},
+      "today_sources": {}
+    },
+    "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5": {
+      "name": "woonstroom-woningwaarde-landing",
+      "today_pageviews": 0,
+      "today_visitors": 0,
+      "today_countries": {},
+      "today_sources": {}
+    },
+    "3970cc41-10db-4747-b7b2-89ea7532c283": {
+      "name": "woonstroom-aanbod-landing",
+      "today_pageviews": 0,
+      "today_visitors": 0,
+      "today_countries": {},
+      "today_sources": {}
+    },
+    "60c23cf1-4c52-4e2a-9e3d-f3399176f47d": {
+      "name": "woonstroom-woningwaarde",
+      "today_pageviews": 1,
+      "today_visitors": 1,
+      "today_countries": {
+        "Netherlands": 1
+      },
+      "today_sources": {
+        "Direct traffic": 1
+      }
+    },
+    "82333e01-6c2b-48b2-a7ca-564ad851bf6b": {
+      "name": "woonstroom-aanbod",
+      "today_pageviews": 0,
+      "today_visitors": 0,
+      "today_countries": {},
+      "today_sources": {}
+    },
+    "49961024-5cc5-4b6c-b77e-636bc91d016c": {
+      "name": "woonstroom-interesse",
+      "today_pageviews": 0,
+      "today_visitors": 0,
+      "today_countries": {},
+      "today_sources": {}
+    }
+  }
+}
