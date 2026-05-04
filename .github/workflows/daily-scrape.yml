@@ -1,13 +1,18 @@
-# Draait elk uur tussen 8:00 en 23:00 CEST (6:00-21:00 UTC, zomer).
-# In de winter (CET, UTC+1) is dit 7:00-22:00 lokale tijd — dicht genoeg.
-# ~17 runs/dag × 15 seconden ≈ 130 minuten/maand (ruim binnen de 2.000 gratis minuten).
+# Draait elk uur tussen 8:00 en 23:00 CEST (6:00-21:00 UTC).
+# ~17 runs/dag × 15 seconden ≈ 130 minuten/maand (ruim binnen 2.000 gratis minuten).
 
 name: Netlify Analytics
 
 on:
   schedule:
-    - cron: "0 6-21 * * *"   # Elk uur van 8-23 CEST
+    - cron: "0 6-21 * * *"
   workflow_dispatch:
+    inputs:
+      reset:
+        description: "Nulpunt opnieuw instellen (wist huidige data)"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   scrape:
@@ -27,6 +32,12 @@ jobs:
       - name: Afhankelijkheden installeren
         run: pip install -r requirements.txt
 
+      - name: Nulpunt resetten (indien gevraagd)
+        if: github.event.inputs.reset == 'true'
+        run: |
+          echo "Nulpunt wordt gereset..."
+          rm -f data/zero_point.json data/analytics.json
+
       - name: Scraper uitvoeren
         env:
           NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
@@ -36,10 +47,10 @@ jobs:
         run: |
           git config user.name  "Analytics Bot"
           git config user.email "analytics-bot@users.noreply.github.com"
-          git add data/ index.html
+          git add data/
           git diff --staged --quiet \
             && echo "Geen nieuwe data." \
             || (
-              git commit -m "chore: analytics bijwerken $(date -u +%Y-%m-%d)" \
+              git commit -m "chore: analytics bijwerken $(date -u +%Y-%m-%d\ %H:%M) UTC" \
               && git push
             )

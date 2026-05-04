@@ -164,6 +164,7 @@
   </svg>
   <h1>Netlify Analytics</h1>
   <span class="updated" id="updated-at"></span>
+  <span class="updated" id="zero-point-at" style="margin-left:0"></span>
 </header>
 
 <main id="main">
@@ -333,6 +334,11 @@ async function load() {
     const d = new Date(data.last_updated);
     updEl.textContent = `Bijgewerkt: ${d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}`;
   }
+  const zpEl = document.getElementById("zero-point-at");
+  if (data.zero_point) {
+    const d = new Date(data.zero_point);
+    zpEl.textContent = `Nulpunt: ${d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}`;
+  }
 
   const sites = (data.sites ?? []).sort((a, b) => {
     const ai = SITE_ORDER.indexOf(a.name);
@@ -344,7 +350,8 @@ async function load() {
   });
 
   if (sites.length === 0) {
-    main.innerHTML = `<p style="color:var(--muted)">Nog geen data. Start de scraper om data te verzamelen.</p>`;
+    const zp = data.zero_point ? new Date(data.zero_point).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" }) : "onbekend";
+    main.innerHTML = `<p style="color:var(--muted)">Nulpunt ingesteld op ${zp}. Wacht op de volgende scraper-run voor nieuwe data.</p>`;
     return;
   }
 
