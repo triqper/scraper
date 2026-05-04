@@ -453,10 +453,11 @@ function getCountryChartData(site) {
   const hourly = (site.country_hourly ?? []).filter(r => inRange(r.hour));
   if (hourly.length === 0) return null;
 
-  // Top 5 landen op basis van totaal in gefilterde periode
+  // Top landen op basis van totaal in gefilterde periode (alleen NL als nlOnly)
   const totals = {};
   for (const row of hourly) {
     for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      if (nlOnly && c !== "NL") continue;
       totals[c] = (totals[c] ?? 0) + v;
     }
   }
@@ -525,26 +526,42 @@ function makeStackedChart(canvas, labels, datasets) {
 
 function getChartData(site) {
   if (nlOnly) {
-    // Gebruik country_hourly NL-deltas als databron
+    // Deductie: trek niet-NL pageview deltas af van hourly/daily totalen
     if (mode === "per-uur") {
-      const nlHour = nlPageviewsPerHour(site);
-      const fromMs = fromDt ? fromDt.getTime() : Date.now();
+      const rows   = filteredHourly(site);
+      const lookup = Object.fromEntries(rows.map(r => [r.hour, r]));
+      const nonNL  = nonNLPerHour(site);
+      const fromMs = fromDt ? fromDt.getTime() : (rows.length ? new Date(rows[0].hour).getTime() : Date.now());
       const toMs   = toDt   ? toDt.getTime()   : Date.now();
       const allHours = generateHourlyRange(fromMs, toMs);
-      const pvData = allHours.map(h => nlHour[h] ?? 0);
-      return { type: "bar", labels: allHours.map(h => shortHour(h)), pvData, visData: pvData };
+      return {
+        type:    "bar",
+        labels:  allHours.map(h => shortHour(h)),
+        pvData:  allHours.map(h => Math.max(0, (lookup[h]?.pageviews ?? 0) - (nonNL[h] ?? 0))),
+        visData: allHours.map(h => Math.max(0, (lookup[h]?.visitors  ?? 0) - (nonNL[h] ?? 0))),
+      };
     }
-    const nlDay = nlPageviewsPerDay(site);
-    const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const rows   = filteredDaily(site);
+    const lookup = Object.fromEntries(rows.map(r => [r.date, r]));
+    const nonNL  = nonNLPerDay(site);
+    const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : (rows.length ? rows[0].date : new Date().toISOString().slice(0, 10));
     const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
     const allDates = generateDailyRange(fromDate, toDate);
     if (mode === "totaal") {
-      let pvSum = 0;
-      const pvData = allDates.map(d => { pvSum += (nlDay[d] ?? 0); return pvSum; });
-      return { type: "line", labels: allDates.map(d => shortDate(d)), pvData, visData: pvData };
+      let pvSum = 0, visSum = 0;
+      return {
+        type:    "line",
+        labels:  allDates.map(d => shortDate(d)),
+        pvData:  allDates.map(d => { pvSum  += Math.max(0, (lookup[d]?.pageviews ?? 0) - (nonNL[d] ?? 0)); return pvSum;  }),
+        visData: allDates.map(d => { visSum += Math.max(0, (lookup[d]?.visitors  ?? 0) - (nonNL[d] ?? 0)); return visSum; }),
+      };
     }
-    const pvData = allDates.map(d => nlDay[d] ?? 0);
-    return { type: "bar", labels: allDates.map(d => shortDate(d)), pvData, visData: pvData };
+    return {
+      type:    "bar",
+      labels:  allDates.map(d => shortDate(d)),
+      pvData:  allDates.map(d => Math.max(0, (lookup[d]?.pageviews ?? 0) - (nonNL[d] ?? 0))),
+      visData: allDates.map(d => Math.max(0, (lookup[d]?.visitors  ?? 0) - (nonNL[d] ?? 0))),
+    };
   }
 
   if (mode === "per-uur") {
@@ -622,34 +639,47 @@ function getFormChartData(form) {
   return { labels: allDates.map(d => shortDate(d)), values: allDates.map(d => lookup[d] ?? 0) };
 }
 
-/* ─── NL-only helpers ─────────────────────────────────────── */
-function nlPageviewsPerHour(site) {
-  // { "2026-05-04T08:00:00+00:00": N }
+/* ─── NL-only helpers (deductie: totaal min niet-NL) ──────── */
+function nonNLPerHour(site) {
+  // Som van niet-NL pageview deltas per uur, binnen de geselecteerde range
   const result = {};
   for (const row of (site.country_hourly ?? [])) {
     if (!inRange(row.hour)) continue;
-    result[row.hour] = (result[row.hour] ?? 0) + (row.deltas?.NL ?? 0);
+    const nonNL = Object.entries(row.deltas ?? {})
+      .filter(([c]) => c !== "NL")
+      .reduce((s, [, v]) => s + v, 0);
+    result[row.hour] = (result[row.hour] ?? 0) + nonNL;
   }
   return result;
 }
 
-function nlPageviewsPerDay(site) {
-  // { "2026-05-04": N }
+function nonNLPerDay(site) {
+  const byHour = nonNLPerHour(site);
   const result = {};
-  for (const row of (site.country_hourly ?? [])) {
-    if (!inRange(row.hour)) continue;
-    const day = row.hour.slice(0, 10);
-    result[day] = (result[day] ?? 0) + (row.deltas?.NL ?? 0);
+  for (const [hour, count] of Object.entries(byHour)) {
+    const day = hour.slice(0, 10);
+    result[day] = (result[day] ?? 0) + count;
   }
   return result;
 }
 
 function getTotals(site) {
   if (nlOnly) {
-    const pv = Object.values(
-      mode === "per-uur" ? nlPageviewsPerHour(site) : nlPageviewsPerDay(site)
-    ).reduce((s, v) => s + v, 0);
-    return { pv, vis: null };
+    // Deductie: gebruik hourly/daily totalen en trek niet-NL eraf
+    if (mode === "per-uur") {
+      const rows  = filteredHourly(site);
+      const nonNL = nonNLPerHour(site);
+      return {
+        pv:  rows.reduce((s, r) => s + Math.max(0, r.pageviews - (nonNL[r.hour] ?? 0)), 0),
+        vis: rows.reduce((s, r) => s + Math.max(0, r.visitors  - (nonNL[r.hour] ?? 0)), 0),
+      };
+    }
+    const rows  = filteredDaily(site);
+    const nonNL = nonNLPerDay(site);
+    return {
+      pv:  rows.reduce((s, r) => s + Math.max(0, r.pageviews - (nonNL[r.date] ?? 0)), 0),
+      vis: rows.reduce((s, r) => s + Math.max(0, r.visitors  - (nonNL[r.date] ?? 0)), 0),
+    };
   }
   if (mode === "per-uur") {
     const rows = filteredHourly(site);
@@ -860,9 +890,9 @@ function barTable(rows, labelKey, valueKey, colA, colB) {
 /* ─── Render / update ─────────────────────────────────────── */
 function statLabel() {
   const nl = nlOnly ? " (NL)" : "";
-  if (mode === "per-uur") return [`Pageviews (gefilterd)${nl}`, nlOnly ? "Bezoekers (n.b.)" : "Bezoekers (gefilterd)"];
-  if (mode === "totaal")  return [`Totaal pageviews${nl}`,      nlOnly ? "Bezoekers (n.b.)" : "Totaal bezoekers"];
-  return [`Pageviews${nl}`, nlOnly ? "Bezoekers (n.b.)" : "Bezoekers"];
+  if (mode === "per-uur") return [`Pageviews (gefilterd)${nl}`, `Bezoekers (gefilterd)${nl}`];
+  if (mode === "totaal")  return [`Totaal pageviews${nl}`,      `Totaal bezoekers${nl}`];
+  return [`Pageviews${nl}`, `Bezoekers${nl}`];
 }
 
 function fmtStat(n) { return n === null ? "—" : fmt(n); }
