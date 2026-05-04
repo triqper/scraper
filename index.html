@@ -792,9 +792,6 @@ function updateAllCards() {
     };
   }
 
-  // Mini-grafieken bijwerken
-  updateMiniCharts();
-
   // Formulieren bijwerken
   for (const f of formsData) {
     const valEl  = el(`form-val-${f.id}`);
@@ -918,9 +915,6 @@ async function load() {
     main.innerHTML = `<p style="color:var(--muted)">Nulpunt ingesteld op ${zp}. Wacht op de volgende scraper-run voor nieuwe data.</p>`;
     return;
   }
-
-  // Vergelijkpaneel bovenin
-  renderCompare();
 
   // Volledige cards gegroepeerd met groepstitels
   for (const group of GROUPS) {
