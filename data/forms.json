@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-05-04T15:33:46.956453+00:00",
+  "last_updated": "2026-05-04T17:56:40.185689+00:00",
   "forms": [
     {
       "id": "69f229ebc935e500086b5c26",
@@ -20,9 +20,14 @@
       "name": "woonstroom",
       "site_id": "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5",
       "site_name": "woonstroom-woningwaarde-landing",
-      "total_submissions": 0,
-      "last_submission_date": null,
-      "daily": []
+      "total_submissions": 1,
+      "last_submission_date": "2026-05-04",
+      "daily": [
+        {
+          "date": "2026-05-04",
+          "count": 1
+        }
+      ]
     },
     {
       "id": "69f22588ced3d00008729374",
