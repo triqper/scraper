@@ -1,24 +1,24 @@
 {
   "zero_point": "2026-05-04T07:52:59.540654+00:00",
-  "last_updated": "2026-05-04T17:56:31.348190+00:00",
+  "last_updated": "2026-05-04T18:00:39.919903+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
       "name": "woonstroom-interesse-landing",
       "url": "https://woonstroom-interesse-landing.netlify.app",
-      "total_pageviews": 5,
+      "total_pageviews": 6,
       "total_visitors": 3,
       "daily": [
         {
           "date": "2026-05-04",
-          "pageviews": 5,
+          "pageviews": 6,
           "visitors": 3
         }
       ],
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 4
+          "pageviews": 5
         },
         {
           "country": "Canada",
@@ -28,7 +28,7 @@
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 3
+          "referrals": 4
         },
         {
           "source": "woonstroom-interesse.netlify.app",
@@ -59,6 +59,12 @@
           "deltas": {
             "Canada": 1
           }
+        },
+        {
+          "hour": "2026-05-04T18:00:00+00:00",
+          "deltas": {
+            "Netherlands": 1
+          }
         }
       ],
       "source_hourly": [
@@ -86,6 +92,12 @@
           "deltas": {
             "Direct traffic": 1
           }
+        },
+        {
+          "hour": "2026-05-04T18:00:00+00:00",
+          "deltas": {
+            "Direct traffic": 1
+          }
         }
       ],
       "hourly": [
@@ -108,6 +120,11 @@
           "hour": "2026-05-04T15:00:00+00:00",
           "pageviews": 1,
           "visitors": 1
+        },
+        {
+          "hour": "2026-05-04T17:00:00+00:00",
+          "pageviews": 1,
+          "visitors": 1
         }
       ]
     },
@@ -115,19 +132,23 @@
       "id": "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5",
       "name": "woonstroom-woningwaarde-landing",
       "url": "https://woonstroom-woningwaarde-landing.netlify.app",
-      "total_pageviews": 7,
-      "total_visitors": 3,
+      "total_pageviews": 8,
+      "total_visitors": 4,
       "daily": [
         {
           "date": "2026-05-04",
-          "pageviews": 7,
-          "visitors": 3
+          "pageviews": 8,
+          "visitors": 4
         }
       ],
       "top_countries": [
         {
           "country": "Netherlands",
           "pageviews": 6
+        },
+        {
+          "country": "Norway",
+          "pageviews": 1
         },
         {
           "country": "Canada",
@@ -137,7 +158,7 @@
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 5
+          "referrals": 6
         },
         {
           "source": "woonstroom-woningwaarde.netlify.app",
@@ -174,6 +195,12 @@
           "deltas": {
             "Netherlands": 1
           }
+        },
+        {
+          "hour": "2026-05-04T18:00:00+00:00",
+          "deltas": {
+            "Norway": 1
+          }
         }
       ],
       "source_hourly": [
@@ -198,6 +225,12 @@
         },
         {
           "hour": "2026-05-04T15:00:00+00:00",
+          "deltas": {
+            "Direct traffic": 1
+          }
+        },
+        {
+          "hour": "2026-05-04T18:00:00+00:00",
           "deltas": {
             "Direct traffic": 1
           }
@@ -226,8 +259,8 @@
         },
         {
           "hour": "2026-05-04T17:00:00+00:00",
-          "pageviews": 1,
-          "visitors": 1
+          "pageviews": 2,
+          "visitors": 2
         }
       ]
     },
@@ -235,19 +268,19 @@
       "id": "3970cc41-10db-4747-b7b2-89ea7532c283",
       "name": "woonstroom-aanbod-landing",
       "url": "https://woonstroom-aanbod-landing.netlify.app",
-      "total_pageviews": 6,
+      "total_pageviews": 7,
       "total_visitors": 3,
       "daily": [
         {
           "date": "2026-05-04",
-          "pageviews": 6,
+          "pageviews": 7,
           "visitors": 3
         }
       ],
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 5
+          "pageviews": 6
         },
         {
           "country": "Canada",
@@ -257,7 +290,7 @@
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 4
+          "referrals": 5
         },
         {
           "source": "triqper.github.io",
@@ -286,6 +319,12 @@
           "deltas": {
             "Canada": 1
           }
+        },
+        {
+          "hour": "2026-05-04T18:00:00+00:00",
+          "deltas": {
+            "Netherlands": 1
+          }
         }
       ],
       "source_hourly": [
@@ -308,6 +347,12 @@
           "deltas": {
             "Direct traffic": 1
           }
+        },
+        {
+          "hour": "2026-05-04T18:00:00+00:00",
+          "deltas": {
+            "Direct traffic": 1
+          }
         }
       ],
       "hourly": [
@@ -323,6 +368,11 @@
         },
         {
           "hour": "2026-05-04T15:00:00+00:00",
+          "pageviews": 1,
+          "visitors": 1
+        },
+        {
+          "hour": "2026-05-04T17:00:00+00:00",
           "pageviews": 1,
           "visitors": 1
         }
