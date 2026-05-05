@@ -404,9 +404,9 @@
     Instellingen
   </button>
 <div class="mode-group">
-    <button class="mode-btn active" data-mode="per-dag">Per dag</button>
+    <button class="mode-btn" data-mode="per-dag">Per dag</button>
 
-    <button class="mode-btn" data-mode="per-uur">Per uur</button>
+    <button class="mode-btn active" data-mode="per-uur">Per uur</button>
   </div>
 </div>
 
@@ -429,19 +429,19 @@
   </div>
   <div class="settings-section">
     <div class="settings-section-title">Grafieken — Landing</div>
-    <div class="settings-row"><span>Unieke bezoekers</span><label class="settings-toggle"><input type="checkbox" id="s-vis-chart" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Unieke bezoekers</span><label class="settings-toggle"><input type="checkbox" id="s-vis-chart"><span class="settings-slider"></span></label></div>
     <div class="settings-row"><span>Pageviews</span><label class="settings-toggle"><input type="checkbox" id="s-ctry-chart" checked><span class="settings-slider"></span></label></div>
-    <div class="settings-row"><span>Aanmeldingen</span><label class="settings-toggle"><input type="checkbox" id="s-form-chart" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Aanmeldingen</span><label class="settings-toggle"><input type="checkbox" id="s-form-chart"><span class="settings-slider"></span></label></div>
   </div>
   <div class="settings-section">
     <div class="settings-section-title">Grafieken — QR Flyer</div>
-    <div class="settings-row"><span>Unieke scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-vis-chart" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Unieke scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-vis-chart"><span class="settings-slider"></span></label></div>
     <div class="settings-row"><span>Alle scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-ctry-chart" checked><span class="settings-slider"></span></label></div>
   </div>
   <div class="settings-section">
     <div class="settings-section-title">Tabellen</div>
-    <div class="settings-row"><span>Top landen</span><label class="settings-toggle"><input type="checkbox" id="s-top-landen" checked><span class="settings-slider"></span></label></div>
-    <div class="settings-row"><span>Top bronnen</span><label class="settings-toggle"><input type="checkbox" id="s-top-bronnen" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Top landen</span><label class="settings-toggle"><input type="checkbox" id="s-top-landen"><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Top bronnen</span><label class="settings-toggle"><input type="checkbox" id="s-top-bronnen"><span class="settings-slider"></span></label></div>
   </div>
   <div class="settings-section">
     <div class="settings-section-title">Grafiektype</div>
@@ -490,7 +490,7 @@ const COUNTRY_COLORS = [
 
 let siteData         = [];
 let formsData        = [];
-let mode             = "per-dag";
+let mode             = "per-uur";
 let fromDt           = null;
 let toDt             = null;
 let nlOnly           = false;
@@ -498,9 +498,9 @@ let nlOnly           = false;
 const settings = {
   showVisCard: true, showPvCard: true, showFormCard: true,
   showScansVisCard: true, showScansPvCard: true,
-  showVisChart: true, showCtryChart: true, showFormChart: true,
-  showScansVisChart: true, showScansCtryChart: true,
-  showTopLanden: true, showTopBronnen: true,
+  showVisChart: false, showCtryChart: true, showFormChart: false,
+  showScansVisChart: false, showScansCtryChart: true,
+  showTopLanden: false, showTopBronnen: false,
   chartType: "bar",
 };
 
