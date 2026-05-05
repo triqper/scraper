@@ -1,24 +1,29 @@
 {
   "zero_point": "2026-05-04T07:52:59.540654+00:00",
-  "last_updated": "2026-05-05T17:00:58.875492+00:00",
+  "last_updated": "2026-05-05T18:00:31.552416+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
       "name": "woonstroom-interesse-landing",
       "url": "https://woonstroom-interesse-landing.netlify.app",
-      "total_pageviews": 12,
-      "total_visitors": 6,
+      "total_pageviews": 13,
+      "total_visitors": 7,
       "daily": [
         {
           "date": "2026-05-04",
           "pageviews": 12,
           "visitors": 6
+        },
+        {
+          "date": "2026-05-05",
+          "pageviews": 1,
+          "visitors": 1
         }
       ],
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 8
+          "pageviews": 9
         },
         {
           "country": "Norway",
@@ -92,6 +97,12 @@
           "hour": "2026-05-04T21:00:00+00:00",
           "deltas": {
             "Norway": 1
+          }
+        },
+        {
+          "hour": "2026-05-05T18:00:00+00:00",
+          "deltas": {
+            "Netherlands": 1
           }
         }
       ],
@@ -186,6 +197,11 @@
           "hour": "2026-05-04T20:00:00+00:00",
           "pageviews": 1,
           "visitors": 1
+        },
+        {
+          "hour": "2026-05-05T17:00:00+00:00",
+          "pageviews": 1,
+          "visitors": 1
         }
       ]
     },
@@ -193,8 +209,8 @@
       "id": "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5",
       "name": "woonstroom-woningwaarde-landing",
       "url": "https://woonstroom-woningwaarde-landing.netlify.app",
-      "total_pageviews": 17,
-      "total_visitors": 7,
+      "total_pageviews": 18,
+      "total_visitors": 8,
       "daily": [
         {
           "date": "2026-05-04",
@@ -203,14 +219,14 @@
         },
         {
           "date": "2026-05-05",
-          "pageviews": 2,
-          "visitors": 1
+          "pageviews": 3,
+          "visitors": 2
         }
       ],
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 13
+          "pageviews": 14
         },
         {
           "country": "Norway",
@@ -295,6 +311,12 @@
           "hour": "2026-05-05T08:00:00+00:00",
           "deltas": {
             "Netherlands": 2
+          }
+        },
+        {
+          "hour": "2026-05-05T18:00:00+00:00",
+          "deltas": {
+            "Netherlands": 1
           }
         }
       ],
@@ -399,6 +421,11 @@
         {
           "hour": "2026-05-05T07:00:00+00:00",
           "pageviews": 2,
+          "visitors": 1
+        },
+        {
+          "hour": "2026-05-05T17:00:00+00:00",
+          "pageviews": 1,
           "visitors": 1
         }
       ]
