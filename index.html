@@ -665,8 +665,7 @@ function getCountryChartData(site) {
   };
 }
 
-function makeStackedChart(canvas, labels, datasets) {
-  return new Chart(canvas, {
+function makeStackedChart(canvas, labels, datasets) {  return new Chart(canvas, {
     type: "bar",
     data: { labels, datasets },
     options: {
@@ -691,6 +690,16 @@ function makeStackedChart(canvas, labels, datasets) {
       },
     },
   });
+}
+
+function renderCountryChart(canvas, ctryData) {
+  if (settings.chartType === "line") {
+    const totalData = ctryData.labels.map((_, i) =>
+      ctryData.datasets.reduce((s, ds) => s + (ds.data[i] ?? 0), 0)
+    );
+    return makeChart(canvas, "line", ctryData.labels, totalData, COLORS.pageviews);
+  }
+  return makeStackedChart(canvas, ctryData.labels, ctryData.datasets);
 }
 
 function getChartData(site) {
@@ -1170,7 +1179,7 @@ function renderSite(site) {
     const canvas = wrap.querySelector(`#ctry-chart-${site.id}`);
     if (canvas) {
       if (countryChartRefs[site.id]) { countryChartRefs[site.id].destroy(); }
-      countryChartRefs[site.id] = makeStackedChart(canvas, ctryData.labels, ctryData.datasets);
+      countryChartRefs[site.id] = renderCountryChart(canvas, ctryData);
     }
   });
 
@@ -1217,7 +1226,7 @@ function updateAllCards() {
       if (ctryData) {
         wCtry.innerHTML = `<canvas id="ctry-chart-${site.id}"></canvas>`;
         const ctryCanvas = el(`ctry-chart-${site.id}`);
-        if (ctryCanvas) countryChartRefs[site.id] = makeStackedChart(ctryCanvas, ctryData.labels, ctryData.datasets);
+        if (ctryCanvas) countryChartRefs[site.id] = renderCountryChart(ctryCanvas, ctryData);
       } else {
         wCtry.innerHTML = `<p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>`;
       }
