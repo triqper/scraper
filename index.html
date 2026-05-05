@@ -956,6 +956,12 @@ function renderSite(site) {
         <div class="stat-value" id="val-vis-${site.id}">${fmtStat(totals.vis)}</div>
       </div>
     </div>
+    <div class="country-chart-section">
+      <div class="table-title">Landen over tijd</div>
+      <div class="chart-wrap chart-wrap--country" id="wrap-ctry-chart-${site.id}">
+        <p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>
+      </div>
+    </div>
     <div class="charts-row">
       <div class="chart-box">
         <div class="chart-title">Pageviews</div>
@@ -978,12 +984,6 @@ function renderSite(site) {
       <div class="table-box">
         <div class="table-title">Top bronnen</div>
         <div id="tbl-src-${site.id}">${barTable(getSources(site), "source", "referrals", "Bron", "Verwijzingen")}</div>
-      </div>
-    </div>
-    <div class="country-chart-section">
-      <div class="table-title">Landen over tijd</div>
-      <div class="chart-wrap chart-wrap--country" id="wrap-ctry-chart-${site.id}">
-        <p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>
       </div>
     </div>
     ${siteForms.map(f => `
