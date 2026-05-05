@@ -64,6 +64,9 @@
       white-space: nowrap;
     }
     input[type="datetime-local"] {
+      position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+    }
+    .date-btn {
       font-size: 0.8rem;
       padding: 0.28rem 0.45rem;
       border: 1px solid var(--border);
@@ -71,8 +74,10 @@
       background: var(--bg);
       color: var(--text);
       cursor: pointer;
+      white-space: nowrap;
+      font-family: inherit;
     }
-    input[type="datetime-local"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .date-btn:hover { border-color: var(--accent); }
 
     .ctrl-sep { color: var(--border); padding: 0 0.1rem; }
 
@@ -293,7 +298,7 @@
       .controls { flex-direction: column; align-items: stretch; padding: 0.45rem 0.75rem; gap: 0.35rem; }
       .controls-dates { gap: 0.35rem; }
       .controls-dates .ctrl-label { display: none; }
-      .controls-dates input[type="datetime-local"] { flex: 1; font-size: 0.72rem; padding: 0.22rem 0.3rem; min-width: 0; }
+      .controls-dates .date-btn { flex: 1; font-size: 0.72rem; padding: 0.22rem 0.3rem; min-width: 0; }
       .controls-actions { gap: 0.35rem; }
       #reset-filter { display: none; }
       .settings-btn-label { display: none; }
@@ -399,10 +404,12 @@
   <div class="controls-dates">
     <div class="ctrl-group">
       <span class="ctrl-label">Van</span>
+      <button class="date-btn" id="from-btn" type="button">Datum</button>
       <input type="datetime-local" id="from-dt" />
     </div>
     <div class="ctrl-group">
       <span class="ctrl-label">Tot</span>
+      <button class="date-btn" id="to-btn" type="button">Datum</button>
       <input type="datetime-local" id="to-dt" />
     </div>
     <button class="btn-reset" id="reset-filter">Alles tonen</button>
@@ -1311,12 +1318,44 @@ function readInputs() {
   updateAllCards();
 }
 
-document.getElementById("from-dt").addEventListener("change", readInputs);
-document.getElementById("to-dt").addEventListener("change", readInputs);
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function fmtDateBtn(isoStr) {
+  if (!isoStr) return null;
+  const d   = new Date(isoStr);
+  const wd  = d.toLocaleDateString("nl-NL", { weekday: "short" }).replace(".", "");
+  const day = d.getDate();
+  const mo  = d.toLocaleDateString("nl-NL", { month: "long" });
+  const hh  = String(d.getHours()).padStart(2, "0");
+  const mm  = String(d.getMinutes()).padStart(2, "0");
+  return `${cap(wd)} ${day} ${cap(mo)} ${hh}:${mm}`;
+}
+function updateDateBtns() {
+  const fv = document.getElementById("from-dt").value;
+  const tv = document.getElementById("to-dt").value;
+  document.getElementById("from-btn").textContent = fmtDateBtn(fv) ?? "Van";
+  document.getElementById("to-btn").textContent   = fmtDateBtn(tv) ?? "Tot";
+}
+
+document.getElementById("from-btn").addEventListener("click", () => {
+  const inp = document.getElementById("from-dt");
+  inp.style.pointerEvents = "auto";
+  inp.showPicker?.();
+  inp.style.pointerEvents = "";
+});
+document.getElementById("to-btn").addEventListener("click", () => {
+  const inp = document.getElementById("to-dt");
+  inp.style.pointerEvents = "auto";
+  inp.showPicker?.();
+  inp.style.pointerEvents = "";
+});
+
+document.getElementById("from-dt").addEventListener("change", () => { updateDateBtns(); readInputs(); });
+document.getElementById("to-dt").addEventListener("change",   () => { updateDateBtns(); readInputs(); });
 
 document.getElementById("reset-filter").addEventListener("click", () => {
   document.getElementById("from-dt").value = "";
   document.getElementById("to-dt").value   = "";
+  updateDateBtns();
   fromDt = null;
   toDt   = null;
   updateAllCards();
@@ -1432,6 +1471,7 @@ async function load() {
     // Standaard: van = nulpunt, tot = nu
     fromEl.value = minStr;
     toEl.value   = nowStr;
+    updateDateBtns();
     fromDt = zpLocal;
     toDt   = new Date();
   }
