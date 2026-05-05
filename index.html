@@ -315,6 +315,19 @@
       .group-cards { grid-template-columns: 1fr; }
     }
 
+    @media (max-width: 600px) {
+      .settings-panel { width: 100%; right: -105%; }
+      .settings-header { font-size: 1.125rem; padding: 1.25rem 1.5rem; }
+      .settings-close { font-size: 1.5rem; }
+      .settings-section { padding: 1.25rem 1.5rem; }
+      .settings-section-title { font-size: 0.85rem; }
+      .settings-row { font-size: 1.025rem; padding: 0.44rem 0; }
+      .settings-toggle { width: 42px; height: 25px; }
+      .settings-slider::before { width: 17px; height: 17px; left: 4px; bottom: 4px; }
+      .settings-toggle input:checked + .settings-slider::before { transform: translateX(17px); }
+      .settings-radio-btn { font-size: 0.975rem; padding: 0.44rem; }
+    }
+
     /* ── Settings panel ───────────────────────────────────── */
     .settings-backdrop {
       display: none;
