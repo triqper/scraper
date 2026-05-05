@@ -517,6 +517,17 @@ def update_forms() -> None:
 # ---------------------------------------------------------------------------
 
 
+def _field(data: dict, *keys: str) -> str | None:
+    """Zoek een veld op in form-data, case-insensitief en zonder koppeltekens/spaties."""
+    for k in keys:
+        for dk, dv in data.items():
+            if dk.lower().replace("-", "").replace(" ", "") == k.lower().replace("-", "").replace(" ", ""):
+                v = str(dv).strip() if dv is not None else ""
+                if v:
+                    return v
+    return None
+
+
 def update_leads() -> None:
     path = DATA_DIR / "leads.json"
     existing = load_json(path)
@@ -541,15 +552,18 @@ def update_leads() -> None:
         for form in forms:
             fid   = form["id"]
             fname = form.get("name", fid)
+            netlify_url = f"https://app.netlify.com/sites/{sname}/forms/{fid}"
 
             entry = forms_idx.setdefault(fid, {
                 "id":          fid,
                 "name":        fname,
                 "site_name":   sname,
+                "netlify_url": netlify_url,
                 "submissions": [],
             })
-            entry["name"]      = fname
-            entry["site_name"] = sname
+            entry["name"]        = fname
+            entry["site_name"]   = sname
+            entry["netlify_url"] = netlify_url
 
             existing_ids: set[str] = {s["id"] for s in entry["submissions"]}
 
@@ -566,14 +580,17 @@ def update_leads() -> None:
                         continue
                     existing_ids.add(sub_id)
                     raw_data = sub.get("data") or sub.get("ordered_human_fields") or {}
-                    # Normalise: ordered_human_fields is a list of {name, value} dicts
                     if isinstance(raw_data, list):
                         raw_data = {item["name"]: item["value"] for item in raw_data if "name" in item}
+                    # Sla alleen naam en contactvoorkeur op — gevoelige velden blijven in Netlify
+                    naam     = _field(raw_data, "naam", "name", "voornaam")
+                    contact  = _field(raw_data, "contactvoorkeur", "contact", "voorkeur", "contactmethode")
                     entry["submissions"].append({
                         "id":         sub_id,
                         "created_at": sub.get("created_at", ""),
                         "number":     sub.get("number", 0),
-                        "data":       raw_data,
+                        "naam":       naam,
+                        "contactvoorkeur": contact,
                     })
                     new_count += 1
                 if len(batch) < 100:
