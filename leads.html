@@ -340,9 +340,23 @@ function renderField(label, value) {
     : `<span class="lead-field-label">${esc(label)}</span><span class="lead-field-value empty">—</span>`;
 }
 
+function fieldFromData(data, ...keys) {
+  if (!data || typeof data !== "object") return null;
+  for (const k of keys) {
+    for (const dk of Object.keys(data)) {
+      if (dk.toLowerCase().replace(/[- ]/g,"") === k.toLowerCase().replace(/[- ]/g,"")) {
+        const v = data[dk];
+        if (v !== null && v !== undefined && String(v).trim() !== "") return String(v).trim();
+      }
+    }
+  }
+  return null;
+}
+
 function renderCard(sub, netlifyUrl) {
-  const naam    = sub.naam    || "—";
-  const contact = sub.contactvoorkeur || "—";
+  // Ondersteun zowel nieuw formaat (sub.naam) als oud formaat (sub.data.naam)
+  const naam    = sub.naam    || fieldFromData(sub.data, "naam", "name", "voornaam")    || null;
+  const contact = sub.contactvoorkeur || fieldFromData(sub.data, "contactvoorkeur", "contact", "voorkeur") || null;
   const current = getStatus(sub.id);
   const options = STATUSES.map(s =>
     `<option value="${esc(s)}"${s === current ? " selected" : ""}>${esc(s)}</option>`
@@ -384,7 +398,10 @@ function renderAll() {
     const label = SITE_LABELS[sn] || sn;
     const siteForms = bySite[sn] || [];
     const subs = siteForms
-      .flatMap(f => (f.submissions || []).map(s => ({ ...s, _netlifyUrl: f.netlify_url })))
+      .flatMap(f => {
+        const url = f.netlify_url || `https://app.netlify.com/sites/${f.site_name}/forms/${f.id}`;
+        return (f.submissions || []).map(s => ({ ...s, _netlifyUrl: url }));
+      })
       .filter(s => inRange(s.created_at))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     total += subs.length;
