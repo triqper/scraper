@@ -194,8 +194,8 @@
    2. Maak een API Key aan (Dashboard → API Keys)
    3. Maak een nieuwe Bin aan met inhoud {} en kopieer het Bin ID
 ──────────────────────────────────────────────────────────────── */
-const JSONBIN_KEY    = "JOUW_API_KEY_HIER";
-const JSONBIN_BIN_ID = "JOUW_BIN_ID_HIER";
+const JSONBIN_KEY    = "$2a$10$CSwQD7aPZSfOOcP0oPjWoeUpva8jxT9hA3z8gd.QKkEC5r1J5Igf2";
+const JSONBIN_BIN_ID = "69fa2db2aaba88219775265a";
 const JSONBIN_URL    = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
 
 const SITE_LABELS = {
@@ -239,7 +239,7 @@ async function saveStatus(subId, status) {
     await fetch(JSONBIN_URL, {
       method:  "PUT",
       headers: { "Content-Type": "application/json", "X-Master-Key": JSONBIN_KEY },
-      body:    JSON.stringify(remoteStatuses),
+      body:    JSON.stringify({ statuses: remoteStatuses }),
     });
   } catch (e) {
     console.warn("JSONBin opslaan mislukt:", e);
@@ -254,7 +254,7 @@ async function loadRemoteStatuses() {
     });
     if (!r.ok) return;
     const data = await r.json();
-    remoteStatuses = data.record || {};
+    remoteStatuses = data.record?.statuses || data.record || {};
     // Sync naar localStorage als cache
     for (const [id, st] of Object.entries(remoteStatuses)) {
       localStorage.setItem(`lead_status_${id}`, st);
