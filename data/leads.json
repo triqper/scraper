@@ -59,7 +59,8 @@
             "referrer": "https://woonstroom-interesse-landing.netlify.app/"
           }
         }
-      ]
+      ],
+      "netlify_url": "https://app.netlify.com/sites/woonstroom-interesse-landing/forms/69f229ebc935e500086b5c26"
     },
     {
       "id": "69f229d3a7e77d0008da4617",
@@ -156,7 +157,8 @@
             "referrer": "https://woonstroom-woningwaarde-landing.netlify.app/"
           }
         }
-      ]
+      ],
+      "netlify_url": "https://app.netlify.com/sites/woonstroom-woningwaarde-landing/forms/69f229d3a7e77d0008da4617"
     },
     {
       "id": "69f22588ced3d00008729374",
@@ -181,8 +183,9 @@
             "referrer": "https://woonstroom-aanbod-landing.netlify.app/"
           }
         }
-      ]
+      ],
+      "netlify_url": "https://app.netlify.com/sites/woonstroom-aanbod-landing/forms/69f22588ced3d00008729374"
     }
   ],
-  "last_updated": "2026-05-05T18:00:49.784798+00:00"
+  "last_updated": "2026-05-05T18:42:23.162963+00:00"
 }
