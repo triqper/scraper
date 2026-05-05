@@ -513,6 +513,83 @@ def update_forms() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Leads update
+# ---------------------------------------------------------------------------
+
+
+def update_leads() -> None:
+    path = DATA_DIR / "leads.json"
+    existing = load_json(path)
+    existing.setdefault("forms", [])
+
+    # Index existing forms and their submission ids for deduplication
+    forms_idx: dict[str, dict] = {f["id"]: f for f in existing["forms"]}
+
+    landing_sites = {name for name in ANALYTICS_SITES if "landing" in name}
+
+    for site in get_sites():
+        sid   = site["id"]
+        sname = site.get("name", sid)
+
+        if sname not in landing_sites:
+            continue
+
+        forms = get_forms(sid)
+        if not forms:
+            continue
+
+        for form in forms:
+            fid   = form["id"]
+            fname = form.get("name", fid)
+
+            entry = forms_idx.setdefault(fid, {
+                "id":          fid,
+                "name":        fname,
+                "site_name":   sname,
+                "submissions": [],
+            })
+            entry["name"]      = fname
+            entry["site_name"] = sname
+
+            existing_ids: set[str] = {s["id"] for s in entry["submissions"]}
+
+            # Paginate through all submissions
+            page = 1
+            new_count = 0
+            while True:
+                batch = get_form_submissions(fid, per_page=100, page=page)
+                if not batch:
+                    break
+                for sub in batch:
+                    sub_id = sub.get("id", "")
+                    if sub_id in existing_ids:
+                        continue
+                    existing_ids.add(sub_id)
+                    raw_data = sub.get("data") or sub.get("ordered_human_fields") or {}
+                    # Normalise: ordered_human_fields is a list of {name, value} dicts
+                    if isinstance(raw_data, list):
+                        raw_data = {item["name"]: item["value"] for item in raw_data if "name" in item}
+                    entry["submissions"].append({
+                        "id":         sub_id,
+                        "created_at": sub.get("created_at", ""),
+                        "number":     sub.get("number", 0),
+                        "data":       raw_data,
+                    })
+                    new_count += 1
+                if len(batch) < 100:
+                    break
+                page += 1
+
+            print(f"  {sname} / {fname}: {new_count} nieuwe inzending(en), "
+                  f"{len(entry['submissions'])} totaal")
+
+    existing["forms"]        = list(forms_idx.values())
+    existing["last_updated"] = datetime.now(timezone.utc).isoformat()
+    save_json(path, existing)
+    print(f"  ✓ {len(existing['forms'])} formulier(en) opgeslagen in leads.json")
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -542,6 +619,8 @@ def main() -> None:
     update_analytics(zero_point)
     print("\nFormulieren ophalen:")
     update_forms()
+    print("\nLeads ophalen:")
+    update_leads()
     print("\nKlaar!")
 
 
