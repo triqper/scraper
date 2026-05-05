@@ -295,6 +295,84 @@
       #compare { grid-template-columns: 1fr; }
       .group-cards { grid-template-columns: 1fr; }
     }
+
+    /* ── Settings panel ───────────────────────────────────── */
+    .settings-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.25);
+      z-index: 99;
+    }
+    .settings-backdrop.open { display: block; }
+    .settings-panel {
+      position: fixed; top: 0; right: -340px; bottom: 0;
+      width: 320px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      box-shadow: -4px 0 20px rgba(0,0,0,0.12);
+      z-index: 100;
+      transition: right 0.25s ease;
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+    }
+    .settings-panel.open { right: 0; }
+    .settings-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600; font-size: 0.9rem;
+    }
+    .settings-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 1.2rem; line-height: 1;
+      padding: 0.2rem 0.4rem;
+    }
+    .settings-close:hover { color: var(--text); }
+    .settings-section {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .settings-section-title {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--muted); margin-bottom: 0.75rem; font-weight: 600;
+    }
+    .settings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.35rem 0;
+      font-size: 0.82rem;
+    }
+    .settings-toggle {
+      position: relative; display: inline-block; width: 34px; height: 20px; flex-shrink: 0;
+    }
+    .settings-toggle input { opacity: 0; width: 0; height: 0; }
+    .settings-slider {
+      position: absolute; inset: 0; cursor: pointer;
+      background: var(--border); border-radius: 20px;
+      transition: background 0.2s;
+    }
+    .settings-slider::before {
+      content: ""; position: absolute;
+      width: 14px; height: 14px; left: 3px; bottom: 3px;
+      background: #fff; border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .settings-toggle input:checked + .settings-slider { background: #1a7f37; }
+    .settings-toggle input:checked + .settings-slider::before { transform: translateX(14px); }
+    .settings-radio-group { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .settings-radio-btn {
+      flex: 1; text-align: center; padding: 0.35rem;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-size: 0.78rem; cursor: pointer; background: var(--bg);
+      color: var(--muted); transition: all 0.15s;
+    }
+    .settings-radio-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-settings {
+      font-size: 0.78rem; padding: 0.28rem 0.65rem;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); color: var(--muted);
+      cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.35rem;
+    }
+    .btn-settings:hover { background: var(--bg); color: var(--text); }
   </style>
 </head>
 <body>
@@ -321,10 +399,46 @@
   </div>
   <button class="btn-reset" id="reset-filter">Alles tonen</button>
   <button class="btn-nl-toggle" id="nl-toggle">Alleen NL</button>
+  <button class="btn-settings" id="settings-btn">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Instellingen
+  </button>
 <div class="mode-group">
     <button class="mode-btn active" data-mode="per-dag">Per dag</button>
 
     <button class="mode-btn" data-mode="per-uur">Per uur</button>
+  </div>
+</div>
+
+<div class="settings-backdrop" id="settings-backdrop"></div>
+<div class="settings-panel" id="settings-panel">
+  <div class="settings-header">
+    <span>Instellingen</span>
+    <button class="settings-close" id="settings-close">✕</button>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Statcards</div>
+    <div class="settings-row"><span>Bezoekers</span><label class="settings-toggle"><input type="checkbox" id="s-vis-card" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Pageviews</span><label class="settings-toggle"><input type="checkbox" id="s-pv-card" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Aanmeldingen</span><label class="settings-toggle"><input type="checkbox" id="s-form-card" checked><span class="settings-slider"></span></label></div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Grafieken</div>
+    <div class="settings-row"><span>Bezoekers</span><label class="settings-toggle"><input type="checkbox" id="s-vis-chart" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Pageviews</span><label class="settings-toggle"><input type="checkbox" id="s-ctry-chart" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Aanmeldingen</span><label class="settings-toggle"><input type="checkbox" id="s-form-chart" checked><span class="settings-slider"></span></label></div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Tabellen</div>
+    <div class="settings-row"><span>Top landen</span><label class="settings-toggle"><input type="checkbox" id="s-top-landen" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Top bronnen</span><label class="settings-toggle"><input type="checkbox" id="s-top-bronnen" checked><span class="settings-slider"></span></label></div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Grafiektype</div>
+    <div class="settings-radio-group">
+      <div class="settings-radio-btn active" data-chart-type="bar">Staaf</div>
+      <div class="settings-radio-btn" data-chart-type="line">Lijn</div>
+    </div>
   </div>
 </div>
 
@@ -371,7 +485,32 @@ let fromDt           = null;
 let toDt             = null;
 let nlOnly           = false;
 
-let chartRefs        = {};   // { siteId: { pv: Chart|null, vis: Chart|null } }
+const settings = {
+  showVisCard: true, showPvCard: true, showFormCard: true,
+  showVisChart: true, showCtryChart: true, showFormChart: true,
+  showTopLanden: true, showTopBronnen: true,
+  chartType: "bar",
+};
+
+function applySettings() {
+  const map = {
+    "vis-card":    settings.showVisCard,
+    "pv-card":     settings.showPvCard,
+    "form-card":   settings.showFormCard,
+    "vis-chart":   settings.showVisChart,
+    "ctry-chart":  settings.showCtryChart,
+    "form-chart":  settings.showFormChart,
+    "top-landen":  settings.showTopLanden,
+    "top-bronnen": settings.showTopBronnen,
+  };
+  for (const [key, visible] of Object.entries(map)) {
+    document.querySelectorAll(`[data-setting="${key}"]`).forEach(el => {
+      el.style.display = visible ? "" : "none";
+    });
+  }
+}
+
+let chartRefs        = {};   // { siteId: { vis: Chart|null } }
 let formChartRefs    = {};   // { formId: Chart|null }
 let miniChartRefs    = {};
 let countryChartRefs = {};   // { siteId: Chart|null }
@@ -937,7 +1076,8 @@ function renderSite(site) {
   const siteForms = formsData.filter(f => f.site_name === site.name);
   const isQR    = displayName(site.name).toLowerCase().includes("qr");
   const totals = getTotals(site);
-  const { type, labels, pvData, visData } = getChartData(site);
+  const { type: rawType, labels, pvData, visData } = getChartData(site);
+  const type = settings.chartType || rawType;
   const [pvLbl, visLbl] = statLabel(site.name);
   const hasHourly = (site.hourly ?? []).length > 0;
   const noChart   = mode === "per-uur" ? (!hasHourly || labels.length === 0) : labels.length === 0;
@@ -950,44 +1090,44 @@ function renderSite(site) {
       <h2>${esc(displayName(site.name))}</h2>
     </div>
     <div class="summary-row">
-      <div class="stat-box">
+      <div class="stat-box" data-setting="vis-card">
         <div class="stat-label" id="lbl-vis-${site.id}">${esc(visLbl)}</div>
         <div class="stat-value" id="val-vis-${site.id}">${fmtStat(totals.vis)}</div>
       </div>
-      <div class="stat-box">
+      <div class="stat-box" data-setting="pv-card">
         <div class="stat-label" id="lbl-pv-${site.id}">${esc(pvLbl)}</div>
         <div class="stat-value" id="val-pv-${site.id}">${fmtStat(totals.pv)}</div>
       </div>
       ${siteForms.map(f => `
-      <div class="stat-box">
+      <div class="stat-box" data-setting="form-card">
         <div class="stat-label">Aanmeldingen</div>
         <div class="stat-value" id="form-val-${f.id}">${fmt(filteredFormTotal(f))}</div>
       </div>`).join("")}
     </div>
-    <div class="country-chart-section">
+    <div class="country-chart-section" data-setting="vis-chart">
       <div class="table-title">${isQR ? "Unieke scans" : "Unieke bezoekers"}</div>
       <div class="chart-wrap chart-wrap--country" id="wrap-vis-${site.id}">
         ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="vis-${site.id}"></canvas>`}
       </div>
     </div>
-    <div class="country-chart-section">
+    <div class="country-chart-section" data-setting="ctry-chart">
       <div class="table-title">${isQR ? "Alle scans" : "Pageviews"}</div>
       <div class="chart-wrap chart-wrap--country" id="wrap-ctry-chart-${site.id}">
         <p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>
       </div>
     </div>
     ${siteForms.map(f => `
-    <div class="country-chart-section">
+    <div class="country-chart-section" data-setting="form-chart">
       <div class="chart-title" id="form-chart-title-${f.id}">Aanmeldingen</div>
       <div class="chart-wrap chart-wrap--country" id="form-wrap-${f.id}">
         ${(() => { const d = getFormChartData(f); return d.values.every(v => v === 0) ? `<p class="chart-note">Geen verzendingen in deze periode.</p>` : `<canvas id="form-chart-${f.id}"></canvas>`; })()}
       </div>
     </div>`).join("")}
-    <div class="country-chart-section">
+    <div class="country-chart-section" data-setting="top-landen">
       <div class="table-title">Top landen</div>
       <div id="tbl-ctry-${site.id}">${barTable(getCountries(site), "country", "pageviews", "Land", "Pageviews")}</div>
     </div>
-    <div class="country-chart-section">
+    <div class="country-chart-section" data-setting="top-bronnen">
       <div class="table-title">Top bronnen</div>
       <div id="tbl-src-${site.id}">${barTable(getSources(site), "source", "referrals", "Bron", "Verwijzingen")}</div>
     </div>
@@ -1025,10 +1165,11 @@ function renderSite(site) {
       if (!canvas) continue;
       const { labels, values } = getFormChartData(f);
       if (formChartRefs[f.id]) { formChartRefs[f.id].destroy(); }
-      formChartRefs[f.id] = makeChart(canvas, "bar", labels, values, {
+      formChartRefs[f.id] = makeChart(canvas, settings.chartType || "bar", labels, values, {
         line: "#7c3aed", fill: "rgba(124,58,237,0.10)", bar: "rgba(124,58,237,0.55)",
       });
     }
+    applySettings();
   });
 
   return card;
@@ -1072,7 +1213,8 @@ function updateAllCards() {
     chartRefs[site.id] = { vis: null };
 
     const hasHourly = (site.hourly ?? []).length > 0;
-    const { type, labels, visData } = getChartData(site);
+    const { type: rawType2, labels, visData } = getChartData(site);
+    const type = settings.chartType || rawType2;
     const noChart = mode === "per-uur" ? (!hasHourly || labels.length === 0) : labels.length === 0;
     const noteMsg = mode === "per-uur" && !hasHourly
       ? "Nog geen uurdata — beschikbaar na de volgende scraper-run."
@@ -1112,11 +1254,12 @@ function updateAllCards() {
     wrapEl.innerHTML = `<canvas id="form-chart-${f.id}"></canvas>`;
     const canvas = el(`form-chart-${f.id}`);
     if (canvas) {
-      formChartRefs[f.id] = makeChart(canvas, "bar", labels, values,
+      formChartRefs[f.id] = makeChart(canvas, settings.chartType || "bar", labels, values,
         { line: "#7c3aed", fill: "rgba(124,58,237,0.10)", bar: "rgba(124,58,237,0.55)" }
       );
     }
   }
+  applySettings();
 }
 
 /* ─── Controls wiring ─────────────────────────────────────── */
@@ -1154,6 +1297,43 @@ document.getElementById("nl-toggle").addEventListener("click", () => {
   updateAllCards();
 });
 
+
+/* ─── Settings panel wiring ───────────────────────────────── */
+function openSettings() {
+  document.getElementById("settings-panel").classList.add("open");
+  document.getElementById("settings-backdrop").classList.add("open");
+}
+function closeSettings() {
+  document.getElementById("settings-panel").classList.remove("open");
+  document.getElementById("settings-backdrop").classList.remove("open");
+}
+document.getElementById("settings-btn").addEventListener("click", openSettings);
+document.getElementById("settings-close").addEventListener("click", closeSettings);
+document.getElementById("settings-backdrop").addEventListener("click", closeSettings);
+
+const toggleMap = {
+  "s-vis-card":    v => { settings.showVisCard   = v; applySettings(); },
+  "s-pv-card":     v => { settings.showPvCard    = v; applySettings(); },
+  "s-form-card":   v => { settings.showFormCard  = v; applySettings(); },
+  "s-vis-chart":   v => { settings.showVisChart  = v; applySettings(); },
+  "s-ctry-chart":  v => { settings.showCtryChart = v; applySettings(); },
+  "s-form-chart":  v => { settings.showFormChart = v; applySettings(); },
+  "s-top-landen":  v => { settings.showTopLanden  = v; applySettings(); },
+  "s-top-bronnen": v => { settings.showTopBronnen = v; applySettings(); },
+};
+for (const [id, handler] of Object.entries(toggleMap)) {
+  document.getElementById(id).addEventListener("change", e => handler(e.target.checked));
+}
+
+document.querySelectorAll("[data-chart-type]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    settings.chartType = btn.dataset.chartType;
+    document.querySelectorAll("[data-chart-type]").forEach(b =>
+      b.classList.toggle("active", b === btn)
+    );
+    updateAllCards();
+  });
+});
 
 /* ─── Load ────────────────────────────────────────────────── */
 async function load() {
