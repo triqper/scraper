@@ -35,7 +35,7 @@
       gap: 0.75rem;
       flex-wrap: wrap;
     }
-    header h1 { color: #fff; font-size: 1rem; font-weight: 600; }
+    header h1 { color: #fff; font-size: 2rem; font-weight: 600; }
     #updated-at { color: #8b949e; font-size: 0.78rem; margin-left: auto; }
 
     /* ── Controls bar ────────────────────────────── */
@@ -86,6 +86,7 @@
     .btn-reset {
       font-size: 0.88rem;
       padding: 0.32rem 0.74rem;
+      min-width: 7rem;
       line-height: 1.4;
       box-sizing: border-box;
       border: 1px solid var(--border);
@@ -99,6 +100,7 @@
     .btn-nl-toggle {
       font-size: 0.88rem;
       padding: 0.32rem 0.85rem;
+      min-width: 7rem;
       border: 1px solid var(--border);
       border-radius: var(--radius);
       background: var(--surface);
@@ -119,6 +121,8 @@
     .mode-btn {
       font-size: 0.88rem;
       padding: 0.32rem 0.79rem;
+      min-width: 4.5rem;
+      text-align: center;
       border: none;
       border-right: 1px solid var(--border);
       background: var(--surface);
@@ -287,7 +291,7 @@
 
     /* ── Group header between full cards ─────────── */
     .group-header {
-      font-size: 1rem;
+      font-size: 2rem;
       font-weight: 700;
       color: var(--text);
       padding: 0.25rem 0 0.1rem;
@@ -423,9 +427,10 @@
     .settings-radio-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .btn-settings {
       font-size: 0.88rem; padding: 0.32rem 0.74rem;
+      min-width: 7rem;
       border: 1px solid var(--border); border-radius: var(--radius);
       background: var(--surface); color: var(--muted);
-      cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.35rem;
+      cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 0.35rem;
     }
     .btn-settings:hover { background: var(--bg); color: var(--text); }
 
@@ -524,7 +529,7 @@
     </div>
   </div>
   <div class="settings-section" style="margin-top:auto">
-    <div class="settings-section-title">Basisdata set</div>
+    <div class="settings-section-title">Basis dataset</div>
     <div class="settings-date-field">
       <span class="settings-date-label">Van</span>
       <button class="settings-date-pick-btn" id="base-from-btn" type="button">Alles</button>
@@ -716,9 +721,11 @@ function getSources(site) {
     .map(([source, referrals]) => ({ source, referrals }));
 }
 
+const EMPTY_CHART_DATA = { labels: [], datasets: [] };
+
 function getCountryChartData(site) {
   const hourly = (site.country_hourly ?? []).filter(r => inRange(viewHourKey(r.hour)));
-  if (hourly.length === 0) return null;
+  if (hourly.length === 0) return EMPTY_CHART_DATA;
 
   // Top landen op basis van totaal in gefilterde periode (alleen NL als nlOnly)
   const totals = {};
@@ -730,7 +737,7 @@ function getCountryChartData(site) {
   }
   const topCountries = Object.entries(totals)
     .sort((a, b) => b[1] - a[1]).slice(0, 5).map(([c]) => c);
-  if (topCountries.length === 0) return null;
+  if (topCountries.length === 0) return EMPTY_CHART_DATA;
 
   // Per tijdseenheid aggregeren op view-tijdstip
   const buckets = {};
@@ -1034,8 +1041,8 @@ function makeChart(canvas, type, labels, values, color) {
         backgroundColor:  isBar ? color.bar  : color.fill,
         borderWidth:      isBar ? 0 : 2,
         borderRadius:     isBar ? 3 : 0,
-        pointRadius:      isBar ? 0 : 3,
-        pointHoverRadius: 4,
+        pointRadius:      0,
+        pointHoverRadius: 5,
         fill:    !isBar,
         tension: 0.3,
       }],
@@ -1213,6 +1220,7 @@ function renderSite(site) {
   card.innerHTML = `
     <div class="site-header">
       <h2>${esc(displayName(site.name))}</h2>
+      ${!isQR ? `<a href="https://triqper.github.io/Test-ai/" target="_blank" rel="noopener">Bekijk pagina</a>` : ""}
     </div>
     <div class="summary-row">
       <div class="stat-box" data-setting="${isQR ? 'scans-vis-card' : 'vis-card'}">
@@ -1238,7 +1246,7 @@ function renderSite(site) {
     <div class="country-chart-section" data-setting="${isQR ? 'scans-ctry-chart' : 'ctry-chart'}">
       <div class="table-title">${isQR ? "Alle scans" : "Pageviews"}</div>
       <div class="chart-wrap chart-wrap--country" id="wrap-ctry-chart-${site.id}">
-        <p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>
+        <canvas id="ctry-chart-${site.id}"></canvas>
       </div>
     </div>
     ${siteForms.map(f => `
@@ -1274,7 +1282,6 @@ function renderSite(site) {
     const wrap = card.querySelector(`#wrap-ctry-chart-${site.id}`);
     if (!wrap) return;
     const ctryData = getCountryChartData(site);
-    if (!ctryData) return;
     wrap.innerHTML = `<canvas id="ctry-chart-${site.id}"></canvas>`;
     const canvas = wrap.querySelector(`#ctry-chart-${site.id}`);
     if (canvas) {
@@ -1323,13 +1330,9 @@ function updateAllCards() {
     const wCtry = el(`wrap-ctry-chart-${site.id}`);
     if (wCtry) {
       const ctryData = getCountryChartData(site);
-      if (ctryData) {
-        wCtry.innerHTML = `<canvas id="ctry-chart-${site.id}"></canvas>`;
-        const ctryCanvas = el(`ctry-chart-${site.id}`);
-        if (ctryCanvas) countryChartRefs[site.id] = renderCountryChart(ctryCanvas, ctryData);
-      } else {
-        wCtry.innerHTML = `<p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>`;
-      }
+      wCtry.innerHTML = `<canvas id="ctry-chart-${site.id}"></canvas>`;
+      const ctryCanvas = el(`ctry-chart-${site.id}`);
+      if (ctryCanvas) countryChartRefs[site.id] = renderCountryChart(ctryCanvas, ctryData);
     }
 
     // Bezoekers grafiek: destroy old, recreate
