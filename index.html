@@ -923,11 +923,10 @@ function barTable(rows, labelKey, valueKey, colA, colB) {
 
 /* ─── Render / update ─────────────────────────────────────── */
 function statLabel(siteName) {
-  const nl  = nlOnly ? " (NL)" : "";
   const qr  = displayName(siteName ?? "").toLowerCase().includes("qr");
   const vis = qr ? "Unieke scans" : "Unieke bezoekers";
   const pv  = qr ? "Alle scans"   : "Pageviews";
-  return [`${pv}${nl}`, `${vis}${nl}`];
+  return [pv, vis];
 }
 
 function fmtStat(n) { return n === null ? "—" : fmt(n); }
