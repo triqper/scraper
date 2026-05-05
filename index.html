@@ -530,12 +530,13 @@
       <button class="settings-date-pick-btn" id="base-from-btn" type="button">Alles</button>
       <input type="datetime-local" id="base-from-dt" />
     </div>
-    <div class="settings-date-warning">⚠️ Let op: alle data voor 6 mei is testdata.</div>
     <div class="settings-date-field">
       <span class="settings-date-label">Tot</span>
       <button class="settings-date-pick-btn" id="base-to-btn" type="button">Alles</button>
       <input type="datetime-local" id="base-to-dt" />
     </div>
+    <div class="settings-date-warning">⚠️ Let op: alle data voor 6 mei is testdata.</div>
+    <button class="settings-date-reset" id="base-show-testdata" type="button">Alleen testdata tonen</button>
     <button class="settings-date-reset" id="base-reset" type="button">Alle data tonen</button>
   </div>
   <div class="settings-section">
@@ -1472,6 +1473,17 @@ document.getElementById("base-reset").addEventListener("click", () => {
   updateBasePickBtns();
   baseFromDt = null;
   baseToDt   = null;
+  updateAllCards();
+});
+
+document.getElementById("base-show-testdata").addEventListener("click", () => {
+  const fromStr = "2026-05-04T20:00";
+  const toStr   = "2026-05-05T23:59";
+  document.getElementById("base-from-dt").value = fromStr;
+  document.getElementById("base-to-dt").value   = toStr;
+  updateBasePickBtns();
+  baseFromDt = new Date(fromStr);
+  baseToDt   = new Date(toStr);
   updateAllCards();
 });
 
