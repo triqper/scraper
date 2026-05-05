@@ -975,6 +975,12 @@ function renderSite(site) {
         <p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>
       </div>
     </div>
+    <div class="country-chart-section" id="box-pv-${site.id}">
+      <div class="table-title">Alle scans</div>
+      <div class="chart-wrap chart-wrap--country" id="wrap-pv-${site.id}">
+        ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="pv-${site.id}"></canvas>`}
+      </div>
+    </div>
     ${siteForms.map(f => `
     <div class="country-chart-section">
       <div class="chart-title" id="form-chart-title-${f.id}">Aanmeldingen</div>
@@ -982,23 +988,13 @@ function renderSite(site) {
         ${(() => { const d = getFormChartData(f); return d.values.every(v => v === 0) ? `<p class="chart-note">Geen verzendingen in deze periode.</p>` : `<canvas id="form-chart-${f.id}"></canvas>`; })()}
       </div>
     </div>`).join("")}
-    <div class="charts-row" id="box-pv-${site.id}">
-      <div class="chart-box" style="border-right:none">
-        <div class="chart-title">Pageviews</div>
-        <div class="chart-wrap" id="wrap-pv-${site.id}">
-          ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="pv-${site.id}"></canvas>`}
-        </div>
-      </div>
+    <div class="country-chart-section">
+      <div class="table-title">Top landen</div>
+      <div id="tbl-ctry-${site.id}">${barTable(getCountries(site), "country", "pageviews", "Land", "Pageviews")}</div>
     </div>
-    <div class="tables-row">
-      <div class="table-box">
-        <div class="table-title">Top landen</div>
-        <div id="tbl-ctry-${site.id}">${barTable(getCountries(site), "country", "pageviews", "Land", "Pageviews")}</div>
-      </div>
-      <div class="table-box">
-        <div class="table-title">Top bronnen</div>
-        <div id="tbl-src-${site.id}">${barTable(getSources(site), "source", "referrals", "Bron", "Verwijzingen")}</div>
-      </div>
+    <div class="country-chart-section">
+      <div class="table-title">Top bronnen</div>
+      <div id="tbl-src-${site.id}">${barTable(getSources(site), "source", "referrals", "Bron", "Verwijzingen")}</div>
     </div>
   `;
 
