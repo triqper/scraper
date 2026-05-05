@@ -99,7 +99,6 @@
     }
     .btn-nl-toggle:hover  { background: var(--bg); color: var(--text); }
     .btn-nl-toggle.active { background: #1a7f37; color: #fff; border-color: #1a7f37; }
-    .ctrl-checkbox { display: flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; color: var(--muted); cursor: pointer; user-select: none; }
 
     .mode-group {
       display: flex;
@@ -322,8 +321,7 @@
   </div>
   <button class="btn-reset" id="reset-filter">Alles tonen</button>
   <button class="btn-nl-toggle" id="nl-toggle">Alleen NL</button>
-  <label class="ctrl-checkbox"><input type="checkbox" id="pv-toggle"> Toon pageviews</label>
-  <div class="mode-group">
+<div class="mode-group">
     <button class="mode-btn active" data-mode="per-dag">Per dag</button>
 
     <button class="mode-btn" data-mode="per-uur">Per uur</button>
@@ -372,7 +370,7 @@ let mode             = "per-dag";
 let fromDt           = null;
 let toDt             = null;
 let nlOnly           = false;
-let showPv           = false;
+
 let chartRefs        = {};   // { siteId: { pv: Chart|null, vis: Chart|null } }
 let formChartRefs    = {};   // { formId: Chart|null }
 let miniChartRefs    = {};
@@ -984,7 +982,7 @@ function renderSite(site) {
         ${(() => { const d = getFormChartData(f); return d.values.every(v => v === 0) ? `<p class="chart-note">Geen verzendingen in deze periode.</p>` : `<canvas id="form-chart-${f.id}"></canvas>`; })()}
       </div>
     </div>`).join("")}
-    <div class="charts-row" id="box-pv-${site.id}" style="${showPv ? '' : 'display:none'}">
+    <div class="charts-row" id="box-pv-${site.id}">
       <div class="chart-box" style="border-right:none">
         <div class="chart-title">Pageviews</div>
         <div class="chart-wrap" id="wrap-pv-${site.id}">
@@ -1173,12 +1171,6 @@ document.getElementById("nl-toggle").addEventListener("click", () => {
   updateAllCards();
 });
 
-document.getElementById("pv-toggle").addEventListener("change", e => {
-  showPv = e.target.checked;
-  document.querySelectorAll("[id^='box-pv-']").forEach(el => {
-    el.style.display = showPv ? "" : "none";
-  });
-});
 
 /* ─── Load ────────────────────────────────────────────────── */
 async function load() {
