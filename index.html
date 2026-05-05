@@ -518,8 +518,8 @@
   </div>
   <div class="settings-section">
     <div class="settings-section-title">Tabellen</div>
-    <div class="settings-row"><span>Top landen</span><label class="settings-toggle"><input type="checkbox" id="s-top-landen"><span class="settings-slider"></span></label></div>
-    <div class="settings-row"><span>Top bronnen</span><label class="settings-toggle"><input type="checkbox" id="s-top-bronnen"><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Landen</span><label class="settings-toggle"><input type="checkbox" id="s-top-landen"><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Bronnen</span><label class="settings-toggle"><input type="checkbox" id="s-top-bronnen"><span class="settings-slider"></span></label></div>
   </div>
   <div class="settings-section">
     <div class="settings-section-title">Grafiektype</div>
@@ -1257,11 +1257,11 @@ function renderSite(site) {
       </div>
     </div>`).join("")}
     <div class="country-chart-section" data-setting="top-landen">
-      <div class="table-title">Top landen</div>
+      <div class="table-title">Landen</div>
       <div id="tbl-ctry-${site.id}">${barTable(getCountries(site), "country", "pageviews", "Land", "Pageviews")}</div>
     </div>
     <div class="country-chart-section" data-setting="top-bronnen">
-      <div class="table-title">Top bronnen</div>
+      <div class="table-title">Bronnen</div>
       <div id="tbl-src-${site.id}">${barTable(getSources(site), "source", "referrals", "Bron", "Verwijzingen")}</div>
     </div>
   `;
