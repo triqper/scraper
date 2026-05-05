@@ -25,6 +25,7 @@
       line-height: 1.5;
     }
 
+    /* ── Header ── */
     header {
       background: #000000;
       padding: 0.75rem 1.5rem;
@@ -35,14 +36,51 @@
     }
     header h1 { color: #fff; font-size: 1.5rem; font-weight: 600; }
     header a.back-link {
-      color: #8b949e;
-      font-size: 0.82rem;
-      text-decoration: none;
-      margin-left: auto;
-      white-space: nowrap;
+      color: #8b949e; font-size: 0.82rem;
+      text-decoration: none; margin-left: auto; white-space: nowrap;
     }
     header a.back-link:hover { color: #fff; }
 
+    /* ── Filter bar ── */
+    .controls {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.6rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .ctrl-label { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+    .ctrl-group { display: flex; align-items: center; gap: 0.4rem; }
+
+    .date-btn {
+      font-size: 0.88rem; padding: 0.32rem 0.74rem; line-height: 1.4;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--bg); color: var(--text);
+      cursor: pointer; white-space: nowrap; font-family: inherit;
+    }
+    .date-btn:hover { border-color: var(--accent); }
+    input[type="datetime-local"].hidden-picker {
+      position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;
+    }
+
+    .btn-reset {
+      font-size: 0.88rem; padding: 0.32rem 0.74rem; line-height: 1.4;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); color: var(--muted); cursor: pointer;
+    }
+    .btn-reset:hover { background: var(--bg); color: var(--text); }
+
+    .filter-count {
+      font-size: 0.78rem; color: var(--muted); margin-left: auto;
+    }
+
+    /* ── Main ── */
     main {
       max-width: 1100px;
       margin: 0 auto;
@@ -53,22 +91,18 @@
     }
 
     .group-header {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text);
+      font-size: 1.5rem; font-weight: 700; color: var(--text);
       padding: 0.25rem 0 0.1rem;
       border-bottom: 2px solid var(--border);
       margin-bottom: 0.75rem;
     }
+    .group-count { font-size: 0.82rem; font-weight: 400; color: var(--muted); margin-left: 0.5rem; }
 
-    .leads-section { display: flex; flex-direction: column; gap: 0; }
+    .leads-list { display: flex; flex-direction: column; gap: 0; }
 
-    .empty-note {
-      color: var(--muted);
-      font-size: 0.9rem;
-      padding: 0.75rem 0;
-    }
+    .empty-note { color: var(--muted); font-size: 0.9rem; padding: 0.75rem 0; }
 
+    /* ── Lead card ── */
     .lead-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -80,64 +114,47 @@
       gap: 0.5rem 1rem;
       align-items: start;
     }
-
-    .lead-fields { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.75rem; align-items: baseline; }
+    .lead-meta { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .lead-fields {
+      display: grid; grid-template-columns: auto 1fr;
+      gap: 0.2rem 0.75rem; align-items: baseline;
+    }
     .lead-field-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--muted);
-      white-space: nowrap;
+      font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--muted); white-space: nowrap;
     }
     .lead-field-value { font-size: 0.88rem; color: var(--text); word-break: break-word; }
     .lead-field-value.empty { color: var(--muted); font-style: italic; }
 
-    .lead-meta {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-      grid-column: 1 / -1;
+    /* ── Status ── */
+    .lead-status-wrap {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; min-width: 9rem;
     }
-
-    .lead-status-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; min-width: 9rem; }
-
     .status-select {
-      font-size: 0.82rem;
-      padding: 0.28rem 0.5rem;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--surface);
-      color: var(--text);
-      cursor: pointer;
-      font-family: inherit;
-      width: 100%;
+      font-size: 0.82rem; padding: 0.28rem 0.5rem;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); color: var(--text);
+      cursor: pointer; font-family: inherit; width: 100%;
     }
     .status-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-
-    /* Status colour coding */
-    .status-select[data-status="Todo"]               { background: #f6f8fa; color: #656d76; }
-    .status-select[data-status="Benaderd"]           { background: #ddf4ff; color: #0969da; border-color: #54aeff; }
-    .status-select[data-status="Ingepland"]          { background: #dafbe1; color: #1a7f37; border-color: #4ac26b; }
-    .status-select[data-status="Afgezegd"]           { background: #ffebe9; color: #cf222e; border-color: #ff8182; }
-    .status-select[data-status="Benaderd 2e keer"]   { background: #fff3cd; color: #9a6700; border-color: #d4a72c; }
-    .status-select[data-status="Benaderd 3e keer"]   { background: #ffe8b4; color: #7d4e00; border-color: #c07000; }
-    .status-select[data-status="Geen gehoor"]        { background: #f0f0f0; color: #555; border-color: #aaa; }
+    .status-select[data-status="Todo"]             { background: #f6f8fa; color: #656d76; }
+    .status-select[data-status="Benaderd"]         { background: #ddf4ff; color: #0969da; border-color: #54aeff; }
+    .status-select[data-status="Ingepland"]        { background: #dafbe1; color: #1a7f37; border-color: #4ac26b; }
+    .status-select[data-status="Afgezegd"]         { background: #ffebe9; color: #cf222e; border-color: #ff8182; }
+    .status-select[data-status="Benaderd 2e keer"] { background: #fff3cd; color: #9a6700; border-color: #d4a72c; }
+    .status-select[data-status="Benaderd 3e keer"] { background: #ffe8b4; color: #7d4e00; border-color: #c07000; }
+    .status-select[data-status="Geen gehoor"]      { background: #f0f0f0; color: #555;    border-color: #aaa; }
 
     .status-saved-note {
-      font-size: 0.72rem;
-      color: #1a7f37;
-      opacity: 0;
-      transition: opacity 0.3s;
+      font-size: 0.72rem; color: #1a7f37; opacity: 0; transition: opacity 0.3s;
     }
     .status-saved-note.visible { opacity: 1; }
-
-    .loading { color: var(--muted); padding: 2rem 0; }
 
     @media (max-width: 600px) {
       header h1 { font-size: 1.15rem; }
       .lead-card { grid-template-columns: 1fr; }
       .lead-status-wrap { align-items: stretch; }
+      .filter-count { margin-left: 0; }
     }
   </style>
 </head>
@@ -151,54 +168,69 @@
   <a class="back-link" href="./index.html">← Dashboard</a>
 </header>
 
+<div class="controls">
+  <div class="ctrl-group">
+    <span class="ctrl-label">Van</span>
+    <button class="date-btn" id="from-btn" type="button">Datum</button>
+    <input type="datetime-local" id="from-dt" class="hidden-picker" />
+  </div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">Tot</span>
+    <button class="date-btn" id="to-btn" type="button">Datum</button>
+    <input type="datetime-local" id="to-dt" class="hidden-picker" />
+  </div>
+  <button class="btn-reset" id="reset-filter">Alles tonen</button>
+  <span class="filter-count" id="filter-count"></span>
+</div>
+
 <main id="main">
-  <p class="loading">Laden…</p>
+  <p style="color:var(--muted)">Laden…</p>
 </main>
 
 <script>
 const SITE_LABELS = {
-  "woonstroom-interesse-landing":   "Interesse Landing",
-  "woonstroom-aanbod-landing":      "Aanbod Landing",
-  "woonstroom-woningwaarde-landing":"Woningwaarde Landing",
+  "woonstroom-interesse-landing":    "Interesse Landing",
+  "woonstroom-aanbod-landing":       "Aanbod Landing",
+  "woonstroom-woningwaarde-landing": "Woningwaarde Landing",
 };
-
 const SITE_ORDER = [
   "woonstroom-interesse-landing",
   "woonstroom-aanbod-landing",
   "woonstroom-woningwaarde-landing",
 ];
-
 const STATUSES = [
-  "Todo",
-  "Benaderd",
-  "Ingepland",
-  "Afgezegd",
-  "Benaderd 2e keer",
-  "Benaderd 3e keer",
-  "Geen gehoor",
+  "Todo", "Benaderd", "Ingepland", "Afgezegd",
+  "Benaderd 2e keer", "Benaderd 3e keer", "Geen gehoor",
 ];
 
-function statusKey(subId) { return `lead_status_${subId}`; }
+let allForms  = [];
+let filterFrom = null;
+let filterTo   = null;
 
-function getStatus(subId) {
-  return localStorage.getItem(statusKey(subId)) || "Todo";
-}
-
-function saveStatus(subId, status) {
-  localStorage.setItem(statusKey(subId), status);
-}
-
+/* ── Helpers ── */
 function esc(s) {
   return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function fmtDateBtn(isoStr) {
+  if (!isoStr) return null;
+  const d  = new Date(isoStr);
+  const wd = d.toLocaleDateString("nl-NL", { weekday: "short" }).replace(".", "");
+  const mo = d.toLocaleDateString("nl-NL", { month: "long" });
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${cap(wd)} ${d.getDate()} ${cap(mo)} ${hh}:${mm}`;
 }
 
 function fmtDate(isoStr) {
   if (!isoStr) return "";
   const d = new Date(isoStr);
-  return d.toLocaleString("nl-NL", {
+  return cap(d.toLocaleString("nl-NL", {
     weekday: "short", day: "numeric", month: "long",
-    year: "numeric", hour: "2-digit", minute: "2-digit"
-  }).replace(/\.$/, "");
+    year: "numeric", hour: "2-digit", minute: "2-digit",
+  }).replace(/\.$/, ""));
 }
 
 function field(data, ...keys) {
@@ -213,30 +245,35 @@ function field(data, ...keys) {
   return null;
 }
 
-function renderField(label, value) {
-  if (value) {
-    return `<span class="lead-field-label">${esc(label)}</span><span class="lead-field-value">${esc(value)}</span>`;
-  }
-  return `<span class="lead-field-label">${esc(label)}</span><span class="lead-field-value empty">—</span>`;
+function getStatus(subId)          { return localStorage.getItem(`lead_status_${subId}`) || "Todo"; }
+function saveStatus(subId, status) { localStorage.setItem(`lead_status_${subId}`, status); }
+
+/* ── Filter ── */
+function inRange(isoStr) {
+  const t = new Date(isoStr);
+  if (filterFrom && t < filterFrom) return false;
+  if (filterTo   && t > filterTo)   return false;
+  return true;
 }
 
-function buildStatusSelect(subId) {
-  const current = getStatus(subId);
-  const options = STATUSES.map(s =>
+/* ── Render ── */
+function renderField(label, value) {
+  return value
+    ? `<span class="lead-field-label">${esc(label)}</span><span class="lead-field-value">${esc(value)}</span>`
+    : `<span class="lead-field-label">${esc(label)}</span><span class="lead-field-value empty">—</span>`;
+}
+
+function renderCard(sub) {
+  const d        = sub.data || {};
+  const naam     = field(d, "naam", "name", "voornaam");
+  const adres    = field(d, "adres", "address", "straat");
+  const contact  = field(d, "contactvoorkeur", "contact", "voorkeur", "contactmethode");
+  const email    = field(d, "email", "emailadres", "e-mail", "mail");
+  const telefoon = field(d, "telefoon", "telefoonnummer", "phone", "tel");
+  const current  = getStatus(sub.id);
+  const options  = STATUSES.map(s =>
     `<option value="${esc(s)}"${s === current ? " selected" : ""}>${esc(s)}</option>`
   ).join("");
-  return `<select class="status-select" data-sub-id="${esc(subId)}" data-status="${esc(current)}">${options}</select>
-          <span class="status-saved-note" id="saved-${esc(subId)}">Opgeslagen</span>`;
-}
-
-function renderSubmission(sub) {
-  const d    = sub.data || {};
-  const naam = field(d, "naam", "name", "voornaam");
-  const adres = field(d, "adres", "address", "straat");
-  const contact = field(d, "contactvoorkeur", "contact", "voorkeur", "contactmethode");
-  const email = field(d, "email", "emailadres", "e-mail", "mail");
-  const telefoon = field(d, "telefoon", "telefoonnummer", "phone", "tel");
-
   return `
   <div class="lead-card" id="lead-${esc(sub.id)}">
     <div>
@@ -250,68 +287,51 @@ function renderSubmission(sub) {
       </div>
     </div>
     <div class="lead-status-wrap">
-      ${buildStatusSelect(sub.id)}
+      <select class="status-select" data-sub-id="${esc(sub.id)}" data-status="${esc(current)}">${options}</select>
+      <span class="status-saved-note" id="saved-${esc(sub.id)}">Opgeslagen</span>
     </div>
   </div>`;
 }
 
-function renderSection(siteName, forms) {
-  const label = SITE_LABELS[siteName] || siteName;
-  const subs = forms
-    .flatMap(f => f.submissions || [])
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-  const body = subs.length
-    ? subs.map(renderSubmission).join("")
-    : `<p class="empty-note">Geen inzendingen.</p>`;
-
-  return `
-  <section>
-    <div class="group-header">${esc(label)}</div>
-    <div class="leads-section">${body}</div>
-  </section>`;
-}
-
-async function load() {
+function renderAll() {
   const main = document.getElementById("main");
-  const bust = Date.now();
-  let data;
-  try {
-    const r = await fetch(`./data/leads.json?v=${bust}`, { cache: "no-store" });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    data = await r.json();
-  } catch (e) {
-    main.innerHTML = `<p style="color:var(--muted)">Kon leads.json niet laden: ${esc(String(e))}</p>`;
-    return;
-  }
-
-  const forms = data.forms || [];
-
-  // Group forms by site_name
   const bySite = {};
-  for (const f of forms) {
-    const sn = f.site_name;
-    if (!bySite[sn]) bySite[sn] = [];
-    bySite[sn].push(f);
+  for (const f of allForms) {
+    if (!bySite[f.site_name]) bySite[f.site_name] = [];
+    bySite[f.site_name].push(f);
   }
 
-  const html = SITE_ORDER
-    .filter(sn => bySite[sn] || true)
-    .map(sn => renderSection(sn, bySite[sn] || []))
-    .join("");
+  let total = 0;
+  const html = SITE_ORDER.map(sn => {
+    const label = SITE_LABELS[sn] || sn;
+    const subs = (bySite[sn] || [])
+      .flatMap(f => f.submissions || [])
+      .filter(s => inRange(s.created_at))
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    total += subs.length;
+    const count = subs.length;
+    const body  = count
+      ? subs.map(renderCard).join("")
+      : `<p class="empty-note">Geen inzendingen in deze periode.</p>`;
+    return `
+    <section>
+      <div class="group-header">${esc(label)}<span class="group-count">${count}</span></div>
+      <div class="leads-list">${body}</div>
+    </section>`;
+  }).join("");
 
-  if (data.last_updated) {
-    const d = new Date(data.last_updated);
-    const updated = d.toLocaleString("nl-NL", {
-      weekday: "long", day: "numeric", month: "long",
-      year: "numeric", hour: "2-digit", minute: "2-digit"
-    });
-    main.innerHTML = `<p style="font-size:0.78rem;color:var(--muted);margin-bottom:-1rem">Laatst bijgewerkt: ${esc(updated)}</p>${html}`;
+  main.innerHTML = html;
+
+  // Update filter count label
+  const allSubs = allForms.flatMap(f => f.submissions || []);
+  const countEl = document.getElementById("filter-count");
+  if (filterFrom || filterTo) {
+    countEl.textContent = `${total} van ${allSubs.length} inzendingen`;
   } else {
-    main.innerHTML = html;
+    countEl.textContent = `${total} inzending${total !== 1 ? "en" : ""}`;
   }
 
-  // Wire up status selects
+  // Wire status selects
   document.querySelectorAll(".status-select").forEach(sel => {
     sel.addEventListener("change", () => {
       const subId  = sel.dataset.subId;
@@ -325,6 +345,62 @@ async function load() {
       }
     });
   });
+}
+
+/* ── Date filter controls ── */
+function updateDateBtns() {
+  const fv = document.getElementById("from-dt").value;
+  const tv = document.getElementById("to-dt").value;
+  document.getElementById("from-btn").textContent = fmtDateBtn(fv) ?? "Datum";
+  document.getElementById("to-btn").textContent   = fmtDateBtn(tv) ?? "Datum";
+}
+
+function applyFilter() {
+  const fv = document.getElementById("from-dt").value;
+  const tv = document.getElementById("to-dt").value;
+  filterFrom = fv ? new Date(fv) : null;
+  filterTo   = tv ? new Date(tv) : null;
+  renderAll();
+}
+
+document.getElementById("from-btn").addEventListener("click", () => {
+  const inp = document.getElementById("from-dt");
+  inp.style.pointerEvents = "auto";
+  inp.showPicker?.();
+  inp.style.pointerEvents = "";
+});
+document.getElementById("to-btn").addEventListener("click", () => {
+  const inp = document.getElementById("to-dt");
+  inp.style.pointerEvents = "auto";
+  inp.showPicker?.();
+  inp.style.pointerEvents = "";
+});
+document.getElementById("from-dt").addEventListener("change", () => { updateDateBtns(); applyFilter(); });
+document.getElementById("to-dt").addEventListener("change",   () => { updateDateBtns(); applyFilter(); });
+document.getElementById("reset-filter").addEventListener("click", () => {
+  document.getElementById("from-dt").value = "";
+  document.getElementById("to-dt").value   = "";
+  updateDateBtns();
+  filterFrom = null;
+  filterTo   = null;
+  renderAll();
+});
+
+/* ── Load data ── */
+async function load() {
+  const main = document.getElementById("main");
+  let data;
+  try {
+    const r = await fetch(`./data/leads.json?v=${Date.now()}`, { cache: "no-store" });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    data = await r.json();
+  } catch (e) {
+    main.innerHTML = `<p style="color:var(--muted)">Kon leads.json niet laden: ${esc(String(e))}</p>`;
+    return;
+  }
+
+  allForms = data.forms || [];
+  renderAll();
 }
 
 load();
