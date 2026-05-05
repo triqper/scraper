@@ -28,16 +28,15 @@
 
     /* ── Header ─────────────────────────────────── */
     header {
-      background: #6DCFB4;
+      background: #24292f;
       padding: 0.75rem 1.5rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
       flex-wrap: wrap;
     }
-    header h1 { color: #1a1a1a; font-size: 1rem; font-weight: 600; }
-    header svg { stroke: #1a1a1a !important; }
-    #updated-at { color: rgba(0,0,0,0.55); }
+    header h1 { color: #fff; font-size: 1rem; font-weight: 600; }
+    #updated-at { color: #8b949e; font-size: 0.78rem; margin-left: auto; }
 
     /* ── Controls bar ────────────────────────────── */
     .controls {
@@ -296,6 +295,8 @@
     .controls-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 
     @media (max-width: 600px) {
+      header { flex-wrap: wrap; gap: 0.4rem; padding: 0.6rem 1rem; }
+      #updated-at { width: 100%; margin-left: 0; order: 3; }
       .controls { flex-direction: column; align-items: stretch; padding: 0.45rem 0.75rem; gap: 0.35rem; }
       .controls-dates { gap: 0.35rem; }
       .controls-dates .ctrl-label { display: none; }
@@ -396,7 +397,7 @@
     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
   </svg>
   <h1>WoonConnect flyer test analytics</h1>
-  <span id="updated-at" style="color:#8b949e; font-size:0.78rem; margin-left:auto"></span>
+  <span id="updated-at"></span>
 </header>
 
 <div class="controls">
