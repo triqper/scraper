@@ -954,7 +954,7 @@ function renderSite(site) {
         <div class="stat-label" id="lbl-vis-${site.id}">${esc(visLbl)}</div>
         <div class="stat-value" id="val-vis-${site.id}">${fmtStat(totals.vis)}</div>
       </div>
-      <div class="stat-box" id="stat-pv-${site.id}" style="${showPv ? '' : 'display:none'}">
+      <div class="stat-box">
         <div class="stat-label" id="lbl-pv-${site.id}">${esc(pvLbl)}</div>
         <div class="stat-value" id="val-pv-${site.id}">${fmtStat(totals.pv)}</div>
       </div>
@@ -1176,7 +1176,7 @@ document.getElementById("nl-toggle").addEventListener("click", () => {
 
 document.getElementById("pv-toggle").addEventListener("change", e => {
   showPv = e.target.checked;
-  document.querySelectorAll("[id^='box-pv-'], [id^='stat-pv-']").forEach(el => {
+  document.querySelectorAll("[id^='box-pv-']").forEach(el => {
     el.style.display = showPv ? "" : "none";
   });
 });
