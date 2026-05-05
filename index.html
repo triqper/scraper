@@ -922,11 +922,14 @@ function barTable(rows, labelKey, valueKey, colA, colB) {
 }
 
 /* ─── Render / update ─────────────────────────────────────── */
-function statLabel() {
-  const nl = nlOnly ? " (NL)" : "";
-  if (mode === "per-uur") return [`Alle scans (gefilterd)${nl}`, `Unieke scans (gefilterd)${nl}`];
-  if (mode === "totaal")  return [`Totaal alle scans${nl}`,      `Totaal unieke scans${nl}`];
-  return [`Alle scans${nl}`, `Unieke scans${nl}`];
+function statLabel(siteName) {
+  const nl  = nlOnly ? " (NL)" : "";
+  const qr  = (siteName ?? "").toLowerCase().includes("qr");
+  const vis = qr ? "Unieke scans"   : "Unieke bezoekers";
+  const pv  = qr ? "Alle scans"     : "Pageviews";
+  if (mode === "per-uur") return [`${pv} (gefilterd)${nl}`, `${vis} (gefilterd)${nl}`];
+  if (mode === "totaal")  return [`Totaal ${pv.toLowerCase()}${nl}`, `Totaal ${vis.toLowerCase()}${nl}`];
+  return [`${pv}${nl}`, `${vis}${nl}`];
 }
 
 function fmtStat(n) { return n === null ? "—" : fmt(n); }
@@ -939,7 +942,7 @@ function renderSite(site) {
   const siteForms = formsData.filter(f => f.site_name === site.name);
   const totals = getTotals(site);
   const { type, labels, pvData, visData } = getChartData(site);
-  const [pvLbl, visLbl] = statLabel();
+  const [pvLbl, visLbl] = statLabel(site.name);
   const hasHourly = (site.hourly ?? []).length > 0;
   const noChart   = mode === "per-uur" ? (!hasHourly || labels.length === 0) : labels.length === 0;
   const noteMsg   = mode === "per-uur" && !hasHourly
@@ -1053,7 +1056,7 @@ function updateAllCards() {
   for (const site of siteData) {
     // Summary numbers
     const totals         = getTotals(site);
-    const [pvLbl, visLbl] = statLabel();
+    const [pvLbl, visLbl] = statLabel(site.name);
     if (el(`lbl-pv-${site.id}`))  el(`lbl-pv-${site.id}`).textContent  = pvLbl;
     if (el(`lbl-vis-${site.id}`)) el(`lbl-vis-${site.id}`).textContent = visLbl;
     if (el(`val-pv-${site.id}`))  el(`val-pv-${site.id}`).textContent  = fmtStat(totals.pv);
