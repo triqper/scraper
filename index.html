@@ -406,6 +406,13 @@
       cursor: pointer; font-family: inherit;
     }
     .settings-date-reset:hover { background: var(--bg); color: var(--text); }
+    .settings-date-warning {
+      font-size: 0.75rem; color: #9a6700;
+      background: #fff8c5; border: 1px solid #d4a72c;
+      border-radius: var(--radius);
+      padding: 0.3rem 0.5rem; margin: 0.1rem 0 0.3rem;
+      line-height: 1.4;
+    }
     .settings-radio-group { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
     .settings-radio-btn {
       flex: 1; text-align: center; padding: 0.35rem;
@@ -523,6 +530,7 @@
       <button class="settings-date-pick-btn" id="base-from-btn" type="button">Alles</button>
       <input type="datetime-local" id="base-from-dt" />
     </div>
+    <div class="settings-date-warning">⚠️ Let op: alle data voor 6 mei is testdata.</div>
     <div class="settings-date-field">
       <span class="settings-date-label">Tot</span>
       <button class="settings-date-pick-btn" id="base-to-btn" type="button">Alles</button>
@@ -1580,6 +1588,13 @@ async function load() {
     updateDateBtns();
     fromDt = zpLocal;
     toDt   = new Date();
+
+    // Standaard basisdataset: vanaf 6 mei 09:00
+    const baseDefaultStr = "2026-05-06T09:00";
+    const baseFromEl = document.getElementById("base-from-dt");
+    baseFromEl.value = baseDefaultStr;
+    baseFromDt = new Date(baseDefaultStr);
+    updateBasePickBtns();
   }
 
   siteData = (data.sites ?? []).sort((a, b) => {
