@@ -144,6 +144,17 @@
     .status-select[data-status="Benaderd 2e keer"] { background: #fff3cd; color: #9a6700; border-color: #d4a72c; }
     .status-select[data-status="Benaderd 3e keer"] { background: #ffe8b4; color: #7d4e00; border-color: #c07000; }
     .status-select[data-status="Geen gehoor"]      { background: #f0f0f0; color: #555;    border-color: #aaa; }
+    .status-select[data-status="Afgerond"]         { background: #e6f4ea; color: #137333; border-color: #34a853; }
+
+    .lead-note-wrap { margin-top: 0.6rem; }
+    .lead-note {
+      width: 100%; font-size: 0.82rem; font-family: inherit;
+      padding: 0.3rem 0.5rem; border: 1px solid var(--border);
+      border-radius: var(--radius); background: var(--bg);
+      color: var(--text); resize: vertical; line-height: 1.4;
+    }
+    .lead-note:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+    .lead-note::placeholder { color: var(--muted); }
 
     .status-saved-note {
       font-size: 0.72rem; color: #1a7f37; opacity: 0; transition: opacity 0.3s;
@@ -210,13 +221,14 @@ const SITE_ORDER = [
 ];
 const STATUSES = [
   "Todo", "Benaderd", "Ingepland", "Afgezegd",
-  "Benaderd 2e keer", "Benaderd 3e keer", "Geen gehoor",
+  "Benaderd 2e keer", "Benaderd 3e keer", "Geen gehoor", "Afgerond",
 ];
 
-let allForms   = [];
-let filterFrom = null;
-let filterTo   = null;
-let remoteStatuses = {};  // { subId: status } — geladen uit JSONBin
+let allForms       = [];
+let filterFrom     = null;
+let filterTo       = null;
+let remoteStatuses = {};  // { subId: status }
+let remoteNotes    = {};  // { subId: notitie }
 
 const JSONBIN_CONFIGURED = JSONBIN_KEY !== "JOUW_API_KEY_HIER" && JSONBIN_BIN_ID !== "JOUW_BIN_ID_HIER";
 
@@ -228,22 +240,43 @@ function getStatus(subId) {
     || "Todo";
 }
 
-async function saveStatus(subId, status) {
-  // Altijd lokaal cachen
-  localStorage.setItem(`lead_status_${subId}`, status);
-  remoteStatuses[subId] = status;
-
+async function pushToJsonBin() {
   if (!JSONBIN_CONFIGURED) return;
-
   try {
     await fetch(JSONBIN_URL, {
       method:  "PUT",
       headers: { "Content-Type": "application/json", "X-Master-Key": JSONBIN_KEY },
-      body:    JSON.stringify({ statuses: remoteStatuses }),
+      body:    JSON.stringify({ statuses: remoteStatuses, notes: remoteNotes }),
     });
   } catch (e) {
     console.warn("JSONBin opslaan mislukt:", e);
   }
+}
+
+async function saveStatus(subId, status) {
+  localStorage.setItem(`lead_status_${subId}`, status);
+  remoteStatuses[subId] = status;
+  await pushToJsonBin();
+}
+
+function getNote(subId) {
+  return remoteNotes[subId] || localStorage.getItem(`lead_note_${subId}`) || "";
+}
+
+const noteTimers = {};
+async function saveNote(subId, note) {
+  localStorage.setItem(`lead_note_${subId}`, note);
+  remoteNotes[subId] = note;
+  // Debounce: wacht 800ms na laatste toetsaanslag
+  clearTimeout(noteTimers[subId]);
+  noteTimers[subId] = setTimeout(async () => {
+    await pushToJsonBin();
+    const note = document.getElementById(`note-saved-${subId}`);
+    if (note) {
+      note.classList.add("visible");
+      setTimeout(() => note.classList.remove("visible"), 1800);
+    }
+  }, 800);
 }
 
 async function loadRemoteStatuses() {
@@ -254,19 +287,20 @@ async function loadRemoteStatuses() {
     });
     if (!r.ok) return;
     const data = await r.json();
-    remoteStatuses = data.record?.statuses || data.record || {};
-    // Sync naar localStorage als cache
+    remoteStatuses = data.record?.statuses || {};
+    remoteNotes    = data.record?.notes    || {};
     for (const [id, st] of Object.entries(remoteStatuses)) {
       localStorage.setItem(`lead_status_${id}`, st);
     }
+    for (const [id, nt] of Object.entries(remoteNotes)) {
+      localStorage.setItem(`lead_note_${id}`, nt);
+    }
   } catch (e) {
     console.warn("JSONBin laden mislukt, localStorage als fallback:", e);
-    // Haal alles op uit localStorage als fallback
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      if (k?.startsWith("lead_status_")) {
-        remoteStatuses[k.replace("lead_status_", "")] = localStorage.getItem(k);
-      }
+      if (k?.startsWith("lead_status_")) remoteStatuses[k.replace("lead_status_", "")] = localStorage.getItem(k);
+      if (k?.startsWith("lead_note_"))   remoteNotes[k.replace("lead_note_", "")]      = localStorage.getItem(k);
     }
   }
 }
@@ -307,9 +341,6 @@ function field(data, ...keys) {
   return null;
 }
 
-function getStatus(subId)          { return localStorage.getItem(`lead_status_${subId}`) || "Todo"; }
-function saveStatus(subId, status) { localStorage.setItem(`lead_status_${subId}`, status); }
-
 /* ── Filter ── */
 function inRange(isoStr) {
   const t = new Date(isoStr);
@@ -336,6 +367,7 @@ function renderCard(sub) {
   const options  = STATUSES.map(s =>
     `<option value="${esc(s)}"${s === current ? " selected" : ""}>${esc(s)}</option>`
   ).join("");
+  const note = getNote(sub.id);
   return `
   <div class="lead-card" id="lead-${esc(sub.id)}">
     <div>
@@ -346,6 +378,10 @@ function renderCard(sub) {
         ${renderField("Contactvoorkeur", contact)}
         ${renderField("E-mail", email)}
         ${renderField("Telefoon", telefoon)}
+      </div>
+      <div class="lead-note-wrap">
+        <textarea class="lead-note" data-sub-id="${esc(sub.id)}" placeholder="Notitie…" rows="2">${esc(note)}</textarea>
+        <span class="status-saved-note" id="note-saved-${esc(sub.id)}">Opgeslagen</span>
       </div>
     </div>
     <div class="lead-status-wrap">
@@ -392,6 +428,11 @@ function renderAll() {
   } else {
     countEl.textContent = `${total} inzending${total !== 1 ? "en" : ""}`;
   }
+
+  // Wire note textareas
+  document.querySelectorAll(".lead-note").forEach(ta => {
+    ta.addEventListener("input", () => saveNote(ta.dataset.subId, ta.value));
+  });
 
   // Wire status selects
   document.querySelectorAll(".status-select").forEach(sel => {
