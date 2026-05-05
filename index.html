@@ -925,10 +925,8 @@ function barTable(rows, labelKey, valueKey, colA, colB) {
 function statLabel(siteName) {
   const nl  = nlOnly ? " (NL)" : "";
   const qr  = displayName(siteName ?? "").toLowerCase().includes("qr");
-  const vis = qr ? "Unieke scans"   : "Unieke bezoekers";
-  const pv  = qr ? "Alle scans"     : "Pageviews";
-  if (mode === "per-uur") return [`${pv} (gefilterd)${nl}`, `${vis} (gefilterd)${nl}`];
-  if (mode === "totaal")  return [`Totaal ${pv.toLowerCase()}${nl}`, `Totaal ${vis.toLowerCase()}${nl}`];
+  const vis = qr ? "Unieke scans" : "Unieke bezoekers";
+  const pv  = qr ? "Alle scans"   : "Pageviews";
   return [`${pv}${nl}`, `${vis}${nl}`];
 }
 
