@@ -164,6 +164,7 @@
     .stat-box:last-child { border-right: none; }
     .stat-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.15rem; }
     .stat-value { font-size: 1.55rem; font-weight: 700; }
+    .sub-label { color: var(--muted); font-size: 0.7rem; margin-top: 0.1rem; }
 
     .charts-row {
       display: grid;
@@ -958,6 +959,12 @@ function renderSite(site) {
         <div class="stat-label" id="lbl-pv-${site.id}">${esc(pvLbl)}</div>
         <div class="stat-value" id="val-pv-${site.id}">${fmtStat(totals.pv)}</div>
       </div>
+      ${siteForms.map(f => `
+      <div class="stat-box">
+        <div class="stat-label">Formulier: ${esc(f.name)}</div>
+        <div class="stat-value" id="form-val-${f.id}">${fmt(filteredFormTotal(f))}</div>
+        <div class="sub-label">verzendingen in periode</div>
+      </div>`).join("")}
     </div>
     <div class="country-chart-section">
       <div class="table-title">Unieke bezoekers</div>
@@ -971,6 +978,13 @@ function renderSite(site) {
         <p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>
       </div>
     </div>
+    ${siteForms.map(f => `
+    <div class="country-chart-section">
+      <div class="chart-title" id="form-chart-title-${f.id}">${mode === "per-uur" ? "Verzendingen per uur" : "Verzendingen per dag"}: ${esc(f.name)}</div>
+      <div class="chart-wrap chart-wrap--country" id="form-wrap-${f.id}">
+        ${(() => { const d = getFormChartData(f); return d.values.every(v => v === 0) ? `<p class="chart-note">Geen verzendingen in deze periode.</p>` : `<canvas id="form-chart-${f.id}"></canvas>`; })()}
+      </div>
+    </div>`).join("")}
     <div class="charts-row" id="box-pv-${site.id}" style="${showPv ? '' : 'display:none'}">
       <div class="chart-box" style="border-right:none">
         <div class="chart-title">Pageviews</div>
@@ -989,20 +1003,6 @@ function renderSite(site) {
         <div id="tbl-src-${site.id}">${barTable(getSources(site), "source", "referrals", "Bron", "Verwijzingen")}</div>
       </div>
     </div>
-    ${siteForms.map(f => `
-    <div class="forms-section">
-      <div class="form-stat">
-        <div class="stat-label">Formulier: ${esc(f.name)}</div>
-        <div class="stat-value" id="form-val-${f.id}">${fmt(filteredFormTotal(f))}</div>
-        <div class="sub-label">verzendingen in periode</div>
-      </div>
-      <div class="form-chart-box">
-        <div class="chart-title" id="form-chart-title-${f.id}">${mode === "per-uur" ? "Verzendingen per uur" : "Verzendingen per dag"}</div>
-        <div class="chart-wrap" id="form-wrap-${f.id}">
-          ${(() => { const d = getFormChartData(f); return d.values.every(v => v === 0) ? `<p class="chart-note">Geen verzendingen in deze periode.</p>` : `<canvas id="form-chart-${f.id}"></canvas>`; })()}
-        </div>
-      </div>
-    </div>`).join("")}
   `;
 
   if (!noChart) {
