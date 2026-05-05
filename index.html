@@ -584,6 +584,7 @@ const COUNTRY_COLORS = [
 
 let siteData         = [];
 let formsData        = [];
+let earliestDataPoint = null;
 let mode             = "per-uur";
 let fromDt           = null;
 let toDt             = null;
@@ -1477,12 +1478,14 @@ document.getElementById("base-reset").addEventListener("click", () => {
 });
 
 document.getElementById("base-show-testdata").addEventListener("click", () => {
-  const fromStr = "2026-05-04T20:00";
-  const toStr   = "2026-05-05T23:59";
+  const toStr = "2026-05-05T23:59";
+  const fromDtVal = earliestDataPoint ?? new Date("2026-05-04T20:00");
+  const pad = n => String(n).padStart(2, "0");
+  const fromStr = `${fromDtVal.getFullYear()}-${pad(fromDtVal.getMonth()+1)}-${pad(fromDtVal.getDate())}T${pad(fromDtVal.getHours())}:${pad(fromDtVal.getMinutes())}`;
   document.getElementById("base-from-dt").value = fromStr;
   document.getElementById("base-to-dt").value   = toStr;
   updateBasePickBtns();
-  baseFromDt = new Date(fromStr);
+  baseFromDt = fromDtVal;
   baseToDt   = new Date(toStr);
   updateAllCards();
 });
@@ -1613,6 +1616,18 @@ async function load() {
     const ai = SITE_ORDER.indexOf(a.name), bi = SITE_ORDER.indexOf(b.name);
     return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
   });
+
+  // Vroegste datapunt bepalen over alle sites
+  for (const site of siteData) {
+    for (const r of (site.hourly ?? [])) {
+      const t = new Date(r.hour);
+      if (!earliestDataPoint || t < earliestDataPoint) earliestDataPoint = t;
+    }
+    for (const r of (site.daily ?? [])) {
+      const t = new Date(r.date + "T00:00:00Z");
+      if (!earliestDataPoint || t < earliestDataPoint) earliestDataPoint = t;
+    }
+  }
 
   if (siteData.length === 0) {
     const zp = data.zero_point
