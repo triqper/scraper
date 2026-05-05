@@ -99,6 +99,7 @@
     }
     .btn-nl-toggle:hover  { background: var(--bg); color: var(--text); }
     .btn-nl-toggle.active { background: #1a7f37; color: #fff; border-color: #1a7f37; }
+    .ctrl-checkbox { display: flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; color: var(--muted); cursor: pointer; user-select: none; }
 
     .mode-group {
       display: flex;
@@ -320,6 +321,7 @@
   </div>
   <button class="btn-reset" id="reset-filter">Alles tonen</button>
   <button class="btn-nl-toggle" id="nl-toggle">Alleen NL</button>
+  <label class="ctrl-checkbox"><input type="checkbox" id="pv-toggle"> Toon pageviews</label>
   <div class="mode-group">
     <button class="mode-btn active" data-mode="per-dag">Per dag</button>
     <button class="mode-btn" data-mode="totaal">Totaal</button>
@@ -369,6 +371,7 @@ let mode             = "per-dag";
 let fromDt           = null;
 let toDt             = null;
 let nlOnly           = false;
+let showPv           = false;
 let chartRefs        = {};   // { siteId: { pv: Chart|null, vis: Chart|null } }
 let formChartRefs    = {};   // { formId: Chart|null }
 let miniChartRefs    = {};
@@ -951,7 +954,7 @@ function renderSite(site) {
         <div class="stat-label" id="lbl-vis-${site.id}">${esc(visLbl)}</div>
         <div class="stat-value" id="val-vis-${site.id}">${fmtStat(totals.vis)}</div>
       </div>
-      <div class="stat-box">
+      <div class="stat-box" id="stat-pv-${site.id}" style="${showPv ? '' : 'display:none'}">
         <div class="stat-label" id="lbl-pv-${site.id}">${esc(pvLbl)}</div>
         <div class="stat-value" id="val-pv-${site.id}">${fmtStat(totals.pv)}</div>
       </div>
@@ -969,7 +972,7 @@ function renderSite(site) {
           ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="vis-${site.id}"></canvas>`}
         </div>
       </div>
-      <div class="chart-box">
+      <div class="chart-box" id="box-pv-${site.id}" style="${showPv ? '' : 'display:none'}">
         <div class="chart-title">Pageviews</div>
         <div class="chart-wrap" id="wrap-pv-${site.id}">
           ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="pv-${site.id}"></canvas>`}
@@ -1169,6 +1172,13 @@ document.getElementById("nl-toggle").addEventListener("click", () => {
   nlOnly = !nlOnly;
   document.getElementById("nl-toggle").classList.toggle("active", nlOnly);
   updateAllCards();
+});
+
+document.getElementById("pv-toggle").addEventListener("change", e => {
+  showPv = e.target.checked;
+  document.querySelectorAll("[id^='box-pv-'], [id^='stat-pv-']").forEach(el => {
+    el.style.display = showPv ? "" : "none";
+  });
 });
 
 /* ─── Load ────────────────────────────────────────────────── */
