@@ -263,20 +263,15 @@ function getNote(subId) {
   return remoteNotes[subId] || localStorage.getItem(`lead_note_${subId}`) || "";
 }
 
-const noteTimers = {};
 async function saveNote(subId, note) {
   localStorage.setItem(`lead_note_${subId}`, note);
   remoteNotes[subId] = note;
-  // Debounce: wacht 800ms na laatste toetsaanslag
-  clearTimeout(noteTimers[subId]);
-  noteTimers[subId] = setTimeout(async () => {
-    await pushToJsonBin();
-    const note = document.getElementById(`note-saved-${subId}`);
-    if (note) {
-      note.classList.add("visible");
-      setTimeout(() => note.classList.remove("visible"), 1800);
-    }
-  }, 800);
+  await pushToJsonBin();
+  const el = document.getElementById(`note-saved-${subId}`);
+  if (el) {
+    el.classList.add("visible");
+    setTimeout(() => el.classList.remove("visible"), 1800);
+  }
 }
 
 async function loadRemoteStatuses() {
@@ -429,9 +424,9 @@ function renderAll() {
     countEl.textContent = `${total} inzending${total !== 1 ? "en" : ""}`;
   }
 
-  // Wire note textareas
+  // Wire note textareas — opslaan bij verlaten veld (blur)
   document.querySelectorAll(".lead-note").forEach(ta => {
-    ta.addEventListener("input", () => saveNote(ta.dataset.subId, ta.value));
+    ta.addEventListener("blur", () => saveNote(ta.dataset.subId, ta.value));
   });
 
   // Wire status selects
