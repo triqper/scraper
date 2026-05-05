@@ -935,6 +935,7 @@ function renderSite(site) {
   card.id = `card-${site.id}`;
 
   const siteForms = formsData.filter(f => f.site_name === site.name);
+  const isQR    = displayName(site.name).toLowerCase().includes("qr");
   const totals = getTotals(site);
   const { type, labels, pvData, visData } = getChartData(site);
   const [pvLbl, visLbl] = statLabel(site.name);
@@ -964,21 +965,15 @@ function renderSite(site) {
       </div>`).join("")}
     </div>
     <div class="country-chart-section">
-      <div class="table-title">Unieke bezoekers</div>
+      <div class="table-title">${isQR ? "Unieke scans" : "Unieke bezoekers"}</div>
       <div class="chart-wrap chart-wrap--country" id="wrap-vis-${site.id}">
         ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="vis-${site.id}"></canvas>`}
       </div>
     </div>
     <div class="country-chart-section">
-      <div class="table-title">Pageviews</div>
+      <div class="table-title">${isQR ? "Alle scans" : "Pageviews"}</div>
       <div class="chart-wrap chart-wrap--country" id="wrap-ctry-chart-${site.id}">
         <p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>
-      </div>
-    </div>
-    <div class="country-chart-section" id="box-pv-${site.id}">
-      <div class="table-title">Alle scans</div>
-      <div class="chart-wrap chart-wrap--country" id="wrap-pv-${site.id}">
-        ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="pv-${site.id}"></canvas>`}
       </div>
     </div>
     ${siteForms.map(f => `
@@ -1000,15 +995,13 @@ function renderSite(site) {
 
   if (!noChart) {
     requestAnimationFrame(() => {
-      const c1 = card.querySelector(`#pv-${site.id}`);
       const c2 = card.querySelector(`#vis-${site.id}`);
       chartRefs[site.id] = {
-        pv:  c1 ? makeChart(c1, type, labels, pvData,  COLORS.pageviews) : null,
-        vis: c2 ? makeChart(c2, type, labels, visData, COLORS.visitors)  : null,
+        vis: c2 ? makeChart(c2, type, labels, visData, COLORS.visitors) : null,
       };
     });
   } else {
-    chartRefs[site.id] = { pv: null, vis: null };
+    chartRefs[site.id] = { vis: null };
   }
 
   // Landen-over-tijd grafiek
@@ -1073,36 +1066,30 @@ function updateAllCards() {
       }
     }
 
-    // Pageviews / bezoekers grafieken: destroy old, recreate
+    // Bezoekers grafiek: destroy old, recreate
     const refs = chartRefs[site.id] ?? {};
-    if (refs.pv)  { refs.pv.destroy();  refs.pv  = null; }
     if (refs.vis) { refs.vis.destroy(); refs.vis = null; }
-    chartRefs[site.id] = { pv: null, vis: null };
+    chartRefs[site.id] = { vis: null };
 
     const hasHourly = (site.hourly ?? []).length > 0;
-    const { type, labels, pvData, visData } = getChartData(site);
+    const { type, labels, visData } = getChartData(site);
     const noChart = mode === "per-uur" ? (!hasHourly || labels.length === 0) : labels.length === 0;
     const noteMsg = mode === "per-uur" && !hasHourly
       ? "Nog geen uurdata — beschikbaar na de volgende scraper-run."
       : "Geen data in deze periode.";
 
-    const wPv  = el(`wrap-pv-${site.id}`);
     const wVis = el(`wrap-vis-${site.id}`);
 
     if (noChart) {
-      if (wPv)  wPv.innerHTML  = `<p class="chart-note">${noteMsg}</p>`;
       if (wVis) wVis.innerHTML = `<p class="chart-note">${noteMsg}</p>`;
       continue;
     }
 
-    if (wPv)  wPv.innerHTML  = `<canvas id="pv-${site.id}"></canvas>`;
     if (wVis) wVis.innerHTML = `<canvas id="vis-${site.id}"></canvas>`;
 
-    const c1 = el(`pv-${site.id}`);
     const c2 = el(`vis-${site.id}`);
     chartRefs[site.id] = {
-      pv:  c1 ? makeChart(c1, type, labels, pvData,  COLORS.pageviews) : null,
-      vis: c2 ? makeChart(c2, type, labels, visData, COLORS.visitors)  : null,
+      vis: c2 ? makeChart(c2, type, labels, visData, COLORS.visitors) : null,
     };
   }
 
