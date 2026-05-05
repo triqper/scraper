@@ -417,16 +417,26 @@
     <button class="settings-close" id="settings-close">✕</button>
   </div>
   <div class="settings-section">
-    <div class="settings-section-title">Statcards</div>
-    <div class="settings-row"><span>Bezoekers</span><label class="settings-toggle"><input type="checkbox" id="s-vis-card" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-section-title">Statcards — Landing</div>
+    <div class="settings-row"><span>Unieke bezoekers</span><label class="settings-toggle"><input type="checkbox" id="s-vis-card" checked><span class="settings-slider"></span></label></div>
     <div class="settings-row"><span>Pageviews</span><label class="settings-toggle"><input type="checkbox" id="s-pv-card" checked><span class="settings-slider"></span></label></div>
     <div class="settings-row"><span>Aanmeldingen</span><label class="settings-toggle"><input type="checkbox" id="s-form-card" checked><span class="settings-slider"></span></label></div>
   </div>
   <div class="settings-section">
-    <div class="settings-section-title">Grafieken</div>
-    <div class="settings-row"><span>Bezoekers</span><label class="settings-toggle"><input type="checkbox" id="s-vis-chart" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-section-title">Statcards — QR Flyer</div>
+    <div class="settings-row"><span>Unieke scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-vis-card" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Alle scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-pv-card" checked><span class="settings-slider"></span></label></div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Grafieken — Landing</div>
+    <div class="settings-row"><span>Unieke bezoekers</span><label class="settings-toggle"><input type="checkbox" id="s-vis-chart" checked><span class="settings-slider"></span></label></div>
     <div class="settings-row"><span>Pageviews</span><label class="settings-toggle"><input type="checkbox" id="s-ctry-chart" checked><span class="settings-slider"></span></label></div>
     <div class="settings-row"><span>Aanmeldingen</span><label class="settings-toggle"><input type="checkbox" id="s-form-chart" checked><span class="settings-slider"></span></label></div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Grafieken — QR Flyer</div>
+    <div class="settings-row"><span>Unieke scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-vis-chart" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Alle scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-ctry-chart" checked><span class="settings-slider"></span></label></div>
   </div>
   <div class="settings-section">
     <div class="settings-section-title">Tabellen</div>
@@ -487,21 +497,27 @@ let nlOnly           = false;
 
 const settings = {
   showVisCard: true, showPvCard: true, showFormCard: true,
+  showScansVisCard: true, showScansPvCard: true,
   showVisChart: true, showCtryChart: true, showFormChart: true,
+  showScansVisChart: true, showScansCtryChart: true,
   showTopLanden: true, showTopBronnen: true,
   chartType: "bar",
 };
 
 function applySettings() {
   const map = {
-    "vis-card":    settings.showVisCard,
-    "pv-card":     settings.showPvCard,
-    "form-card":   settings.showFormCard,
-    "vis-chart":   settings.showVisChart,
-    "ctry-chart":  settings.showCtryChart,
-    "form-chart":  settings.showFormChart,
-    "top-landen":  settings.showTopLanden,
-    "top-bronnen": settings.showTopBronnen,
+    "vis-card":          settings.showVisCard,
+    "pv-card":           settings.showPvCard,
+    "form-card":         settings.showFormCard,
+    "scans-vis-card":    settings.showScansVisCard,
+    "scans-pv-card":     settings.showScansPvCard,
+    "vis-chart":         settings.showVisChart,
+    "ctry-chart":        settings.showCtryChart,
+    "form-chart":        settings.showFormChart,
+    "scans-vis-chart":   settings.showScansVisChart,
+    "scans-ctry-chart":  settings.showScansCtryChart,
+    "top-landen":        settings.showTopLanden,
+    "top-bronnen":       settings.showTopBronnen,
   };
   for (const [key, visible] of Object.entries(map)) {
     document.querySelectorAll(`[data-setting="${key}"]`).forEach(el => {
@@ -1090,11 +1106,11 @@ function renderSite(site) {
       <h2>${esc(displayName(site.name))}</h2>
     </div>
     <div class="summary-row">
-      <div class="stat-box" data-setting="vis-card">
+      <div class="stat-box" data-setting="${isQR ? 'scans-vis-card' : 'vis-card'}">
         <div class="stat-label" id="lbl-vis-${site.id}">${esc(visLbl)}</div>
         <div class="stat-value" id="val-vis-${site.id}">${fmtStat(totals.vis)}</div>
       </div>
-      <div class="stat-box" data-setting="pv-card">
+      <div class="stat-box" data-setting="${isQR ? 'scans-pv-card' : 'pv-card'}">
         <div class="stat-label" id="lbl-pv-${site.id}">${esc(pvLbl)}</div>
         <div class="stat-value" id="val-pv-${site.id}">${fmtStat(totals.pv)}</div>
       </div>
@@ -1104,13 +1120,13 @@ function renderSite(site) {
         <div class="stat-value" id="form-val-${f.id}">${fmt(filteredFormTotal(f))}</div>
       </div>`).join("")}
     </div>
-    <div class="country-chart-section" data-setting="vis-chart">
+    <div class="country-chart-section" data-setting="${isQR ? 'scans-vis-chart' : 'vis-chart'}">
       <div class="table-title">${isQR ? "Unieke scans" : "Unieke bezoekers"}</div>
       <div class="chart-wrap chart-wrap--country" id="wrap-vis-${site.id}">
         ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="vis-${site.id}"></canvas>`}
       </div>
     </div>
-    <div class="country-chart-section" data-setting="ctry-chart">
+    <div class="country-chart-section" data-setting="${isQR ? 'scans-ctry-chart' : 'ctry-chart'}">
       <div class="table-title">${isQR ? "Alle scans" : "Pageviews"}</div>
       <div class="chart-wrap chart-wrap--country" id="wrap-ctry-chart-${site.id}">
         <p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>
@@ -1312,14 +1328,18 @@ document.getElementById("settings-close").addEventListener("click", closeSetting
 document.getElementById("settings-backdrop").addEventListener("click", closeSettings);
 
 const toggleMap = {
-  "s-vis-card":    v => { settings.showVisCard   = v; applySettings(); },
-  "s-pv-card":     v => { settings.showPvCard    = v; applySettings(); },
-  "s-form-card":   v => { settings.showFormCard  = v; applySettings(); },
-  "s-vis-chart":   v => { settings.showVisChart  = v; applySettings(); },
-  "s-ctry-chart":  v => { settings.showCtryChart = v; applySettings(); },
-  "s-form-chart":  v => { settings.showFormChart = v; applySettings(); },
-  "s-top-landen":  v => { settings.showTopLanden  = v; applySettings(); },
-  "s-top-bronnen": v => { settings.showTopBronnen = v; applySettings(); },
+  "s-vis-card":         v => { settings.showVisCard       = v; applySettings(); },
+  "s-pv-card":          v => { settings.showPvCard        = v; applySettings(); },
+  "s-form-card":        v => { settings.showFormCard      = v; applySettings(); },
+  "s-scans-vis-card":   v => { settings.showScansVisCard  = v; applySettings(); },
+  "s-scans-pv-card":    v => { settings.showScansPvCard   = v; applySettings(); },
+  "s-vis-chart":        v => { settings.showVisChart      = v; applySettings(); },
+  "s-ctry-chart":       v => { settings.showCtryChart     = v; applySettings(); },
+  "s-form-chart":       v => { settings.showFormChart     = v; applySettings(); },
+  "s-scans-vis-chart":  v => { settings.showScansVisChart  = v; applySettings(); },
+  "s-scans-ctry-chart": v => { settings.showScansCtryChart = v; applySettings(); },
+  "s-top-landen":       v => { settings.showTopLanden     = v; applySettings(); },
+  "s-top-bronnen":      v => { settings.showTopBronnen    = v; applySettings(); },
 };
 for (const [id, handler] of Object.entries(toggleMap)) {
   document.getElementById(id).addEventListener("change", e => handler(e.target.checked));
