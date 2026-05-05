@@ -545,20 +545,29 @@ function getChartData(site) {
     const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
 
     if (mode === "per-uur") {
-      const nlHour   = nlPerHour(site);
-      const allHours = generateHourlyRange(fromMs, toMs);
-      const pvData   = allHours.map(h => nlHour[h] ?? 0);
-      return { type: "bar", labels: allHours.map(h => shortHour(h)), pvData, visData: pvData };
+      const nlHour    = nlPerHour(site);
+      const nonNLHour = nonNLPerHour(site);
+      const visRows   = filteredHourly(site);
+      const visLookup = Object.fromEntries(visRows.map(r => [r.hour, r.visitors]));
+      const allHours  = generateHourlyRange(fromMs, toMs);
+      const pvData    = allHours.map(h => nlHour[h] ?? 0);
+      const visData   = allHours.map(h => Math.max(0, (visLookup[h] ?? 0) - (nonNLHour[h] ?? 0)));
+      return { type: "bar", labels: allHours.map(h => shortHour(h)), pvData, visData };
     }
-    const nlDay    = nlPerDay(site);
-    const allDates = generateDailyRange(fromDate, toDate);
+    const nlDay     = nlPerDay(site);
+    const nonNLDay  = nonNLPerDay(site);
+    const visRows   = filteredDaily(site);
+    const visLookup = Object.fromEntries(visRows.map(r => [r.date, r.visitors]));
+    const allDates  = generateDailyRange(fromDate, toDate);
     if (mode === "totaal") {
-      let s = 0;
-      const pvData = allDates.map(d => { s += nlDay[d] ?? 0; return s; });
-      return { type: "line", labels: allDates.map(d => shortDate(d)), pvData, visData: pvData };
+      let pvS = 0, visS = 0;
+      const pvData  = allDates.map(d => { pvS  += nlDay[d] ?? 0; return pvS; });
+      const visData = allDates.map(d => { visS += Math.max(0, (visLookup[d] ?? 0) - (nonNLDay[d] ?? 0)); return visS; });
+      return { type: "line", labels: allDates.map(d => shortDate(d)), pvData, visData };
     }
-    const pvData = allDates.map(d => nlDay[d] ?? 0);
-    return { type: "bar", labels: allDates.map(d => shortDate(d)), pvData, visData: pvData };
+    const pvData  = allDates.map(d => nlDay[d] ?? 0);
+    const visData = allDates.map(d => Math.max(0, (visLookup[d] ?? 0) - (nonNLDay[d] ?? 0)));
+    return { type: "bar", labels: allDates.map(d => shortDate(d)), pvData, visData };
   }
 
   if (mode === "per-uur") {
@@ -666,12 +675,41 @@ function nlPerDay(site) {
   return result;
 }
 
+function nonNLPerHour(site) {
+  const result = {};
+  for (const row of (site.country_hourly ?? [])) {
+    if (!inRange(viewHourKey(row.hour))) continue;
+    const key = viewHourKey(row.hour);
+    for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      if (!isNL(c)) result[key] = (result[key] ?? 0) + v;
+    }
+  }
+  return result;
+}
+
+function nonNLPerDay(site) {
+  const result = {};
+  for (const row of (site.country_hourly ?? [])) {
+    if (!inRange(viewHourKey(row.hour))) continue;
+    const day = viewHourKey(row.hour).slice(0, 10);
+    for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      if (!isNL(c)) result[day] = (result[day] ?? 0) + v;
+    }
+  }
+  return result;
+}
+
 function getTotals(site) {
   if (nlOnly) {
     const pv = Object.values(
       mode === "per-uur" ? nlPerHour(site) : nlPerDay(site)
     ).reduce((s, v) => s + v, 0);
-    return { pv, vis: pv }; // bezoekers per land niet beschikbaar; NL pageviews als benadering
+    const nonNL = Object.values(
+      mode === "per-uur" ? nonNLPerHour(site) : nonNLPerDay(site)
+    ).reduce((s, v) => s + v, 0);
+    const baseRows = mode === "per-uur" ? filteredHourly(site) : filteredDaily(site);
+    const baseVis  = baseRows.reduce((s, r) => s + r.visitors, 0);
+    return { pv, vis: Math.max(0, baseVis - nonNL) };
   }
   if (mode === "per-uur") {
     const rows = filteredHourly(site);
