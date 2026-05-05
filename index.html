@@ -924,9 +924,9 @@ function barTable(rows, labelKey, valueKey, colA, colB) {
 /* ─── Render / update ─────────────────────────────────────── */
 function statLabel() {
   const nl = nlOnly ? " (NL)" : "";
-  if (mode === "per-uur") return [`Pageviews (gefilterd)${nl}`, `Bezoekers (gefilterd)${nl}`];
-  if (mode === "totaal")  return [`Totaal pageviews${nl}`,      `Totaal bezoekers${nl}`];
-  return [`Pageviews${nl}`, `Bezoekers${nl}`];
+  if (mode === "per-uur") return [`Alle scans (gefilterd)${nl}`, `Unieke scans (gefilterd)${nl}`];
+  if (mode === "totaal")  return [`Totaal alle scans${nl}`,      `Totaal unieke scans${nl}`];
+  return [`Alle scans${nl}`, `Unieke scans${nl}`];
 }
 
 function fmtStat(n) { return n === null ? "—" : fmt(n); }
@@ -961,7 +961,7 @@ function renderSite(site) {
       </div>
       ${siteForms.map(f => `
       <div class="stat-box">
-        <div class="stat-label">Formulier: ${esc(f.name)}</div>
+        <div class="stat-label">Aanmeldingen</div>
         <div class="stat-value" id="form-val-${f.id}">${fmt(filteredFormTotal(f))}</div>
       </div>`).join("")}
     </div>
@@ -972,14 +972,14 @@ function renderSite(site) {
       </div>
     </div>
     <div class="country-chart-section">
-      <div class="table-title">Landen over tijd</div>
+      <div class="table-title">Pageviews</div>
       <div class="chart-wrap chart-wrap--country" id="wrap-ctry-chart-${site.id}">
         <p class="chart-note">Nog geen landdata — beschikbaar na de volgende scraper-run.</p>
       </div>
     </div>
     ${siteForms.map(f => `
     <div class="country-chart-section">
-      <div class="chart-title" id="form-chart-title-${f.id}">${mode === "per-uur" ? "Verzendingen per uur" : "Verzendingen per dag"}: ${esc(f.name)}</div>
+      <div class="chart-title" id="form-chart-title-${f.id}">Aanmeldingen</div>
       <div class="chart-wrap chart-wrap--country" id="form-wrap-${f.id}">
         ${(() => { const d = getFormChartData(f); return d.values.every(v => v === 0) ? `<p class="chart-note">Geen verzendingen in deze periode.</p>` : `<canvas id="form-chart-${f.id}"></canvas>`; })()}
       </div>
@@ -1118,7 +1118,7 @@ function updateAllCards() {
     const wrapEl  = el(`form-wrap-${f.id}`);
     const titleEl = el(`form-chart-title-${f.id}`);
     if (valEl)   valEl.textContent   = fmt(filteredFormTotal(f));
-    if (titleEl) titleEl.textContent = mode === "per-uur" ? "Verzendingen per uur" : "Verzendingen per dag";
+    if (titleEl) titleEl.textContent = "Aanmeldingen";
     if (!wrapEl) continue;
 
     if (formChartRefs[f.id]) { formChartRefs[f.id].destroy(); formChartRefs[f.id] = null; }
