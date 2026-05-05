@@ -416,11 +416,21 @@ function filteredDaily(site) {
   );
 }
 
+// Scraper detecteert pageviews ~1 uur na de echte view; verschuif terug naar view-tijdstip
+function viewHourKey(runHour) {
+  const t = new Date(new Date(runHour).getTime() - 3600000);
+  const y  = t.getUTCFullYear();
+  const mo = String(t.getUTCMonth() + 1).padStart(2, "0");
+  const d  = String(t.getUTCDate()).padStart(2, "0");
+  const h  = String(t.getUTCHours()).padStart(2, "0");
+  return `${y}-${mo}-${d}T${h}:00:00+00:00`;
+}
+
 // Aggregate country_hourly / source_hourly within the selected range
 function aggregateHourlyDeltas(rows) {
   const agg = {};
   for (const row of rows) {
-    if (!inRange(row.hour)) continue;
+    if (!inRange(viewHourKey(row.hour))) continue;
     for (const [k, v] of Object.entries(row.deltas ?? {})) {
       agg[k] = (agg[k] ?? 0) + v;
     }
@@ -450,7 +460,7 @@ function getSources(site) {
 }
 
 function getCountryChartData(site) {
-  const hourly = (site.country_hourly ?? []).filter(r => inRange(r.hour));
+  const hourly = (site.country_hourly ?? []).filter(r => inRange(viewHourKey(r.hour)));
   if (hourly.length === 0) return null;
 
   // Top landen op basis van totaal in gefilterde periode (alleen NL als nlOnly)
@@ -465,10 +475,11 @@ function getCountryChartData(site) {
     .sort((a, b) => b[1] - a[1]).slice(0, 5).map(([c]) => c);
   if (topCountries.length === 0) return null;
 
-  // Per tijdseenheid aggregeren
+  // Per tijdseenheid aggregeren op view-tijdstip
   const buckets = {};
   for (const row of hourly) {
-    const key = mode === "per-uur" ? row.hour : row.hour.slice(0, 10);
+    const vh  = viewHourKey(row.hour);
+    const key = mode === "per-uur" ? vh : vh.slice(0, 10);
     if (!buckets[key]) buckets[key] = {};
     for (const [c, v] of Object.entries(row.deltas ?? {})) {
       buckets[key][c] = (buckets[key][c] ?? 0) + v;
@@ -477,11 +488,12 @@ function getCountryChartData(site) {
 
   let allKeys;
   if (mode === "per-uur") {
-    const fromMs = fromDt ? fromDt.getTime() : new Date(hourly[0].hour).getTime();
+    const fromMs = fromDt ? fromDt.getTime() : new Date(viewHourKey(hourly[0].hour)).getTime();
     const toMs   = toDt   ? toDt.getTime()   : Date.now();
     allKeys = generateHourlyRange(fromMs, toMs);
   } else {
-    const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : hourly[0].hour.slice(0, 10);
+    const firstVh = viewHourKey(hourly[0].hour);
+    const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : firstVh.slice(0, 10);
     const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
     allKeys = generateDailyRange(fromDate, toDate);
   }
@@ -630,20 +642,10 @@ function isNL(country) {
   return c === "nl" || c === "netherlands" || c === "nederland";
 }
 
-function viewHourKey(runHour) {
-  // Scraper detecteert pageviews ~1 uur na de echte view; verschuif terug
-  const t = new Date(new Date(runHour).getTime() - 3600000);
-  const y  = t.getUTCFullYear();
-  const mo = String(t.getUTCMonth() + 1).padStart(2, "0");
-  const d  = String(t.getUTCDate()).padStart(2, "0");
-  const h  = String(t.getUTCHours()).padStart(2, "0");
-  return `${y}-${mo}-${d}T${h}:00:00+00:00`;
-}
-
 function nlPerHour(site) {
   const result = {};
   for (const row of (site.country_hourly ?? [])) {
-    if (!inRange(row.hour)) continue;
+    if (!inRange(viewHourKey(row.hour))) continue;
     const key = viewHourKey(row.hour);
     for (const [c, v] of Object.entries(row.deltas ?? {})) {
       if (isNL(c)) result[key] = (result[key] ?? 0) + v;
@@ -655,7 +657,7 @@ function nlPerHour(site) {
 function nlPerDay(site) {
   const result = {};
   for (const row of (site.country_hourly ?? [])) {
-    if (!inRange(row.hour)) continue;
+    if (!inRange(viewHourKey(row.hour))) continue;
     const day = viewHourKey(row.hour).slice(0, 10);
     for (const [c, v] of Object.entries(row.deltas ?? {})) {
       if (isNL(c)) result[day] = (result[day] ?? 0) + v;
