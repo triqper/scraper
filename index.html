@@ -101,6 +101,7 @@
       font-size: 0.88rem;
       padding: 0.32rem 0.85rem;
       min-width: 7rem;
+      line-height: 1.4;
       border: 1px solid var(--border);
       border-radius: var(--radius);
       background: var(--surface);
@@ -122,6 +123,7 @@
       font-size: 0.88rem;
       padding: 0.32rem 0.79rem;
       min-width: 4.5rem;
+      line-height: 1.4;
       text-align: center;
       border: none;
       border-right: 1px solid var(--border);
@@ -427,7 +429,7 @@
     .settings-radio-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .btn-settings {
       font-size: 0.88rem; padding: 0.32rem 0.74rem;
-      min-width: 7rem;
+      min-width: 7rem; line-height: 1.4;
       border: 1px solid var(--border); border-radius: var(--radius);
       background: var(--surface); color: var(--muted);
       cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 0.35rem;
@@ -494,6 +496,13 @@
   <div class="settings-header">
     <span>Instellingen</span>
     <button class="settings-close" id="settings-close">✕</button>
+  </div>
+  <div class="settings-section">
+    <div class="settings-row" style="margin-bottom:0.4rem">
+      <span style="font-weight:600">Alles tonen</span>
+      <label class="settings-toggle"><input type="checkbox" id="s-alles-tonen"><span class="settings-slider"></span></label>
+    </div>
+    <button class="settings-date-reset" id="s-default-layout" type="button" style="width:100%">Default layout</button>
   </div>
   <div class="settings-section">
     <div class="settings-section-title">Statcards — Landing</div>
@@ -1235,7 +1244,7 @@ function renderSite(site) {
       ${siteForms.map(f => `
       <div class="stat-box" data-setting="form-card">
         <div class="stat-label">Aanmeldingen</div>
-        <div class="stat-value" id="form-val-${f.id}">${fmt(filteredFormTotal(f))}</div>
+        <div class="stat-value" id="form-val-${f.id}">${fmt(filteredFormTotal(f))} <a href="./leads.html" style="font-size:0.7rem;font-weight:400;color:var(--accent);text-decoration:none;vertical-align:middle">Bekijk</a></div>
       </div>`).join("")}
     </div>
     <div class="country-chart-section" data-setting="${isQR ? 'scans-vis-chart' : 'vis-chart'}">
@@ -1551,6 +1560,38 @@ const toggleMap = {
 for (const [id, handler] of Object.entries(toggleMap)) {
   document.getElementById(id).addEventListener("change", e => handler(e.target.checked));
 }
+
+// Default layout — reset alle toggles naar standaardwaarden
+const DEFAULT_SETTINGS = {
+  showVisCard: true, showPvCard: true, showFormCard: true,
+  showScansVisCard: true, showScansPvCard: true,
+  showVisChart: false, showCtryChart: true, showFormChart: false,
+  showScansVisChart: false, showScansCtryChart: true,
+  showTopLanden: false, showTopBronnen: false,
+};
+document.getElementById("s-default-layout").addEventListener("click", () => {
+  Object.assign(settings, DEFAULT_SETTINGS);
+  for (const [id, key] of [
+    ["s-vis-card","showVisCard"],["s-pv-card","showPvCard"],["s-form-card","showFormCard"],
+    ["s-scans-vis-card","showScansVisCard"],["s-scans-pv-card","showScansPvCard"],
+    ["s-vis-chart","showVisChart"],["s-ctry-chart","showCtryChart"],["s-form-chart","showFormChart"],
+    ["s-scans-vis-chart","showScansVisChart"],["s-scans-ctry-chart","showScansCtryChart"],
+    ["s-top-landen","showTopLanden"],["s-top-bronnen","showTopBronnen"],
+  ]) {
+    document.getElementById(id).checked = settings[key];
+  }
+  document.getElementById("s-alles-tonen").checked = false;
+  applySettings();
+});
+
+// Alles tonen — zet alle toggles aan
+document.getElementById("s-alles-tonen").addEventListener("change", e => {
+  if (!e.target.checked) return;
+  for (const id of Object.keys(toggleMap)) {
+    document.getElementById(id).checked = true;
+    toggleMap[id](true);
+  }
+});
 
 document.querySelectorAll("[data-chart-type]").forEach(btn => {
   btn.addEventListener("click", () => {
