@@ -948,12 +948,12 @@ function renderSite(site) {
     </div>
     <div class="summary-row">
       <div class="stat-box">
-        <div class="stat-label" id="lbl-pv-${site.id}">${esc(pvLbl)}</div>
-        <div class="stat-value" id="val-pv-${site.id}">${fmtStat(totals.pv)}</div>
-      </div>
-      <div class="stat-box">
         <div class="stat-label" id="lbl-vis-${site.id}">${esc(visLbl)}</div>
         <div class="stat-value" id="val-vis-${site.id}">${fmtStat(totals.vis)}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label" id="lbl-pv-${site.id}">${esc(pvLbl)}</div>
+        <div class="stat-value" id="val-pv-${site.id}">${fmtStat(totals.pv)}</div>
       </div>
     </div>
     <div class="country-chart-section">
@@ -964,15 +964,15 @@ function renderSite(site) {
     </div>
     <div class="charts-row">
       <div class="chart-box">
-        <div class="chart-title">Pageviews</div>
-        <div class="chart-wrap" id="wrap-pv-${site.id}">
-          ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="pv-${site.id}"></canvas>`}
-        </div>
-      </div>
-      <div class="chart-box">
         <div class="chart-title">Unieke bezoekers</div>
         <div class="chart-wrap" id="wrap-vis-${site.id}">
           ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="vis-${site.id}"></canvas>`}
+        </div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Pageviews</div>
+        <div class="chart-wrap" id="wrap-pv-${site.id}">
+          ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="pv-${site.id}"></canvas>`}
         </div>
       </div>
     </div>
