@@ -188,6 +188,16 @@
 </main>
 
 <script>
+/* ── JSONBin configuratie ───────────────────────────────────────
+   Vul hieronder jouw JSONBin gegevens in:
+   1. Maak gratis account op https://jsonbin.io
+   2. Maak een API Key aan (Dashboard → API Keys)
+   3. Maak een nieuwe Bin aan met inhoud {} en kopieer het Bin ID
+──────────────────────────────────────────────────────────────── */
+const JSONBIN_KEY    = "JOUW_API_KEY_HIER";
+const JSONBIN_BIN_ID = "JOUW_BIN_ID_HIER";
+const JSONBIN_URL    = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+
 const SITE_LABELS = {
   "woonstroom-interesse-landing":    "Interesse Landing",
   "woonstroom-aanbod-landing":       "Aanbod Landing",
@@ -203,11 +213,63 @@ const STATUSES = [
   "Benaderd 2e keer", "Benaderd 3e keer", "Geen gehoor",
 ];
 
-let allForms  = [];
+let allForms   = [];
 let filterFrom = null;
 let filterTo   = null;
+let remoteStatuses = {};  // { subId: status } — geladen uit JSONBin
 
-/* ── Helpers ── */
+const JSONBIN_CONFIGURED = JSONBIN_KEY !== "JOUW_API_KEY_HIER" && JSONBIN_BIN_ID !== "JOUW_BIN_ID_HIER";
+
+/* ── Status opslag ── */
+function getStatus(subId) {
+  // Prioriteit: remote > localStorage > "Todo"
+  return remoteStatuses[subId]
+    || localStorage.getItem(`lead_status_${subId}`)
+    || "Todo";
+}
+
+async function saveStatus(subId, status) {
+  // Altijd lokaal cachen
+  localStorage.setItem(`lead_status_${subId}`, status);
+  remoteStatuses[subId] = status;
+
+  if (!JSONBIN_CONFIGURED) return;
+
+  try {
+    await fetch(JSONBIN_URL, {
+      method:  "PUT",
+      headers: { "Content-Type": "application/json", "X-Master-Key": JSONBIN_KEY },
+      body:    JSON.stringify(remoteStatuses),
+    });
+  } catch (e) {
+    console.warn("JSONBin opslaan mislukt:", e);
+  }
+}
+
+async function loadRemoteStatuses() {
+  if (!JSONBIN_CONFIGURED) return;
+  try {
+    const r = await fetch(`${JSONBIN_URL}/latest`, {
+      headers: { "X-Master-Key": JSONBIN_KEY },
+    });
+    if (!r.ok) return;
+    const data = await r.json();
+    remoteStatuses = data.record || {};
+    // Sync naar localStorage als cache
+    for (const [id, st] of Object.entries(remoteStatuses)) {
+      localStorage.setItem(`lead_status_${id}`, st);
+    }
+  } catch (e) {
+    console.warn("JSONBin laden mislukt, localStorage als fallback:", e);
+    // Haal alles op uit localStorage als fallback
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k?.startsWith("lead_status_")) {
+        remoteStatuses[k.replace("lead_status_", "")] = localStorage.getItem(k);
+      }
+    }
+  }
+}
 function esc(s) {
   return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
@@ -333,15 +395,17 @@ function renderAll() {
 
   // Wire status selects
   document.querySelectorAll(".status-select").forEach(sel => {
-    sel.addEventListener("change", () => {
+    sel.addEventListener("change", async () => {
       const subId  = sel.dataset.subId;
       const status = sel.value;
-      saveStatus(subId, status);
       sel.dataset.status = status;
       const note = document.getElementById(`saved-${subId}`);
+      if (note) note.textContent = "Opslaan…";
+      await saveStatus(subId, status);
       if (note) {
+        note.textContent = JSONBIN_CONFIGURED ? "Opgeslagen" : "Lokaal opgeslagen";
         note.classList.add("visible");
-        setTimeout(() => note.classList.remove("visible"), 1500);
+        setTimeout(() => note.classList.remove("visible"), 1800);
       }
     });
   });
@@ -389,18 +453,29 @@ document.getElementById("reset-filter").addEventListener("click", () => {
 /* ── Load data ── */
 async function load() {
   const main = document.getElementById("main");
-  let data;
-  try {
-    const r = await fetch(`./data/leads.json?v=${Date.now()}`, { cache: "no-store" });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    data = await r.json();
-  } catch (e) {
-    main.innerHTML = `<p style="color:var(--muted)">Kon leads.json niet laden: ${esc(String(e))}</p>`;
+
+  // Laad statuses en leads parallel
+  const [leadsResult] = await Promise.all([
+    fetch(`./data/leads.json?v=${Date.now()}`, { cache: "no-store" })
+      .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
+      .catch(e => ({ error: String(e) })),
+    loadRemoteStatuses(),
+  ]);
+
+  if (leadsResult.error) {
+    main.innerHTML = `<p style="color:var(--muted)">Kon leads.json niet laden: ${esc(leadsResult.error)}</p>`;
     return;
   }
 
-  allForms = data.forms || [];
+  allForms = leadsResult.forms || [];
   renderAll();
+
+  if (!JSONBIN_CONFIGURED) {
+    const warn = document.createElement("div");
+    warn.style.cssText = "background:#fff8c5;border:1px solid #d4a72c;border-radius:6px;padding:0.6rem 1rem;font-size:0.82rem;color:#9a6700;margin-bottom:-1rem";
+    warn.innerHTML = `<strong>Let op:</strong> JSONBin is nog niet geconfigureerd. Statuswijzigingen worden alleen lokaal opgeslagen en zijn niet zichtbaar op andere devices. Vul <code>JSONBIN_KEY</code> en <code>JSONBIN_BIN_ID</code> in bovenaan het script in leads.html.`;
+    main.prepend(warn);
+  }
 }
 
 load();
