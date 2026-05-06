@@ -11,6 +11,7 @@ Vereiste omgevingsvariabele: NETLIFY_TOKEN
 
 import os
 import json
+import re
 import sys
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
@@ -517,6 +518,22 @@ def update_forms() -> None:
 # ---------------------------------------------------------------------------
 
 
+def _last_name(naam: str | None) -> str | None:
+    """Houd alleen het laatste woord van de naam over (achternaam)."""
+    if not naam:
+        return None
+    parts = naam.strip().split()
+    return parts[-1] if parts else None
+
+
+def _street_only(adres: str | None) -> str | None:
+    """Verwijder het huisnummer van een adres (incl. toevoeging), bijv. 'Kerkstraat 12A' → 'Kerkstraat'."""
+    if not adres:
+        return None
+    cleaned = re.sub(r'\s+\d[\w\-]*\s*$', '', adres.strip())
+    return cleaned.strip() or None
+
+
 def _field(data: dict, *keys: str) -> str | None:
     """Zoek een veld op in form-data, case-insensitief en zonder koppeltekens/spaties."""
     for k in keys:
@@ -582,14 +599,16 @@ def update_leads() -> None:
                     raw_data = sub.get("data") or sub.get("ordered_human_fields") or {}
                     if isinstance(raw_data, list):
                         raw_data = {item["name"]: item["value"] for item in raw_data if "name" in item}
-                    # Sla alleen naam en contactvoorkeur op — gevoelige velden blijven in Netlify
-                    naam     = _field(raw_data, "naam", "name", "voornaam")
-                    contact  = _field(raw_data, "contactvoorkeur", "contact", "voorkeur", "contactmethode")
+                    # Sla naam (alleen achternaam), adres (alleen straatnaam) en contactvoorkeur op
+                    naam    = _last_name(_field(raw_data, "naam", "name", "voornaam"))
+                    adres   = _street_only(_field(raw_data, "adres", "address", "straat", "straatnaam"))
+                    contact = _field(raw_data, "contactvoorkeur", "contact", "voorkeur", "contactmethode")
                     entry["submissions"].append({
-                        "id":         sub_id,
-                        "created_at": sub.get("created_at", ""),
-                        "number":     sub.get("number", 0),
-                        "naam":       naam,
+                        "id":              sub_id,
+                        "created_at":      sub.get("created_at", ""),
+                        "number":          sub.get("number", 0),
+                        "naam":            naam,
+                        "adres":           adres,
                         "contactvoorkeur": contact,
                     })
                     new_count += 1

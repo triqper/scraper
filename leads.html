@@ -449,7 +449,8 @@ function fieldFromData(data, ...keys) {
 
 function renderCard(sub, netlifyUrl) {
   // Ondersteun zowel nieuw formaat (sub.naam) als oud formaat (sub.data.naam)
-  const naam    = sub.naam    || fieldFromData(sub.data, "naam", "name", "voornaam")    || null;
+  const naam    = sub.naam    || fieldFromData(sub.data, "naam", "name", "voornaam")             || null;
+  const adres   = sub.adres   || fieldFromData(sub.data, "adres", "address", "straat", "straatnaam") || null;
   const contact = sub.contactvoorkeur || fieldFromData(sub.data, "contactvoorkeur", "contact", "voorkeur") || null;
   const current = getStatus(sub.id);
   const options = STATUSES.map(s =>
@@ -465,6 +466,7 @@ function renderCard(sub, netlifyUrl) {
       </div>
       <div class="lead-fields">
         ${renderField("Naam", naam)}
+        ${renderField("Adres", adres)}
         ${renderField("Contactvoorkeur", contact)}
       </div>
       <div class="lead-note-wrap">
