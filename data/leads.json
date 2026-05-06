@@ -58,6 +58,30 @@
             "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36",
             "referrer": "https://woonstroom-interesse-landing.netlify.app/"
           }
+        },
+        {
+          "id": "69fad6ca2bb15a07bfad4001",
+          "created_at": "2026-05-06T05:51:06.965Z",
+          "number": 7,
+          "naam": "Kok",
+          "adres": "Middel***",
+          "contactvoorkeur": "mail"
+        },
+        {
+          "id": "69fad69ae4a44a0b8ea6f758",
+          "created_at": "2026-05-06T05:50:18.930Z",
+          "number": 6,
+          "naam": "Worst",
+          "adres": "Middel***",
+          "contactvoorkeur": "whatsapp"
+        },
+        {
+          "id": "69fad67c72c19dfd2a20ad7f",
+          "created_at": "2026-05-06T05:49:48.812Z",
+          "number": 5,
+          "naam": "Ben",
+          "adres": "Apeldo***",
+          "contactvoorkeur": "bel"
         }
       ],
       "netlify_url": "https://app.netlify.com/sites/woonstroom-interesse-landing/forms/69f229ebc935e500086b5c26"
@@ -189,10 +213,18 @@
           "number": 3,
           "naam": "Test",
           "contactvoorkeur": "whatsapp"
+        },
+        {
+          "id": "69faceef67a222fbbd65440a",
+          "created_at": "2026-05-06T05:17:35.858Z",
+          "number": 4,
+          "naam": "Naam",
+          "adres": "Apeldo***",
+          "contactvoorkeur": "mail"
         }
       ],
       "netlify_url": "https://app.netlify.com/sites/woonstroom-aanbod-landing/forms/69f22588ced3d00008729374"
     }
   ],
-  "last_updated": "2026-05-06T05:00:40.221735+00:00"
+  "last_updated": "2026-05-06T06:00:42.301789+00:00"
 }
