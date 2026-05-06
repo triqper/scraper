@@ -450,7 +450,10 @@ function fieldFromData(data, ...keys) {
 function renderCard(sub, netlifyUrl) {
   // Ondersteun zowel nieuw formaat (sub.naam) als oud formaat (sub.data.naam)
   const naam    = sub.naam    || fieldFromData(sub.data, "naam", "name", "voornaam")             || null;
-  const adres   = sub.adres   || fieldFromData(sub.data, "adres", "address", "straat", "straatnaam") || null;
+  const rawAdres = sub.adres || fieldFromData(sub.data, "adres", "address", "straat", "straatnaam") || null;
+  const adres   = rawAdres && !rawAdres.endsWith("***") && rawAdres.length > 6
+    ? rawAdres.slice(0, 6) + "***"
+    : rawAdres;
   const contact = sub.contactvoorkeur || fieldFromData(sub.data, "contactvoorkeur", "contact", "voorkeur") || null;
   const current = getStatus(sub.id);
   const options = STATUSES.map(s =>

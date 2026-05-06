@@ -527,11 +527,13 @@ def _last_name(naam: str | None) -> str | None:
 
 
 def _street_only(adres: str | None) -> str | None:
-    """Verwijder het huisnummer van een adres (incl. toevoeging), bijv. 'Kerkstraat 12A' → 'Kerkstraat'."""
+    """Verwijder huisnummer, houd eerste 6 tekens over en mask de rest met ***."""
     if not adres:
         return None
-    cleaned = re.sub(r'\s+\d[\w\-]*\s*$', '', adres.strip())
-    return cleaned.strip() or None
+    cleaned = re.sub(r'\s+\d[\w\-]*\s*$', '', adres.strip()).strip()
+    if not cleaned:
+        return None
+    return cleaned[:6] + "***" if len(cleaned) > 6 else cleaned
 
 
 def _field(data: dict, *keys: str) -> str | None:
