@@ -219,6 +219,36 @@
     }
     .btn-settings:hover { background: var(--bg); color: var(--text); }
 
+    /* ── Wachtwoordscherm ── */
+    #pw-overlay {
+      position: fixed; inset: 0; z-index: 999;
+      background: #000;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #pw-box {
+      background: #111; border: 1px solid #333; border-radius: 10px;
+      padding: 2rem 2.25rem; width: 100%; max-width: 340px;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    #pw-box h2 { color: #fff; font-size: 1.1rem; font-weight: 600; }
+    #pw-box p  { color: #8b949e; font-size: 0.82rem; margin-top: -0.4rem; }
+    #pw-input {
+      width: 100%; padding: 0.55rem 0.75rem; font-size: 0.95rem;
+      background: #1a1a1a; border: 1px solid #444; border-radius: 6px;
+      color: #fff; font-family: inherit; outline: none;
+    }
+    #pw-input:focus { border-color: #0969da; }
+    #pw-submit {
+      width: 100%; padding: 0.55rem; font-size: 0.9rem; font-weight: 600;
+      background: #0969da; color: #fff; border: none; border-radius: 6px;
+      cursor: pointer; font-family: inherit;
+    }
+    #pw-submit:hover { background: #0757b8; }
+    #pw-error {
+      font-size: 0.8rem; color: #cf222e; text-align: center;
+      display: none;
+    }
+
     @media (max-width: 600px) {
       header h1 { font-size: 1.15rem; }
       .lead-card { grid-template-columns: 1fr; }
@@ -236,6 +266,16 @@
   </style>
 </head>
 <body>
+
+<div id="pw-overlay">
+  <div id="pw-box">
+    <h2>WoonConnect Leads</h2>
+    <p>Voer het wachtwoord in om verder te gaan.</p>
+    <input type="password" id="pw-input" placeholder="Wachtwoord" autocomplete="current-password" />
+    <button id="pw-submit" type="button">Inloggen</button>
+    <span id="pw-error">Onjuist wachtwoord — probeer opnieuw.</span>
+  </div>
+</div>
 
 <header>
   <h1>WoonConnect Leads</h1>
@@ -288,6 +328,46 @@
 </main>
 
 <script>
+/* ── Wachtwoordbeveiliging ──────────────────────────────────────
+   Verander het wachtwoord in drie stappen:
+   1. Open de browserconsole en run:
+      crypto.subtle.digest('SHA-256', new TextEncoder().encode('NIEUW_WACHTWOORD'))
+        .then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))
+   2. Kopieer de hash die verschijnt
+   3. Vervang de waarde van PASSWORD_HASH hieronder
+──────────────────────────────────────────────────────────────── */
+const PASSWORD_HASH = "14962a09cc3c6d3465f6586625010e2ee7922b031000153042029d00a08cc874";
+const SESSION_KEY   = "leads_auth";
+
+async function hashPassword(pw) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw));
+  return [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2, "0")).join("");
+}
+
+async function tryLogin() {
+  const pw   = document.getElementById("pw-input").value;
+  const hash = await hashPassword(pw);
+  if (hash === PASSWORD_HASH) {
+    sessionStorage.setItem(SESSION_KEY, PASSWORD_HASH);
+    document.getElementById("pw-overlay").style.display = "none";
+    load();
+  } else {
+    document.getElementById("pw-error").style.display = "block";
+    document.getElementById("pw-input").select();
+  }
+}
+
+document.getElementById("pw-submit").addEventListener("click", tryLogin);
+document.getElementById("pw-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") tryLogin();
+});
+
+// Check of al ingelogd in deze sessie
+if (sessionStorage.getItem(SESSION_KEY) === PASSWORD_HASH) {
+  document.getElementById("pw-overlay").style.display = "none";
+  load();
+}
+
 /* ── JSONBin configuratie ───────────────────────────────────────
    Vul hieronder jouw JSONBin gegevens in:
    1. Maak gratis account op https://jsonbin.io
@@ -728,7 +808,6 @@ async function load() {
   });
 }
 
-load();
 </script>
 </body>
 </html>
