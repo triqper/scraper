@@ -1263,7 +1263,7 @@ function renderSite(site) {
     <div class="country-chart-section" data-setting="form-chart">
       <div class="chart-title" id="form-chart-title-${f.id}">Aanmeldingen</div>
       <div class="chart-wrap chart-wrap--country" id="form-wrap-${f.id}">
-        ${(() => { const d = getFormChartData(f); return d.values.every(v => v === 0) ? `<p class="chart-note">Geen verzendingen in deze periode.</p>` : `<canvas id="form-chart-${f.id}"></canvas>`; })()}
+        ${(() => { const d = getFormChartData(f); return `<canvas id="form-chart-${f.id}"></canvas>`; })()}
       </div>
     </div>`).join("")}
     <div class="country-chart-section" data-setting="top-landen">
@@ -1385,10 +1385,6 @@ function updateAllCards() {
     if (formChartRefs[f.id]) { formChartRefs[f.id].destroy(); formChartRefs[f.id] = null; }
 
     const { labels, values } = getFormChartData(f);
-    if (values.every(v => v === 0)) {
-      wrapEl.innerHTML = `<p class="chart-note">Geen verzendingen in deze periode.</p>`;
-      continue;
-    }
     wrapEl.innerHTML = `<canvas id="form-chart-${f.id}"></canvas>`;
     const canvas = el(`form-chart-${f.id}`);
     if (canvas) {

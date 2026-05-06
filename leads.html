@@ -98,40 +98,39 @@
     }
     .group-count { font-size: 0.82rem; font-weight: 400; color: var(--muted); margin-left: 0.5rem; }
 
-    .leads-list { display: flex; flex-direction: column; gap: 0; }
+    .empty-note { color: var(--muted); font-size: 0.88rem; padding: 0.75rem 0; font-style: italic; }
 
-    .empty-note { color: var(--muted); font-size: 0.9rem; padding: 0.75rem 0; }
-
-    /* ── Lead card ── */
-    .lead-card {
+    /* ── Leads tabel ── */
+    .table-wrap { overflow-x: auto; }
+    .leads-table {
+      width: 100%; border-collapse: collapse; font-size: 0.82rem;
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem 1.25rem;
-      margin-bottom: 0.6rem;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 0.5rem 1rem;
-      align-items: start;
     }
-    .lead-meta { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem; }
-    .lead-fields {
-      display: grid; grid-template-columns: auto 1fr;
-      gap: 0.2rem 0.75rem; align-items: baseline;
+    .leads-table thead th {
+      text-align: left; padding: 0.45rem 0.75rem;
+      font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--muted);
+      background: var(--bg); border-bottom: 2px solid var(--border);
+      white-space: nowrap;
     }
-    .lead-field-label {
-      font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.05em; color: var(--muted); white-space: nowrap;
+    .leads-table tbody tr { border-bottom: 1px solid var(--border); }
+    .leads-table tbody tr:hover { background: #f5f8ff; }
+    .leads-table td {
+      padding: 0.35rem 0.75rem; vertical-align: middle; white-space: nowrap;
     }
-    .lead-field-value { font-size: 0.88rem; color: var(--text); word-break: break-word; }
-    .lead-field-value.empty { color: var(--muted); font-style: italic; }
+    .col-num    { color: var(--muted); font-size: 0.75rem; width: 2.5rem; }
+    .col-date   { color: var(--muted); font-size: 0.78rem; width: 8rem; }
+    .col-naam   { font-weight: 500; }
+    .col-adres  { color: var(--muted); }
+    .col-contact{ }
+    .col-status { width: 11rem; }
+    .col-note   { width: 16rem; }
+    .col-link   { width: 1.5rem; text-align: center; }
+    .col-empty  { color: var(--muted); font-style: italic; }
 
     /* ── Status ── */
-    .lead-status-wrap {
-      display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; min-width: 9rem;
-    }
     .status-select {
-      font-size: 0.82rem; padding: 0.28rem 0.5rem;
+      font-size: 0.8rem; padding: 0.22rem 0.4rem;
       border: 1px solid var(--border); border-radius: var(--radius);
       background: var(--surface); color: var(--text);
       cursor: pointer; font-family: inherit; width: 100%;
@@ -146,18 +145,19 @@
     .status-select[data-status="Geen gehoor"]      { background: #f0f0f0; color: #555;    border-color: #aaa; }
     .status-select[data-status="Afgerond"]         { background: #e6f4ea; color: #137333; border-color: #34a853; }
 
-    .lead-note-wrap { margin-top: 0.6rem; }
     .lead-note {
       width: 100%; font-size: 0.82rem; font-family: inherit;
-      padding: 0.3rem 0.5rem; border: 1px solid var(--border);
-      border-radius: var(--radius); background: var(--bg);
-      color: var(--text); resize: vertical; line-height: 1.4;
+      padding: 0.2rem 0.4rem; border: 1px solid transparent;
+      border-radius: var(--radius); background: transparent;
+      color: var(--text); line-height: 1.4;
     }
-    .lead-note:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+    .lead-note:hover { border-color: var(--border); background: var(--bg); }
+    .lead-note:focus { outline: 2px solid var(--accent); outline-offset: 1px; background: var(--surface); }
     .lead-note::placeholder { color: var(--muted); }
 
     .status-saved-note {
-      font-size: 0.72rem; color: #1a7f37; opacity: 0; transition: opacity 0.3s;
+      font-size: 0.7rem; color: #1a7f37; opacity: 0; transition: opacity 0.3s;
+      margin-left: 0.25rem;
     }
     .status-saved-note.visible { opacity: 1; }
 
@@ -251,8 +251,6 @@
 
     @media (max-width: 600px) {
       header h1 { font-size: 1.15rem; }
-      .lead-card { grid-template-columns: 1fr; }
-      .lead-status-wrap { align-items: stretch; }
       .filter-count { margin-left: 0; }
       .settings-panel { width: 100%; right: -105%; }
       .settings-header { font-size: 1.125rem; padding: 1.25rem 1.5rem; }
@@ -505,10 +503,13 @@ function inRange(isoStr) {
 }
 
 /* ── Render ── */
-function renderField(label, value) {
-  return value
-    ? `<span class="lead-field-label">${esc(label)}</span><span class="lead-field-value">${esc(value)}</span>`
-    : `<span class="lead-field-label">${esc(label)}</span><span class="lead-field-value empty">—</span>`;
+function fmtDateShort(isoStr) {
+  if (!isoStr) return "";
+  const d  = new Date(isoStr);
+  const mo = d.toLocaleDateString("nl-NL", { month: "short" }).replace(".", "");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${d.getDate()} ${cap(mo)} ${hh}:${mm}`;
 }
 
 function fieldFromData(data, ...keys) {
@@ -524,41 +525,37 @@ function fieldFromData(data, ...keys) {
   return null;
 }
 
-function renderCard(sub, netlifyUrl) {
-  // Ondersteun zowel nieuw formaat (sub.naam) als oud formaat (sub.data.naam)
-  const naam    = sub.naam    || fieldFromData(sub.data, "naam", "name", "voornaam")             || null;
+function renderRow(sub, netlifyUrl) {
+  const naam     = sub.naam || fieldFromData(sub.data, "naam", "name", "voornaam") || null;
   const rawAdres = sub.adres || fieldFromData(sub.data, "adres", "address", "straat", "straatnaam") || null;
-  const adres   = rawAdres && !rawAdres.endsWith("***") && rawAdres.length > 6
-    ? rawAdres.slice(0, 6) + "***"
-    : rawAdres;
-  const contact = sub.contactvoorkeur || fieldFromData(sub.data, "contactvoorkeur", "contact", "voorkeur") || null;
-  const current = getStatus(sub.id);
-  const options = STATUSES.map(s =>
+  const adres    = rawAdres && !rawAdres.endsWith("***") && rawAdres.length > 6
+    ? rawAdres.slice(0, 6) + "***" : rawAdres;
+  const contact  = sub.contactvoorkeur || fieldFromData(sub.data, "contactvoorkeur", "contact", "voorkeur") || null;
+  const current  = getStatus(sub.id);
+  const options  = STATUSES.map(s =>
     `<option value="${esc(s)}"${s === current ? " selected" : ""}>${esc(s)}</option>`
   ).join("");
   const note = getNote(sub.id);
+  const cell = v => v ? esc(v) : `<span class="col-empty">—</span>`;
   return `
-  <div class="lead-card" id="lead-${esc(sub.id)}">
-    <div>
-      <div class="lead-meta">
-        #${sub.number || "?"} &nbsp;·&nbsp; ${esc(fmtDate(sub.created_at))}
-        ${netlifyUrl ? `&nbsp;·&nbsp; <a href="${esc(netlifyUrl)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-size:0.75rem">Bekijk in Netlify ↗</a>` : ""}
-      </div>
-      <div class="lead-fields">
-        ${renderField("Naam", naam)}
-        ${renderField("Adres", adres)}
-        ${renderField("Contactvoorkeur", contact)}
-      </div>
-      <div class="lead-note-wrap">
-        <textarea class="lead-note" data-sub-id="${esc(sub.id)}" placeholder="Notitie…" rows="2">${esc(note)}</textarea>
-        <span class="status-saved-note" id="note-saved-${esc(sub.id)}">Opgeslagen</span>
-      </div>
-    </div>
-    <div class="lead-status-wrap">
+  <tr id="lead-${esc(sub.id)}">
+    <td class="col-num">${sub.number || "?"}</td>
+    <td class="col-date">${esc(fmtDateShort(sub.created_at))}</td>
+    <td class="col-naam">${cell(naam)}</td>
+    <td class="col-adres">${cell(adres)}</td>
+    <td class="col-contact">${cell(contact)}</td>
+    <td class="col-status">
       <select class="status-select" data-sub-id="${esc(sub.id)}" data-status="${esc(current)}">${options}</select>
-      <span class="status-saved-note" id="saved-${esc(sub.id)}">Opgeslagen</span>
-    </div>
-  </div>`;
+      <span class="status-saved-note" id="saved-${esc(sub.id)}">✓</span>
+    </td>
+    <td class="col-note">
+      <input class="lead-note" type="text" data-sub-id="${esc(sub.id)}" placeholder="Notitie…" value="${esc(note)}" />
+      <span class="status-saved-note" id="note-saved-${esc(sub.id)}">✓</span>
+    </td>
+    <td class="col-link">
+      ${netlifyUrl ? `<a href="${esc(netlifyUrl)}" target="_blank" rel="noopener" title="Bekijk in Netlify" style="color:var(--muted);text-decoration:none">↗</a>` : ""}
+    </td>
+  </tr>`;
 }
 
 function renderAll() {
@@ -582,13 +579,19 @@ function renderAll() {
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     total += subs.length;
     const count = subs.length;
-    const body  = count
-      ? subs.map(s => renderCard(s, s._netlifyUrl)).join("")
+    const body = count
+      ? `<div class="table-wrap"><table class="leads-table">
+          <thead><tr>
+            <th>#</th><th>Datum</th><th>Naam</th><th>Adres</th>
+            <th>Contact</th><th>Status</th><th>Notitie</th><th></th>
+          </tr></thead>
+          <tbody>${subs.map(s => renderRow(s, s._netlifyUrl)).join("")}</tbody>
+         </table></div>`
       : `<p class="empty-note">Geen inzendingen in deze periode.</p>`;
     return `
     <section>
       <div class="group-header">${esc(label)}<span class="group-count">${count}</span></div>
-      <div class="leads-list">${body}</div>
+      ${body}
     </section>`;
   }).join("");
 
@@ -603,9 +606,9 @@ function renderAll() {
     countEl.textContent = `${total} inzending${total !== 1 ? "en" : ""}`;
   }
 
-  // Wire note textareas — opslaan bij verlaten veld (blur)
-  document.querySelectorAll(".lead-note").forEach(ta => {
-    ta.addEventListener("blur", () => saveNote(ta.dataset.subId, ta.value));
+  // Wire note inputs — opslaan bij verlaten veld (blur)
+  document.querySelectorAll(".lead-note").forEach(inp => {
+    inp.addEventListener("blur", () => saveNote(inp.dataset.subId, inp.value));
   });
 
   // Wire status selects
