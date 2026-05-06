@@ -321,6 +321,20 @@
     <button class="settings-date-reset" id="base-show-testdata" type="button">Alleen testdata tonen</button>
     <button class="settings-date-reset" id="base-reset" type="button">Alle data tonen</button>
   </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Wachtwoord wijzigen</div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-bottom:0.6rem;line-height:1.5">
+      Typ een nieuw wachtwoord en klik op <em>Genereer code</em>. Kopieer daarna de code en plak die in <strong>leads.html</strong> op de plek van <code>PASSWORD_HASH</code>.
+    </p>
+    <input type="password" id="pw-new-input" placeholder="Nieuw wachtwoord"
+      style="width:100%;padding:0.3rem 0.5rem;font-size:0.82rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:inherit;margin-bottom:0.4rem" />
+    <button class="settings-date-reset" id="pw-gen-btn" type="button" style="margin-top:0">Genereer code</button>
+    <div id="pw-hash-result" style="display:none;margin-top:0.5rem">
+      <div style="font-size:0.7rem;color:var(--muted);margin-bottom:0.2rem">Kopieer deze code:</div>
+      <div id="pw-hash-box" style="font-size:0.7rem;font-family:monospace;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:0.35rem 0.5rem;word-break:break-all;cursor:pointer;line-height:1.5" title="Klik om te kopiëren"></div>
+      <div id="pw-copy-note" style="font-size:0.7rem;color:#1a7f37;margin-top:0.25rem;display:none">Gekopieerd!</div>
+    </div>
+  </div>
 </div>
 
 <main id="main">
@@ -329,12 +343,9 @@
 
 <script>
 /* ── Wachtwoordbeveiliging ──────────────────────────────────────
-   Verander het wachtwoord in drie stappen:
-   1. Open de browserconsole en run:
-      crypto.subtle.digest('SHA-256', new TextEncoder().encode('NIEUW_WACHTWOORD'))
-        .then(b => console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))
-   2. Kopieer de hash die verschijnt
-   3. Vervang de waarde van PASSWORD_HASH hieronder
+   Wachtwoord wijzigen: log in, open Instellingen, gebruik de sectie
+   "Wachtwoord wijzigen" onderaan. Kopieer de gegenereerde code en
+   vervang de waarde van PASSWORD_HASH hieronder.
 ──────────────────────────────────────────────────────────────── */
 const PASSWORD_HASH = "14962a09cc3c6d3465f6586625010e2ee7922b031000153042029d00a08cc874";
 const SESSION_KEY   = "leads_auth";
@@ -629,6 +640,22 @@ function renderAll() {
   });
 }
 
+/* ── Wachtwoord hash generator (in instellingenpaneel) ── */
+document.getElementById("pw-gen-btn").addEventListener("click", async () => {
+  const pw = document.getElementById("pw-new-input").value;
+  if (!pw) return;
+  const hash = await hashPassword(pw);
+  const box  = document.getElementById("pw-hash-box");
+  box.textContent = hash;
+  document.getElementById("pw-hash-result").style.display = "block";
+  document.getElementById("pw-copy-note").style.display   = "none";
+  box.onclick = async () => {
+    await navigator.clipboard.writeText(hash);
+    document.getElementById("pw-copy-note").style.display = "block";
+    setTimeout(() => document.getElementById("pw-copy-note").style.display = "none", 2000);
+  };
+});
+
 /* ── Settings panel ── */
 function openSettings()  {
   document.getElementById("settings-panel").classList.add("open");
@@ -756,13 +783,13 @@ async function load() {
     if (k?.startsWith("lead_note_"))   remoteNotes[k.replace("lead_note_", "")]      = localStorage.getItem(k);
   }
 
-  // Laad leads.json eerst en render meteen
-  const leadsResult = await fetch(`./data/leads.json?v=${Date.now()}`, { cache: "no-store" })
+  // Laad wc-data.json eerst en render meteen
+  const leadsResult = await fetch(`./data/wc-data.json?v=${Date.now()}`, { cache: "no-store" })
     .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
     .catch(e => ({ error: String(e) }));
 
   if (leadsResult.error) {
-    main.innerHTML = `<p style="color:var(--muted)">Kon leads.json niet laden: ${esc(leadsResult.error)}</p>`;
+    main.innerHTML = `<p style="color:var(--muted)">Kon wc-data.json niet laden: ${esc(leadsResult.error)}</p>`;
     return;
   }
 

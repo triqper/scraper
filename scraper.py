@@ -548,7 +548,7 @@ def _field(data: dict, *keys: str) -> str | None:
 
 
 def update_leads() -> None:
-    path = DATA_DIR / "leads.json"
+    path = DATA_DIR / "wc-data.json"
     existing = load_json(path)
     existing.setdefault("forms", [])
 
@@ -624,7 +624,7 @@ def update_leads() -> None:
     existing["forms"]        = list(forms_idx.values())
     existing["last_updated"] = datetime.now(timezone.utc).isoformat()
     save_json(path, existing)
-    print(f"  ✓ {len(existing['forms'])} formulier(en) opgeslagen in leads.json")
+    print(f"  ✓ {len(existing['forms'])} formulier(en) opgeslagen in wc-data.json")
 
 
 # ---------------------------------------------------------------------------
