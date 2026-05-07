@@ -1,6 +1,6 @@
 {
   "zero_point": "2026-05-04T07:52:59.540654+00:00",
-  "last_updated": "2026-05-07T19:00:31.909652+00:00",
+  "last_updated": "2026-05-07T20:00:34.860339+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
@@ -506,8 +506,8 @@
       "id": "3970cc41-10db-4747-b7b2-89ea7532c283",
       "name": "woonstroom-aanbod-landing",
       "url": "https://woonstroom-aanbod-landing.netlify.app",
-      "total_pageviews": 14,
-      "total_visitors": 6,
+      "total_pageviews": 18,
+      "total_visitors": 9,
       "daily": [
         {
           "date": "2026-05-04",
@@ -523,12 +523,21 @@
           "date": "2026-05-06",
           "pageviews": 2,
           "visitors": 1
+        },
+        {
+          "date": "2026-05-07",
+          "pageviews": 4,
+          "visitors": 3
         }
       ],
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 12
+          "pageviews": 13
+        },
+        {
+          "country": "United States",
+          "pageviews": 3
         },
         {
           "country": "Romania",
@@ -542,14 +551,14 @@
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 9
-        },
-        {
-          "source": "triqper.github.io",
-          "referrals": 1
+          "referrals": 12
         },
         {
           "source": "woonstroom-aanbod.netlify.app",
+          "referrals": 2
+        },
+        {
+          "source": "triqper.github.io",
           "referrals": 1
         }
       ],
@@ -607,6 +616,13 @@
           "deltas": {
             "Netherlands": 2
           }
+        },
+        {
+          "hour": "2026-05-07T20:00:00+00:00",
+          "deltas": {
+            "Netherlands": 1,
+            "United States": 3
+          }
         }
       ],
       "source_hourly": [
@@ -659,6 +675,13 @@
           "deltas": {
             "Direct traffic": 1
           }
+        },
+        {
+          "hour": "2026-05-07T20:00:00+00:00",
+          "deltas": {
+            "Direct traffic": 3,
+            "woonstroom-aanbod.netlify.app": 1
+          }
         }
       ],
       "hourly": [
@@ -706,6 +729,11 @@
           "hour": "2026-05-06T05:00:00+00:00",
           "pageviews": 2,
           "visitors": 1
+        },
+        {
+          "hour": "2026-05-07T19:00:00+00:00",
+          "pageviews": 4,
+          "visitors": 3
         }
       ]
     },
@@ -762,31 +790,47 @@
       "id": "82333e01-6c2b-48b2-a7ca-564ad851bf6b",
       "name": "woonstroom-aanbod",
       "url": "https://woonstroom-aanbod.netlify.app",
-      "total_pageviews": 1,
-      "total_visitors": 1,
+      "total_pageviews": 3,
+      "total_visitors": 3,
       "daily": [
         {
           "date": "2026-05-04",
           "pageviews": 1,
           "visitors": 1
+        },
+        {
+          "date": "2026-05-07",
+          "pageviews": 2,
+          "visitors": 2
         }
       ],
       "top_countries": [
         {
           "country": "Netherlands",
+          "pageviews": 2
+        },
+        {
+          "country": "United States",
           "pageviews": 1
         }
       ],
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 1
+          "referrals": 3
         }
       ],
       "country_hourly": [
         {
           "hour": "2026-05-04T09:00:00+00:00",
           "deltas": {
+            "Netherlands": 1
+          }
+        },
+        {
+          "hour": "2026-05-07T20:00:00+00:00",
+          "deltas": {
+            "United States": 1,
             "Netherlands": 1
           }
         }
@@ -797,6 +841,12 @@
           "deltas": {
             "Direct traffic": 1
           }
+        },
+        {
+          "hour": "2026-05-07T20:00:00+00:00",
+          "deltas": {
+            "Direct traffic": 2
+          }
         }
       ],
       "hourly": [
@@ -804,6 +854,11 @@
           "hour": "2026-05-04T08:00:00+00:00",
           "pageviews": 1,
           "visitors": 1
+        },
+        {
+          "hour": "2026-05-07T19:00:00+00:00",
+          "pageviews": 2,
+          "visitors": 2
         }
       ]
     },
