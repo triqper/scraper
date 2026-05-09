@@ -101,32 +101,39 @@
     .empty-note { color: var(--muted); font-size: 0.88rem; padding: 0.75rem 0; font-style: italic; }
 
     /* ── Leads tabel ── */
-    .table-wrap { overflow-x: auto; }
+    .table-wrap { overflow-x: auto; padding-bottom: 0.25rem; }
     .leads-table {
-      width: 100%; border-collapse: collapse; font-size: 0.82rem;
-      background: var(--surface);
+      width: 100%; border-collapse: separate; border-spacing: 0 5px;
+      font-size: 0.82rem;
     }
     .leads-table thead th {
-      text-align: left; padding: 0.45rem 0.75rem;
+      text-align: left; padding: 0.3rem 0.75rem;
       font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
       letter-spacing: 0.05em; color: var(--muted);
-      background: var(--bg); border-bottom: 2px solid var(--border);
       white-space: nowrap;
     }
-    .leads-table tbody tr { border-bottom: 1px solid var(--border); }
-    .leads-table tbody tr:hover { background: #f5f8ff; }
-    .leads-table td {
-      padding: 0.35rem 0.75rem; vertical-align: middle; white-space: nowrap;
+    .leads-table tbody tr {
+      background: var(--surface);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px var(--border);
+      border-radius: var(--radius);
+      transition: box-shadow 0.15s;
     }
-    .col-num    { color: var(--muted); font-size: 0.75rem; width: 2.5rem; }
-    .col-date   { color: var(--muted); font-size: 0.78rem; width: 8rem; }
-    .col-naam   { font-weight: 500; }
-    .col-adres  { color: var(--muted); }
-    .col-contact{ }
-    .col-status { width: 11rem; }
-    .col-note   { width: 16rem; }
-    .col-link   { width: 1.5rem; text-align: center; }
-    .col-empty  { color: var(--muted); font-style: italic; }
+    .leads-table tbody tr:hover {
+      box-shadow: 0 3px 10px rgba(0,0,0,0.10), 0 0 0 1px #b0b8c4;
+    }
+    .leads-table td {
+      padding: 0.5rem 0.75rem; vertical-align: middle; white-space: nowrap;
+    }
+    .leads-table td:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+    .leads-table td:last-child  { border-radius: 0 var(--radius) var(--radius) 0; }
+    .col-date    { color: var(--muted); font-size: 0.78rem; width: 8rem; }
+    .col-naam    { font-weight: 500; }
+    .col-adres   { color: var(--muted); }
+    .col-contact { }
+    .col-status  { width: 11rem; }
+    .col-note    { width: 16rem; }
+    .col-link    { width: 4rem; }
+    .col-empty   { color: var(--muted); font-style: italic; }
 
     /* ── Status ── */
     .status-select {
@@ -150,6 +157,7 @@
       padding: 0.2rem 0.4rem; border: 1px solid transparent;
       border-radius: var(--radius); background: transparent;
       color: var(--text); line-height: 1.4;
+      resize: vertical; min-height: 1.7rem; display: block;
     }
     .lead-note:hover { border-color: var(--border); background: var(--bg); }
     .lead-note:focus { outline: 2px solid var(--accent); outline-offset: 1px; background: var(--surface); }
@@ -160,6 +168,48 @@
       margin-left: 0.25rem;
     }
     .status-saved-note.visible { opacity: 1; }
+
+    /* ── Mobiel: tabelrij → card ── */
+    @media (max-width: 640px) {
+      .table-wrap { overflow-x: visible; }
+      .leads-table, .leads-table tbody,
+      .leads-table tr, .leads-table td { display: block; }
+      .leads-table thead { display: none; }
+      .leads-table { border-spacing: 0; }
+
+      .leads-table tbody tr {
+        border-radius: 8px;
+        margin-bottom: 0.65rem;
+        padding: 0.75rem 1rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.09), 0 0 0 1px var(--border);
+      }
+      .leads-table td {
+        display: flex; align-items: center;
+        padding: 0.22rem 0; white-space: normal; gap: 0.5rem;
+        border-radius: 0;
+      }
+      .leads-table td[data-label]::before {
+        content: attr(data-label);
+        font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 0.04em; color: var(--muted);
+        min-width: 5.25rem; flex-shrink: 0;
+      }
+      .col-date {
+        font-size: 0.78rem; color: var(--muted);
+        padding-bottom: 0.45rem; margin-bottom: 0.2rem;
+        border-bottom: 1px solid var(--border);
+        justify-content: space-between;
+      }
+      .col-note { align-items: flex-start; }
+      .lead-note { border-color: var(--border); background: var(--bg); }
+      .col-link {
+        padding-top: 0.45rem; margin-top: 0.2rem;
+        border-top: 1px solid var(--border);
+        justify-content: flex-end; width: auto;
+      }
+      .col-link a { font-size: 0.82rem; }
+      .col-status select, .col-note .lead-note { flex: 1; min-width: 0; }
+    }
 
     /* ── Settings panel ── */
     .settings-backdrop {
@@ -539,21 +589,20 @@ function renderRow(sub, netlifyUrl) {
   const cell = v => v ? esc(v) : `<span class="col-empty">—</span>`;
   return `
   <tr id="lead-${esc(sub.id)}">
-    <td class="col-num">${sub.number || "?"}</td>
     <td class="col-date">${esc(fmtDateShort(sub.created_at))}</td>
-    <td class="col-naam">${cell(naam)}</td>
-    <td class="col-adres">${cell(adres)}</td>
-    <td class="col-contact">${cell(contact)}</td>
-    <td class="col-status">
+    <td class="col-naam" data-label="Naam">${cell(naam)}</td>
+    <td class="col-adres" data-label="Adres">${cell(adres)}</td>
+    <td class="col-contact" data-label="Contact">${cell(contact)}</td>
+    <td class="col-status" data-label="Status">
       <select class="status-select" data-sub-id="${esc(sub.id)}" data-status="${esc(current)}">${options}</select>
       <span class="status-saved-note" id="saved-${esc(sub.id)}">✓</span>
     </td>
-    <td class="col-note">
-      <input class="lead-note" type="text" data-sub-id="${esc(sub.id)}" placeholder="Notitie…" value="${esc(note)}" />
+    <td class="col-note" data-label="Notitie">
+      <textarea class="lead-note" data-sub-id="${esc(sub.id)}" placeholder="Notitie…" rows="1">${esc(note)}</textarea>
       <span class="status-saved-note" id="note-saved-${esc(sub.id)}">✓</span>
     </td>
     <td class="col-link">
-      ${netlifyUrl ? `<a href="${esc(netlifyUrl)}" target="_blank" rel="noopener" title="Bekijk in Netlify" style="color:var(--muted);text-decoration:none">↗</a>` : ""}
+      ${netlifyUrl ? `<a href="${esc(netlifyUrl)}" target="_blank" rel="noopener" title="Bekijk in Netlify" style="color:var(--accent);text-decoration:none;font-weight:500">Bekijk ↗</a>` : ""}
     </td>
   </tr>`;
 }
@@ -582,7 +631,7 @@ function renderAll() {
     const body = count
       ? `<div class="table-wrap"><table class="leads-table">
           <thead><tr>
-            <th>#</th><th>Datum</th><th>Naam</th><th>Adres</th>
+            <th>Datum</th><th>Naam</th><th>Adres</th>
             <th>Contact</th><th>Status</th><th>Notitie</th><th></th>
           </tr></thead>
           <tbody>${subs.map(s => renderRow(s, s._netlifyUrl)).join("")}</tbody>
