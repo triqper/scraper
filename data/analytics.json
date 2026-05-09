@@ -1,6 +1,6 @@
 {
   "zero_point": "2026-05-04T07:52:59.540654+00:00",
-  "last_updated": "2026-05-09T16:00:29.774951+00:00",
+  "last_updated": "2026-05-09T17:00:31.131727+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
@@ -528,8 +528,8 @@
       "id": "3970cc41-10db-4747-b7b2-89ea7532c283",
       "name": "woonstroom-aanbod-landing",
       "url": "https://woonstroom-aanbod-landing.netlify.app",
-      "total_pageviews": 20,
-      "total_visitors": 11,
+      "total_pageviews": 19,
+      "total_visitors": 10,
       "daily": [
         {
           "date": "2026-05-04",
@@ -553,8 +553,8 @@
         },
         {
           "date": "2026-05-09",
-          "pageviews": 2,
-          "visitors": 2
+          "pageviews": 1,
+          "visitors": 1
         }
       ],
       "top_countries": [
@@ -564,7 +564,7 @@
         },
         {
           "country": "United States",
-          "pageviews": 4
+          "pageviews": 3
         },
         {
           "country": "Romania",
@@ -578,7 +578,7 @@
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 13
+          "referrals": 12
         },
         {
           "source": "woonstroom-aanbod.netlify.app",
@@ -788,11 +788,6 @@
         },
         {
           "hour": "2026-05-09T13:00:00+00:00",
-          "pageviews": 1,
-          "visitors": 1
-        },
-        {
-          "hour": "2026-05-09T15:00:00+00:00",
           "pageviews": 1,
           "visitors": 1
         }
