@@ -528,7 +528,7 @@
       "id": "3970cc41-10db-4747-b7b2-89ea7532c283",
       "name": "woonstroom-aanbod-landing",
       "url": "https://woonstroom-aanbod-landing.netlify.app",
-      "total_pageviews": 21,
+      "total_pageviews": 20,
       "total_visitors": 11,
       "daily": [
         {
@@ -553,14 +553,14 @@
         },
         {
           "date": "2026-05-09",
-          "pageviews": 2,
-          "visitors": 2
+          "pageviews": 1,
+          "visitors": 1
         }
       ],
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 15
+          "pageviews": 14
         },
         {
           "country": "United States",
@@ -654,7 +654,7 @@
         {
           "hour": "2026-05-09T16:00:00+00:00",
           "deltas": {
-            "Netherlands": 2
+            "Netherlands": 1
           }
         }
       ],
