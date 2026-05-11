@@ -1,6 +1,6 @@
 {
   "zero_point": "2026-05-04T07:52:59.540654+00:00",
-  "last_updated": "2026-05-11T17:00:33.778600+00:00",
+  "last_updated": "2026-05-11T18:00:37.534234+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
@@ -248,8 +248,8 @@
       "id": "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5",
       "name": "woonstroom-woningwaarde-landing",
       "url": "https://woonstroom-woningwaarde-landing.netlify.app",
-      "total_pageviews": 22,
-      "total_visitors": 11,
+      "total_pageviews": 23,
+      "total_visitors": 12,
       "daily": [
         {
           "date": "2026-05-04",
@@ -270,12 +270,17 @@
           "date": "2026-05-09",
           "pageviews": 2,
           "visitors": 2
+        },
+        {
+          "date": "2026-05-11",
+          "pageviews": 1,
+          "visitors": 1
         }
       ],
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 18
+          "pageviews": 19
         },
         {
           "country": "Norway",
@@ -297,7 +302,7 @@
         },
         {
           "source": "woonstroom-woningwaarde.netlify.app",
-          "referrals": 3
+          "referrals": 4
         }
       ],
       "country_hourly": [
@@ -379,6 +384,12 @@
           "deltas": {
             "Netherlands": 2
           }
+        },
+        {
+          "hour": "2026-05-11T18:00:00+00:00",
+          "deltas": {
+            "Netherlands": 1
+          }
         }
       ],
       "source_hourly": [
@@ -454,6 +465,12 @@
           "deltas": {
             "woonstroom-woningwaarde.netlify.app": 2
           }
+        },
+        {
+          "hour": "2026-05-11T18:00:00+00:00",
+          "deltas": {
+            "woonstroom-woningwaarde.netlify.app": 1
+          }
         }
       ],
       "hourly": [
@@ -521,6 +538,11 @@
           "hour": "2026-05-09T13:00:00+00:00",
           "pageviews": 2,
           "visitors": 2
+        },
+        {
+          "hour": "2026-05-11T17:00:00+00:00",
+          "pageviews": 1,
+          "visitors": 1
         }
       ]
     },
@@ -791,8 +813,8 @@
       "id": "60c23cf1-4c52-4e2a-9e3d-f3399176f47d",
       "name": "woonstroom-woningwaarde",
       "url": "https://woonstroom-woningwaarde.netlify.app",
-      "total_pageviews": 3,
-      "total_visitors": 3,
+      "total_pageviews": 4,
+      "total_visitors": 4,
       "daily": [
         {
           "date": "2026-05-04",
@@ -803,18 +825,23 @@
           "date": "2026-05-09",
           "pageviews": 2,
           "visitors": 2
+        },
+        {
+          "date": "2026-05-11",
+          "pageviews": 1,
+          "visitors": 1
         }
       ],
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 3
+          "pageviews": 4
         }
       ],
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 3
+          "referrals": 4
         }
       ],
       "country_hourly": [
@@ -828,6 +855,12 @@
           "hour": "2026-05-09T14:00:00+00:00",
           "deltas": {
             "Netherlands": 2
+          }
+        },
+        {
+          "hour": "2026-05-11T18:00:00+00:00",
+          "deltas": {
+            "Netherlands": 1
           }
         }
       ],
@@ -843,6 +876,12 @@
           "deltas": {
             "Direct traffic": 2
           }
+        },
+        {
+          "hour": "2026-05-11T18:00:00+00:00",
+          "deltas": {
+            "Direct traffic": 1
+          }
         }
       ],
       "hourly": [
@@ -855,6 +894,11 @@
           "hour": "2026-05-09T13:00:00+00:00",
           "pageviews": 2,
           "visitors": 2
+        },
+        {
+          "hour": "2026-05-11T17:00:00+00:00",
+          "pageviews": 1,
+          "visitors": 1
         }
       ]
     },
