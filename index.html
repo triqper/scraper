@@ -479,7 +479,7 @@
     <button class="btn-reset" id="reset-filter">Alles tonen</button>
   </div>
   <div class="controls-actions">
-    <button class="btn-nl-toggle" id="nl-toggle">Alleen NL</button>
+    <button class="btn-nl-toggle active" id="nl-toggle">Alleen NL</button>
     <div class="mode-group">
       <button class="mode-btn active" data-mode="per-dag">Per dag</button>
       <button class="mode-btn" data-mode="per-uur">Per uur</button>
@@ -606,7 +606,7 @@ let fromDt           = null;
 let toDt             = null;
 let baseFromDt       = null;
 let baseToDt         = null;
-let nlOnly           = false;
+let nlOnly           = true;
 
 const settings = {
   showVisCard: false, showPvCard: true, showFormCard: true,
@@ -1547,7 +1547,7 @@ const toggleMap = {
   "s-scans-pv-card":    v => { settings.showScansPvCard   = v; applySettings(); },
   "s-vis-chart":        v => { settings.showVisChart      = v; applySettings(); },
   "s-ctry-chart":       v => { settings.showCtryChart     = v; applySettings(); },
-  "s-form-chart":       v => { settings.showFormChart     = v; applySettings(); },
+  "s-form-chart":        v => { settings.showFormChart     = v; applySettings(); },
   "s-scans-vis-chart":  v => { settings.showScansVisChart  = v; applySettings(); },
   "s-scans-ctry-chart": v => { settings.showScansCtryChart = v; applySettings(); },
   "s-top-landen":       v => { settings.showTopLanden     = v; applySettings(); },
