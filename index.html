@@ -481,8 +481,8 @@
   <div class="controls-actions">
     <button class="btn-nl-toggle" id="nl-toggle">Alleen NL</button>
     <div class="mode-group">
-      <button class="mode-btn" data-mode="per-dag">Per dag</button>
-      <button class="mode-btn active" data-mode="per-uur">Per uur</button>
+      <button class="mode-btn active" data-mode="per-dag">Per dag</button>
+      <button class="mode-btn" data-mode="per-uur">Per uur</button>
     </div>
     <button class="btn-settings" id="settings-btn">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -567,7 +567,7 @@
 </main>
 
 <script>
-/* ─── State ───────────────────────────────────────────────── */
+/* ─── State ────────────────────────────────────────────────────────── */
 const GROUPS = [
   { title: "Interesse",    sites: ["woonstroom-interesse",    "woonstroom-interesse-landing"]    },
   { title: "Aanbod",       sites: ["woonstroom-aanbod",       "woonstroom-aanbod-landing"]       },
@@ -601,7 +601,7 @@ const COUNTRY_COLORS = [
 let siteData         = [];
 let formsData        = [];
 let earliestDataPoint = null;
-let mode             = "per-uur";
+let mode             = "per-dag";
 let fromDt           = null;
 let toDt             = null;
 let baseFromDt       = null;
@@ -644,7 +644,7 @@ let formChartRefs    = {};   // { formId: Chart|null }
 let miniChartRefs    = {};
 let countryChartRefs = {};   // { siteId: Chart|null }
 
-/* ─── Helpers ─────────────────────────────────────────────── */
+/* ─── Helpers ────────────────────────────────────────────────────────── */
 function fmt(n) { return (n ?? 0).toLocaleString("nl-NL"); }
 function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
@@ -660,7 +660,7 @@ function shortHour(isoStr) {
   });
 }
 
-/* ─── Data selectors ──────────────────────────────────────── */
+/* ─── Data selectors ────────────────────────────────────────────────────── */
 
 function inRange(dtStr) {
   // dtStr is an ISO string with timezone (hour entries) or "YYYY-MM-DD" (day entries)
@@ -768,7 +768,7 @@ function getCountryChartData(site) {
   } else {
     const firstVh = viewHourKey(hourly[0].hour);
     const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : firstVh.slice(0, 10);
-    const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const toDate   = toDt   ? toDt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
     allKeys = generateDailyRange(fromDate, toDate);
   }
 
@@ -825,7 +825,7 @@ function getChartData(site) {
     const fromMs   = fromDt ? fromDt.getTime() : Date.now();
     const toMs     = toDt   ? toDt.getTime()   : Date.now();
     const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
-    const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const toDate   = toDt   ? toDt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
 
     if (mode === "per-uur") {
       const nlHour    = nlPerHour(site);
@@ -871,7 +871,7 @@ function getChartData(site) {
   const lookup = Object.fromEntries(rows.map(r => [r.date, r]));
   const fromDate = fromDt ? fromDt.toISOString().slice(0, 10)
                           : (rows.length ? rows[0].date : new Date().toISOString().slice(0, 10));
-  const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10)
+  const toDate   = toDt   ? toDt.toISOString().slice(0, 10)
                           : new Date().toISOString().slice(0, 10);
   const allDates = generateDailyRange(fromDate, toDate);
 
@@ -895,7 +895,7 @@ function getChartData(site) {
 
 function filteredFormDaily(form) {
   const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : null;
-  const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : null;
+  const toDate   = toDt   ? toDt.toISOString().slice(0, 10) : null;
   return (form.daily ?? []).filter(d =>
     (!fromDate || d.date >= fromDate) &&
     (!toDate   || d.date <= toDate)
@@ -923,12 +923,12 @@ function getFormChartData(form) {
   const rows     = filteredFormDaily(form);
   const lookup   = Object.fromEntries(rows.map(r => [r.date, r.count]));
   const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : (rows.length ? rows[0].date : new Date().toISOString().slice(0, 10));
-  const toDate   = toDt   ? new Date(toDt.getTime() - 1).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+  const toDate   = toDt   ? toDt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
   const allDates = generateDailyRange(fromDate, toDate);
   return { labels: allDates.map(d => shortDate(d)), values: allDates.map(d => lookup[d] ?? 0) };
 }
 
-/* ─── NL-only helpers ─────────────────────────────────────── */
+/* ─── NL-only helpers ────────────────────────────────────────────────────── */
 function isNL(country) {
   const c = (country ?? "").toLowerCase();
   return c === "nl" || c === "netherlands" || c === "nederland";
@@ -1038,7 +1038,7 @@ function generateHourlyRange(fromMs, toMs) {
   return hours;
 }
 
-/* ─── Chart data ──────────────────────────────────────────────── */
+/* ─── Chart data ────────────────────────────────────────────────────────── */
 function makeChart(canvas, type, labels, values, color) {
   const isBar = type === "bar";
   return new Chart(canvas, {
@@ -1080,7 +1080,7 @@ function makeChart(canvas, type, labels, values, color) {
   });
 }
 
-/* ─── Mini chart (sparkline) ──────────────────────────────── */
+/* ─── Mini chart (sparkline) ──────────────────────────────────────────── */
 function makeMiniChart(canvas, labels, values) {
   return new Chart(canvas, {
     type: "line",
@@ -1109,7 +1109,7 @@ function makeMiniChart(canvas, labels, values) {
   });
 }
 
-/* ─── Compare section ─────────────────────────────────────── */
+/* ─── Compare section ────────────────────────────────────────────────────── */
 function renderCompare() {
   const el = document.getElementById("compare");
   el.innerHTML = "";
@@ -1181,7 +1181,7 @@ function updateMiniCharts() {
   renderCompare();
 }
 
-/* ─── Bar table ───────────────────────────────────────────── */
+/* ─── Bar table ───────────────────────────────────────────────────────── */
 function barTable(rows, labelKey, valueKey, colA, colB) {
   if (!rows || rows.length === 0) return `<p class="empty">Geen data in deze periode.</p>`;
   const max = Math.max(...rows.map(r => r[valueKey] ?? 0), 1);
@@ -1200,7 +1200,7 @@ function barTable(rows, labelKey, valueKey, colA, colB) {
   return html + `</tbody></table>`;
 }
 
-/* ─── Render / update ─────────────────────────────────────── */
+/* ─── Render / update ────────────────────────────────────────────────────── */
 function statLabel(siteName) {
   const qr  = displayName(siteName ?? "").toLowerCase().includes("qr");
   const vis = qr ? "Unieke scans" : "Unieke bezoekers";
@@ -1396,7 +1396,7 @@ function updateAllCards() {
   applySettings();
 }
 
-/* ─── Controls wiring ─────────────────────────────────────── */
+/* ─── Controls wiring ────────────────────────────────────────────────────── */
 function readInputs() {
   const fv = document.getElementById("from-dt").value;
   const tv = document.getElementById("to-dt").value;
@@ -1526,7 +1526,7 @@ document.getElementById("nl-toggle").addEventListener("click", () => {
 });
 
 
-/* ─── Settings panel wiring ───────────────────────────────── */
+/* ─── Settings panel wiring ───────────────────────────────────────────────── */
 function openSettings() {
   document.getElementById("settings-panel").classList.add("open");
   document.getElementById("settings-backdrop").classList.add("open");
@@ -1599,7 +1599,7 @@ document.querySelectorAll("[data-chart-type]").forEach(btn => {
   });
 });
 
-/* ─── Load ────────────────────────────────────────────────── */
+/* ─── Load ─────────────────────────────────────────────────────────────────── */
 async function load() {
   const bust = Date.now();
   const [analyticsRes, formsRes] = await Promise.all([
@@ -1649,11 +1649,12 @@ async function load() {
     fromEl.max = nowStr;
     toEl.max   = nowStr;
 
-    // Standaard: van = nulpunt, tot = nu
-    fromEl.value = minStr;
+    // Standaard: van = 6 mei 09:00, tot = nu
+    const defaultFromStr = "2026-05-06T09:00";
+    fromEl.value = defaultFromStr;
     toEl.value   = nowStr;
     updateDateBtns();
-    fromDt = zpLocal;
+    fromDt = new Date(defaultFromStr);
     toDt   = new Date();
 
     // Standaard basisdataset: vanaf 6 mei 09:00
