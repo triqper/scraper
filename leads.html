@@ -208,7 +208,8 @@
         justify-content: flex-end; width: auto;
       }
       .col-link a { font-size: 0.82rem; }
-      .col-status select, .col-note .lead-note { flex: 1; min-width: 0; }
+      .col-status select { flex: none; }
+      .col-note .lead-note { flex: 1; min-width: 0; }
     }
 
     /* ── Settings panel ── */
@@ -470,6 +471,19 @@ async function pushToJsonBin() {
   }
 }
 
+function resizeStatusSelect(sel) {
+  if (window.innerWidth > 640) return;
+  let sizer = document.getElementById('_status_sizer');
+  if (!sizer) {
+    sizer = document.createElement('span');
+    sizer.id = '_status_sizer';
+    sizer.style.cssText = 'visibility:hidden;position:fixed;white-space:nowrap;font-size:0.8rem;font-family:inherit;padding:0.22rem 0.4rem;pointer-events:none;';
+    document.body.appendChild(sizer);
+  }
+  sizer.textContent = sel.options[sel.selectedIndex]?.text ?? '';
+  sel.style.width = (sizer.offsetWidth + 24) + 'px';
+}
+
 async function saveStatus(subId, status) {
   localStorage.setItem(`lead_status_${subId}`, status);
   remoteStatuses[subId] = status;
@@ -662,10 +676,12 @@ function renderAll() {
 
   // Wire status selects
   document.querySelectorAll(".status-select").forEach(sel => {
+    resizeStatusSelect(sel);
     sel.addEventListener("change", async () => {
       const subId  = sel.dataset.subId;
       const status = sel.value;
       sel.dataset.status = status;
+      resizeStatusSelect(sel);
       const note = document.getElementById(`saved-${subId}`);
       if (note) note.textContent = "Opslaan…";
       await saveStatus(subId, status);
@@ -848,6 +864,7 @@ async function load() {
       sel.value = newStatus;
       sel.dataset.status = newStatus;
     }
+    resizeStatusSelect(sel);
   });
   document.querySelectorAll(".lead-note").forEach(ta => {
     const newNote = getNote(ta.dataset.subId);
