@@ -506,13 +506,13 @@
   </div>
   <div class="settings-section">
     <div class="settings-section-title">Statcards — Landing</div>
-    <div class="settings-row"><span>Unieke bezoekers</span><label class="settings-toggle"><input type="checkbox" id="s-vis-card" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Unieke bezoekers</span><label class="settings-toggle"><input type="checkbox" id="s-vis-card"><span class="settings-slider"></span></label></div>
     <div class="settings-row"><span>Pageviews</span><label class="settings-toggle"><input type="checkbox" id="s-pv-card" checked><span class="settings-slider"></span></label></div>
     <div class="settings-row"><span>Aanmeldingen</span><label class="settings-toggle"><input type="checkbox" id="s-form-card" checked><span class="settings-slider"></span></label></div>
   </div>
   <div class="settings-section">
     <div class="settings-section-title">Statcards — QR Flyer</div>
-    <div class="settings-row"><span>Unieke scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-vis-card" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Unieke scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-vis-card"><span class="settings-slider"></span></label></div>
     <div class="settings-row"><span>Alle scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-pv-card" checked><span class="settings-slider"></span></label></div>
   </div>
   <div class="settings-section">
@@ -609,8 +609,8 @@ let baseToDt         = null;
 let nlOnly           = false;
 
 const settings = {
-  showVisCard: true, showPvCard: true, showFormCard: true,
-  showScansVisCard: true, showScansPvCard: true,
+  showVisCard: false, showPvCard: true, showFormCard: true,
+  showScansVisCard: false, showScansPvCard: true,
   showVisChart: false, showCtryChart: true, showFormChart: false,
   showScansVisChart: false, showScansCtryChart: true,
   showTopLanden: false, showTopBronnen: false,
@@ -1559,8 +1559,8 @@ for (const [id, handler] of Object.entries(toggleMap)) {
 
 // Default layout — reset alle toggles naar standaardwaarden
 const DEFAULT_SETTINGS = {
-  showVisCard: true, showPvCard: true, showFormCard: true,
-  showScansVisCard: true, showScansPvCard: true,
+  showVisCard: false, showPvCard: true, showFormCard: true,
+  showScansVisCard: false, showScansPvCard: true,
   showVisChart: false, showCtryChart: true, showFormChart: false,
   showScansVisChart: false, showScansCtryChart: true,
   showTopLanden: false, showTopBronnen: false,
