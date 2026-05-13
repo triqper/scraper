@@ -567,7 +567,7 @@
 </main>
 
 <script>
-/* ─── State ────────────────────────────────────────────────────────── */
+/* ─── State ──────────────────────────────────────────────────────────────────── */
 const GROUPS = [
   { title: "Interesse",    sites: ["woonstroom-interesse",    "woonstroom-interesse-landing"]    },
   { title: "Aanbod",       sites: ["woonstroom-aanbod",       "woonstroom-aanbod-landing"]       },
@@ -644,7 +644,7 @@ let formChartRefs    = {};   // { formId: Chart|null }
 let miniChartRefs    = {};
 let countryChartRefs = {};   // { siteId: Chart|null }
 
-/* ─── Helpers ────────────────────────────────────────────────────────── */
+/* ─── Helpers ──────────────────────────────────────────────────────────────────── */
 function fmt(n) { return (n ?? 0).toLocaleString("nl-NL"); }
 function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
@@ -660,7 +660,7 @@ function shortHour(isoStr) {
   });
 }
 
-/* ─── Data selectors ────────────────────────────────────────────────────── */
+/* ─── Data selectors ────────────────────────────────────────────────────────────────── */
 
 function inRange(dtStr) {
   // dtStr is an ISO string with timezone (hour entries) or "YYYY-MM-DD" (day entries)
@@ -928,7 +928,7 @@ function getFormChartData(form) {
   return { labels: allDates.map(d => shortDate(d)), values: allDates.map(d => lookup[d] ?? 0) };
 }
 
-/* ─── NL-only helpers ────────────────────────────────────────────────────── */
+/* ─── NL-only helpers ────────────────────────────────────────────────────────────────── */
 function isNL(country) {
   const c = (country ?? "").toLowerCase();
   return c === "nl" || c === "netherlands" || c === "nederland";
@@ -1038,7 +1038,7 @@ function generateHourlyRange(fromMs, toMs) {
   return hours;
 }
 
-/* ─── Chart data ────────────────────────────────────────────────────────── */
+/* ─── Chart data ──────────────────────────────────────────────────────────────────── */
 function makeChart(canvas, type, labels, values, color) {
   const isBar = type === "bar";
   return new Chart(canvas, {
@@ -1080,7 +1080,7 @@ function makeChart(canvas, type, labels, values, color) {
   });
 }
 
-/* ─── Mini chart (sparkline) ──────────────────────────────────────────── */
+/* ─── Mini chart (sparkline) ────────────────────────────────────────────────────── */
 function makeMiniChart(canvas, labels, values) {
   return new Chart(canvas, {
     type: "line",
@@ -1109,7 +1109,7 @@ function makeMiniChart(canvas, labels, values) {
   });
 }
 
-/* ─── Compare section ────────────────────────────────────────────────────── */
+/* ─── Compare section ────────────────────────────────────────────────────────────────── */
 function renderCompare() {
   const el = document.getElementById("compare");
   el.innerHTML = "";
@@ -1181,7 +1181,7 @@ function updateMiniCharts() {
   renderCompare();
 }
 
-/* ─── Bar table ───────────────────────────────────────────────────────── */
+/* ─── Bar table ──────────────────────────────────────────────────────────────────── */
 function barTable(rows, labelKey, valueKey, colA, colB) {
   if (!rows || rows.length === 0) return `<p class="empty">Geen data in deze periode.</p>`;
   const max = Math.max(...rows.map(r => r[valueKey] ?? 0), 1);
@@ -1200,7 +1200,7 @@ function barTable(rows, labelKey, valueKey, colA, colB) {
   return html + `</tbody></table>`;
 }
 
-/* ─── Render / update ────────────────────────────────────────────────────── */
+/* ─── Render / update ────────────────────────────────────────────────────────────────── */
 function statLabel(siteName) {
   const qr  = displayName(siteName ?? "").toLowerCase().includes("qr");
   const vis = qr ? "Unieke scans" : "Unieke bezoekers";
@@ -1396,7 +1396,7 @@ function updateAllCards() {
   applySettings();
 }
 
-/* ─── Controls wiring ────────────────────────────────────────────────────── */
+/* ─── Controls wiring ────────────────────────────────────────────────────────────────── */
 function readInputs() {
   const fv = document.getElementById("from-dt").value;
   const tv = document.getElementById("to-dt").value;
@@ -1440,11 +1440,17 @@ document.getElementById("from-dt").addEventListener("change", () => { updateDate
 document.getElementById("to-dt").addEventListener("change",   () => { updateDateBtns(); readInputs(); });
 
 document.getElementById("reset-filter").addEventListener("click", () => {
-  document.getElementById("from-dt").value = "";
-  document.getElementById("to-dt").value   = "";
+  const now = new Date();
+  const toStr = now.getFullYear() + "-" +
+    String(now.getMonth() + 1).padStart(2, "0") + "-" +
+    String(now.getDate()).padStart(2, "0") + "T" +
+    String(now.getHours()).padStart(2, "0") + ":" +
+    String(now.getMinutes()).padStart(2, "0");
+  document.getElementById("from-dt").value = "2026-05-06T09:00";
+  document.getElementById("to-dt").value   = toStr;
   updateDateBtns();
-  fromDt = null;
-  toDt   = null;
+  fromDt = new Date("2026-05-06T09:00");
+  toDt   = new Date(toStr);
   updateAllCards();
 });
 
@@ -1526,7 +1532,7 @@ document.getElementById("nl-toggle").addEventListener("click", () => {
 });
 
 
-/* ─── Settings panel wiring ───────────────────────────────────────────────── */
+/* ─── Settings panel wiring ───────────────────────────────────────────────────────── */
 function openSettings() {
   document.getElementById("settings-panel").classList.add("open");
   document.getElementById("settings-backdrop").classList.add("open");
@@ -1599,7 +1605,7 @@ document.querySelectorAll("[data-chart-type]").forEach(btn => {
   });
 });
 
-/* ─── Load ─────────────────────────────────────────────────────────────────── */
+/* ─── Load ──────────────────────────────────────────────────────────────────────────────── */
 async function load() {
   const bust = Date.now();
   const [analyticsRes, formsRes] = await Promise.all([
