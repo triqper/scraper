@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WoonConnect flyer test analytics Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #f6f8fa;
+      --surface: #ffffff;
+      --border:  #d0d7de;
+      --text:    #1f2328;
+      --muted:   #656d76;
+      --accent:  #0969da;
+      --radius:  6px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Header ─────────────────────────────────── */
+    header {
+      background: #000000;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    header h1 { color: #fff; font-size: 1.5rem; font-weight: 600; }
+    #updated-at { color: #8b949e; font-size: 0.78rem; margin-left: auto; }
+    #leads-link { color: #8b949e; font-size: 0.82rem; text-decoration: none; white-space: nowrap; }
+    #leads-link:hover { color: #fff; }
+
+    /* ── Controls bar ────────────────────────────── */
+    .controls {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.6rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .ctrl-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    input[type="datetime-local"] {
+      position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+    }
+    .date-btn {
+      font-size: 0.88rem;
+      padding: 0.32rem 0.74rem;
+      line-height: 1.4;
+      box-sizing: border-box;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .date-btn:hover { border-color: var(--accent); }
+
+    .ctrl-sep { color: var(--border); padding: 0 0.1rem; }
+
+    .btn-reset {
+      font-size: 0.88rem;
+      padding: 0.32rem 0.74rem;
+      min-width: 7rem;
+      line-height: 1.4;
+      box-sizing: border-box;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .btn-reset:hover { background: var(--bg); color: var(--text); }
+
+    .btn-nl-toggle {
+      font-size: 0.88rem;
+      padding: 0.32rem 0.85rem;
+      min-width: 7rem;
+      line-height: 1.4;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn-nl-toggle:hover  { background: var(--bg); color: var(--text); }
+    .btn-nl-toggle.active { background: #1a7f37; color: #fff; border-color: #1a7f37; }
+
+    .mode-group {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-left: auto;
+    }
+    .mode-btn {
+      font-size: 0.88rem;
+      padding: 0.32rem 0.79rem;
+      min-width: 4.5rem;
+      line-height: 1.4;
+      text-align: center;
+      border: none;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .mode-btn:last-child { border-right: none; }
+    .mode-btn:hover { background: var(--bg); }
+    .mode-btn.active { background: var(--accent); color: #fff; }
+
+    /* ── Main layout ─────────────────────────────── */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    /* ── Site card ───────────────────────────────── */
+    .site-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .site-header {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: #f6f8fa;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .site-header h2 { font-size: 0.88rem; font-weight: 600; }
+    .site-header a { color: var(--muted); font-size: 0.76rem; text-decoration: none; margin-left: auto; }
+    .site-header a:hover { color: var(--accent); }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-box {
+      padding: 0.8rem 1.25rem;
+      border-right: 1px solid var(--border);
+    }
+    .stat-box:last-child { border-right: none; }
+    .stat-label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.15rem; }
+    .stat-value { font-size: 1.55rem; font-weight: 700; }
+    .sub-label { color: var(--muted); font-size: 0.7rem; margin-top: 0.1rem; }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--border);
+    }
+    .chart-box {
+      padding: 0.8rem 1.25rem;
+      border-right: 1px solid var(--border);
+      min-width: 0;
+    }
+    .chart-box:last-child { border-right: none; }
+    .chart-title { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .chart-wrap { position: relative; height: 120px; }
+    .chart-wrap canvas { width: 100% !important; height: 100% !important; }
+    .chart-note { color: var(--muted); font-size: 0.78rem; font-style: italic; padding-top: 0.5rem; }
+
+    .tables-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .table-box {
+      padding: 0.8rem 1.25rem;
+      border-right: 1px solid var(--border);
+      min-width: 0;
+    }
+    .table-box:last-child { border-right: none; }
+    .table-title { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; table-layout: fixed; }
+    thead th { text-align: left; color: var(--muted); font-size: 0.7rem; font-weight: 500; padding: 0.18rem 0.4rem; border-bottom: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    thead th:last-child { text-align: right; width: 4.5rem; }
+    tbody td { padding: 0.32rem 0.4rem; border-bottom: 1px solid #f0f0f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    tbody td:last-child { text-align: right; font-variant-numeric: tabular-nums; width: 4.5rem; }
+    tbody tr:last-child td { border-bottom: none; }
+    .bar-cell { position: relative; }
+    .bar-bg { position: absolute; left: 0; top: 2px; bottom: 2px; background: #dbeafe; border-radius: 2px; z-index: 0; }
+    .bar-text { position: relative; z-index: 1; }
+    .empty { color: var(--muted); font-style: italic; font-size: 0.8rem; }
+
+    /* ── Landen over tijd ────────────────────────── */
+    .country-chart-section {
+      border-top: 1px solid var(--border);
+      padding: 0.8rem 1.25rem;
+    }
+    .chart-wrap--country { height: 160px; }
+
+    /* ── Forms section ───────────────────────────── */
+    .forms-section {
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 180px 1fr;
+    }
+    .form-stat {
+      padding: 0.8rem 1.25rem;
+      border-right: 1px solid var(--border);
+    }
+    .form-stat .stat-value { font-size: 1.3rem; }
+    .form-stat .sub-label { color: var(--muted); font-size: 0.7rem; margin-top: 0.1rem; }
+    .form-chart-box { padding: 0.8rem 1.25rem; min-width: 0; }
+
+    /* ── Compare section ─────────────────────────── */
+    #compare {
+      max-width: 1100px;
+      margin: 1.25rem auto 0;
+      padding: 0 1rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .compare-group {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .compare-group-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      padding: 0.45rem 0.75rem;
+      background: #f6f8fa;
+      border-bottom: 1px solid var(--border);
+    }
+    .mini-card {
+      padding: 0.5rem 0.75rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .mini-card:last-child { border-bottom: none; }
+    .mini-card:hover { background: #eef2ff; }
+    .mini-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.3rem;
+    }
+    .mini-card-name { font-size: 0.72rem; color: var(--text); font-weight: 500; }
+    .mini-card-total { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .mini-chart-wrap { height: 50px; position: relative; }
+    .mini-chart-wrap canvas { width: 100% !important; height: 100% !important; }
+
+    /* ── Group layout ────────────────────────────── */
+    .group-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* ── Group header between full cards ─────────── */
+    .group-header {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      padding: 0.25rem 0 0.1rem;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: -0.5rem;
+    }
+
+    .controls-dates  { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+    .controls-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+    @media (max-width: 600px) {
+      header { flex-wrap: wrap; gap: 0.4rem; padding: 0.6rem 1rem; }
+      #updated-at { width: 100%; margin-left: 0; order: 3; }
+      #leads-link { order: 2; }
+      .controls { flex-direction: column; align-items: stretch; padding: 0.45rem 0.75rem; gap: 0.35rem; }
+      .controls-dates { gap: 0.35rem; }
+      .controls-dates .ctrl-label { display: none; }
+      .controls-dates .date-btn { flex: 1; font-size: 0.88rem; padding: 0.32rem 0.85rem; min-width: 0; line-height: 1.4; }
+      .btn-reset { font-size: 0.88rem; padding: 0.32rem 0.85rem; line-height: 1.4; }
+      .controls-actions { gap: 0.35rem; }
+      .btn-settings { margin-left: auto; }
+      .summary-row, .charts-row, .tables-row { grid-template-columns: 1fr; }
+      .stat-box, .chart-box, .table-box { border-right: none; border-bottom: 1px solid var(--border); }
+      .forms-section { grid-template-columns: 1fr; }
+      .form-stat { border-right: none; border-bottom: 1px solid var(--border); }
+      #compare { grid-template-columns: 1fr; }
+      .group-cards { grid-template-columns: 1fr; }
+    }
+
+    /* ── Settings panel ───────────────────────────────────── */
+    .settings-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.25);
+      z-index: 99;
+    }
+    .settings-backdrop.open { display: block; }
+    .settings-panel {
+      position: fixed; top: 0; right: -340px; bottom: 0;
+      width: 320px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      box-shadow: -4px 0 20px rgba(0,0,0,0.12);
+      z-index: 100;
+      transition: right 0.25s ease;
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+    }
+    .settings-panel.open { right: 0; }
+    .settings-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600; font-size: 0.9rem;
+    }
+    .settings-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 1.2rem; line-height: 1;
+      padding: 0.2rem 0.4rem;
+    }
+    .settings-close:hover { color: var(--text); }
+    .settings-section {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .settings-section-title {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--muted); margin-bottom: 0.75rem; font-weight: 600;
+    }
+    .settings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.35rem 0;
+      font-size: 0.82rem;
+    }
+    .settings-toggle {
+      position: relative; display: inline-block; width: 34px; height: 20px; flex-shrink: 0;
+    }
+    .settings-toggle input { opacity: 0; width: 0; height: 0; }
+    .settings-slider {
+      position: absolute; inset: 0; cursor: pointer;
+      background: var(--border); border-radius: 20px;
+      transition: background 0.2s;
+    }
+    .settings-slider::before {
+      content: ""; position: absolute;
+      width: 14px; height: 14px; left: 3px; bottom: 3px;
+      background: #fff; border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .settings-toggle input:checked + .settings-slider { background: #1a7f37; }
+    .settings-toggle input:checked + .settings-slider::before { transform: translateX(14px); }
+    .settings-date-field {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.3rem 0;
+    }
+    .settings-date-label {
+      font-size: 0.78rem; color: var(--muted); width: 2rem; flex-shrink: 0;
+    }
+    .settings-date-pick-btn {
+      flex: 1; font-size: 0.82rem; padding: 0.28rem 0.5rem;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--bg); color: var(--text);
+      cursor: pointer; font-family: inherit; text-align: left;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      line-height: 1.4;
+    }
+    .settings-date-pick-btn:hover { border-color: var(--accent); }
+    input[type="datetime-local"]#base-from-dt,
+    input[type="datetime-local"]#base-to-dt {
+      position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;
+    }
+    .settings-date-reset {
+      width: 100%; margin-top: 0.5rem;
+      font-size: 0.82rem; padding: 0.3rem 0.5rem;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); color: var(--muted);
+      cursor: pointer; font-family: inherit;
+    }
+    .settings-date-reset:hover { background: var(--bg); color: var(--text); }
+    .settings-date-warning {
+      font-size: 0.75rem; color: #9a6700;
+      background: #fff8c5; border: 1px solid #d4a72c;
+      border-radius: var(--radius);
+      padding: 0.3rem 0.5rem; margin: 0.1rem 0 0.3rem;
+      line-height: 1.4;
+    }
+    .settings-radio-group { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .settings-radio-btn {
+      flex: 1; text-align: center; padding: 0.35rem;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      font-size: 0.78rem; cursor: pointer; background: var(--bg);
+      color: var(--muted); transition: all 0.15s;
+    }
+    .settings-radio-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-settings {
+      font-size: 0.88rem; padding: 0.32rem 0.74rem;
+      min-width: 7rem; line-height: 1.4;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); color: var(--muted);
+      cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+    }
+    .btn-settings:hover { background: var(--bg); color: var(--text); }
+
+    @media (max-width: 600px) {
+      .settings-panel { width: 100%; right: -105%; }
+      .settings-header { font-size: 1.125rem; padding: 1.25rem 1.5rem; }
+      .settings-close { font-size: 1.5rem; }
+      .settings-section { padding: 1.25rem 1.5rem; }
+      .settings-section-title { font-size: 0.85rem; }
+      .settings-row { font-size: 1.025rem; padding: 0.44rem 0; }
+      .settings-toggle { width: 42px; height: 25px; }
+      .settings-slider::before { width: 17px; height: 17px; left: 4px; bottom: 4px; }
+      .settings-toggle input:checked + .settings-slider::before { transform: translateX(17px); }
+      .settings-radio-btn { font-size: 0.975rem; padding: 0.44rem; }
+      .settings-date-pick-btn { font-size: 1.025rem; padding: 0.35rem 0.6rem; }
+      .settings-date-reset { font-size: 1.025rem; padding: 0.375rem 0.6rem; }
+      .settings-date-label { font-size: 0.975rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>WoonConnect flyer test analytics</h1>
+  <span id="updated-at"></span>
+  <a href="./leads.html" target="_blank" rel="noopener" id="leads-link">Bekijk leads ↗</a>
+</header>
+
+<div class="controls">
+  <div class="controls-dates">
+    <div class="ctrl-group">
+      <span class="ctrl-label">Van</span>
+      <button class="date-btn" id="from-btn" type="button">Datum</button>
+      <input type="datetime-local" id="from-dt" />
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Tot</span>
+      <button class="date-btn" id="to-btn" type="button">Datum</button>
+      <input type="datetime-local" id="to-dt" />
+    </div>
+    <button class="btn-reset" id="reset-filter">Alles tonen</button>
+  </div>
+  <div class="controls-actions">
+    <button class="btn-nl-toggle active" id="nl-toggle">Alleen NL</button>
+    <div class="mode-group">
+      <button class="mode-btn active" data-mode="per-dag">Per dag</button>
+      <button class="mode-btn" data-mode="per-uur">Per uur</button>
+    </div>
+    <button class="btn-settings" id="settings-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="settings-btn-label">Instellingen</span>
+    </button>
+  </div>
+</div>
+
+<div class="settings-backdrop" id="settings-backdrop"></div>
+<div class="settings-panel" id="settings-panel">
+  <div class="settings-header">
+    <span>Instellingen</span>
+    <button class="settings-close" id="settings-close">✕</button>
+  </div>
+  <div class="settings-section">
+    <button class="settings-date-reset" id="s-default-layout" type="button" style="width:100%;margin-top:0">Default layout</button>
+    <div class="settings-row" style="margin-top:0.5rem">
+      <span style="font-weight:600">Alles tonen</span>
+      <label class="settings-toggle"><input type="checkbox" id="s-alles-tonen"><span class="settings-slider"></span></label>
+    </div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Statcards — Landing</div>
+    <div class="settings-row"><span>Unieke bezoekers</span><label class="settings-toggle"><input type="checkbox" id="s-vis-card"><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Pageviews</span><label class="settings-toggle"><input type="checkbox" id="s-pv-card" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Aanmeldingen</span><label class="settings-toggle"><input type="checkbox" id="s-form-card" checked><span class="settings-slider"></span></label></div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Statcards — QR Flyer</div>
+    <div class="settings-row"><span>Unieke scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-vis-card"><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Alle scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-pv-card" checked><span class="settings-slider"></span></label></div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Grafieken — Landing</div>
+    <div class="settings-row"><span>Unieke bezoekers</span><label class="settings-toggle"><input type="checkbox" id="s-vis-chart"><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Pageviews</span><label class="settings-toggle"><input type="checkbox" id="s-ctry-chart" checked><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Aanmeldingen</span><label class="settings-toggle"><input type="checkbox" id="s-form-chart"><span class="settings-slider"></span></label></div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Grafieken — QR Flyer</div>
+    <div class="settings-row"><span>Unieke scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-vis-chart"><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Alle scans</span><label class="settings-toggle"><input type="checkbox" id="s-scans-ctry-chart" checked><span class="settings-slider"></span></label></div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Tabellen</div>
+    <div class="settings-row"><span>Landen</span><label class="settings-toggle"><input type="checkbox" id="s-top-landen"><span class="settings-slider"></span></label></div>
+    <div class="settings-row"><span>Bronnen</span><label class="settings-toggle"><input type="checkbox" id="s-top-bronnen"><span class="settings-slider"></span></label></div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">Grafiektype</div>
+    <div class="settings-radio-group">
+      <div class="settings-radio-btn active" data-chart-type="bar">Staaf</div>
+      <div class="settings-radio-btn" data-chart-type="line">Lijn</div>
+    </div>
+  </div>
+  <div class="settings-section" style="margin-top:auto">
+    <div class="settings-section-title">Basis dataset</div>
+    <div class="settings-date-field">
+      <span class="settings-date-label">Van</span>
+      <button class="settings-date-pick-btn" id="base-from-btn" type="button">Alles</button>
+      <input type="datetime-local" id="base-from-dt" />
+    </div>
+    <div class="settings-date-field">
+      <span class="settings-date-label">Tot</span>
+      <button class="settings-date-pick-btn" id="base-to-btn" type="button">Alles</button>
+      <input type="datetime-local" id="base-to-dt" />
+    </div>
+    <div class="settings-date-warning">⚠️ Let op: alle data voor 6 mei is testdata.</div>
+    <button class="settings-date-reset" id="base-show-real" type="button">Alleen echte data</button>
+    <button class="settings-date-reset" id="base-show-testdata" type="button">Alleen testdata tonen</button>
+    <button class="settings-date-reset" id="base-reset" type="button">Alle data tonen</button>
+  </div>
+  <div class="settings-section">
+    <div style="font-size:0.78rem; color:var(--muted); line-height:1.6">
+      <div id="zero-point-at"></div>
+    </div>
+  </div>
+</div>
+
+<main id="main">
+  <p style="color:var(--muted)">Laden…</p>
+</main>
+
+<script>
+/* ─── State ────────────────────────────────────────────────────────── */
+const GROUPS = [
+  { title: "Interesse",    sites: ["woonstroom-interesse",    "woonstroom-interesse-landing"]    },
+  { title: "Aanbod",       sites: ["woonstroom-aanbod",       "woonstroom-aanbod-landing"]       },
+  { title: "Woningwaarde", sites: ["woonstroom-woningwaarde", "woonstroom-woningwaarde-landing"] },
+];
+const SITE_ORDER = GROUPS.flatMap(g => g.sites);
+
+const DISPLAY_NAMES = {
+  "woonstroom-aanbod":              "QR Flyer Aanbod",
+  "woonstroom-interesse":           "QR Flyer Interesse",
+  "woonstroom-woningwaarde":        "QR Flyer Woningwaarde",
+  "woonstroom-aanbod-landing":      "Aanbod Landing",
+  "woonstroom-interesse-landing":   "Interesse Landing",
+  "woonstroom-woningwaarde-landing":"Woningwaarde Landing",
+};
+function displayName(name) { return DISPLAY_NAMES[name] ?? name; }
+
+const COLORS = {
+  pageviews: { line: "#0969da", fill: "rgba(9,105,218,0.10)", bar: "rgba(9,105,218,0.55)" },
+  visitors:  { line: "#1a7f37", fill: "rgba(26,127,55,0.10)",  bar: "rgba(26,127,55,0.55)"  },
+};
+
+const COUNTRY_COLORS = [
+  "rgba(9,105,218,0.7)",
+  "rgba(26,127,55,0.7)",
+  "rgba(207,79,8,0.7)",
+  "rgba(130,50,180,0.7)",
+  "rgba(191,15,52,0.7)",
+];
+
+let siteData         = [];
+let formsData        = [];
+let earliestDataPoint = null;
+let mode             = "per-dag";
+let fromDt           = null;
+let toDt             = null;
+let baseFromDt       = null;
+let baseToDt         = null;
+let nlOnly           = true;
+
+const settings = {
+  showVisCard: false, showPvCard: true, showFormCard: true,
+  showScansVisCard: false, showScansPvCard: true,
+  showVisChart: false, showCtryChart: true, showFormChart: false,
+  showScansVisChart: false, showScansCtryChart: true,
+  showTopLanden: false, showTopBronnen: false,
+  chartType: "bar",
+};
+
+function applySettings() {
+  const map = {
+    "vis-card":          settings.showVisCard,
+    "pv-card":           settings.showPvCard,
+    "form-card":         settings.showFormCard,
+    "scans-vis-card":    settings.showScansVisCard,
+    "scans-pv-card":     settings.showScansPvCard,
+    "vis-chart":         settings.showVisChart,
+    "ctry-chart":        settings.showCtryChart,
+    "form-chart":        settings.showFormChart,
+    "scans-vis-chart":   settings.showScansVisChart,
+    "scans-ctry-chart":  settings.showScansCtryChart,
+    "top-landen":        settings.showTopLanden,
+    "top-bronnen":       settings.showTopBronnen,
+  };
+  for (const [key, visible] of Object.entries(map)) {
+    document.querySelectorAll(`[data-setting="${key}"]`).forEach(el => {
+      el.style.display = visible ? "" : "none";
+    });
+  }
+}
+
+let chartRefs        = {};   // { siteId: { vis: Chart|null } }
+let formChartRefs    = {};   // { formId: Chart|null }
+let miniChartRefs    = {};
+let countryChartRefs = {};   // { siteId: Chart|null }
+
+/* ─── Helpers ────────────────────────────────────────────────────────── */
+function fmt(n) { return (n ?? 0).toLocaleString("nl-NL"); }
+function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function shortDate(iso) {
+  return new Date(iso + "T00:00:00Z")
+    .toLocaleDateString("nl-NL", { day: "numeric", month: "short", timeZone: "UTC" });
+}
+function shortHour(isoStr) {
+  return new Date(isoStr).toLocaleString("nl-NL", {
+    day: "numeric", month: "short",
+    hour: "2-digit", minute: "2-digit",
+    timeZone: "Europe/Amsterdam",
+  });
+}
+
+/* ─── Data selectors ────────────────────────────────────────────────────── */
+
+function inRange(dtStr) {
+  // dtStr is an ISO string with timezone (hour entries) or "YYYY-MM-DD" (day entries)
+  const t = new Date(dtStr.length === 10 ? dtStr + "T00:00:00Z" : dtStr);
+  if (baseFromDt && t < baseFromDt) return false;
+  if (baseToDt   && t >= baseToDt)  return false;
+  if (fromDt     && t < fromDt)     return false;
+  if (toDt       && t >= toDt)      return false;
+  return true;
+}
+
+function filteredHourly(site) {
+  return (site.hourly ?? []).filter(r => inRange(r.hour));
+}
+
+function filteredDaily(site) {
+  const effFrom = baseFromDt && fromDt ? (baseFromDt > fromDt ? baseFromDt : fromDt) : (baseFromDt ?? fromDt);
+  const effTo   = baseToDt   && toDt   ? (baseToDt   < toDt   ? baseToDt   : toDt)   : (baseToDt   ?? toDt);
+  if (!effFrom && !effTo) return site.daily ?? [];
+  const fromDate = effFrom ? effFrom.toISOString().slice(0, 10) : null;
+  const toDate   = effTo   ? new Date(effTo.getTime() - 1).toISOString().slice(0, 10) : null;
+  return (site.daily ?? []).filter(r =>
+    (!fromDate || r.date >= fromDate) &&
+    (!toDate   || r.date <= toDate)
+  );
+}
+
+// Scraper detecteert pageviews ~1 uur na de echte view; verschuif terug naar view-tijdstip
+function viewHourKey(runHour) {
+  const t = new Date(new Date(runHour).getTime() - 3600000);
+  const y  = t.getUTCFullYear();
+  const mo = String(t.getUTCMonth() + 1).padStart(2, "0");
+  const d  = String(t.getUTCDate()).padStart(2, "0");
+  const h  = String(t.getUTCHours()).padStart(2, "0");
+  return `${y}-${mo}-${d}T${h}:00:00+00:00`;
+}
+
+// Aggregate country_hourly / source_hourly within the selected range
+function aggregateHourlyDeltas(rows) {
+  const agg = {};
+  for (const row of rows) {
+    if (!inRange(viewHourKey(row.hour))) continue;
+    for (const [k, v] of Object.entries(row.deltas ?? {})) {
+      agg[k] = (agg[k] ?? 0) + v;
+    }
+  }
+  return agg;
+}
+
+function getCountries(site) {
+  const agg = (!fromDt && !toDt && !nlOnly)
+    ? Object.fromEntries((site.top_countries ?? []).map(r => [r.country, r.pageviews]))
+    : aggregateHourlyDeltas(site.country_hourly ?? []);
+  const entries = nlOnly
+    ? Object.entries(agg).filter(([c]) => isNL(c))
+    : Object.entries(agg).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  return entries.map(([country, pageviews]) => ({ country, pageviews }));
+}
+
+function getSources(site) {
+  if (!fromDt && !toDt) {
+    return site.top_sources ?? [];
+  }
+  const agg = aggregateHourlyDeltas(site.source_hourly ?? []);
+  return Object.entries(agg)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([source, referrals]) => ({ source, referrals }));
+}
+
+const EMPTY_CHART_DATA = { labels: [], datasets: [] };
+
+function getCountryChartData(site) {
+  const hourly = (site.country_hourly ?? []).filter(r => inRange(viewHourKey(r.hour)));
+  if (hourly.length === 0) return EMPTY_CHART_DATA;
+
+  // Top landen op basis van totaal in gefilterde periode (alleen NL als nlOnly)
+  const totals = {};
+  for (const row of hourly) {
+    for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      if (nlOnly && !isNL(c)) continue;
+      totals[c] = (totals[c] ?? 0) + v;
+    }
+  }
+  const topCountries = Object.entries(totals)
+    .sort((a, b) => b[1] - a[1]).slice(0, 5).map(([c]) => c);
+  if (topCountries.length === 0) return EMPTY_CHART_DATA;
+
+  // Per tijdseenheid aggregeren op view-tijdstip
+  const buckets = {};
+  for (const row of hourly) {
+    const vh  = viewHourKey(row.hour);
+    const key = mode === "per-uur" ? vh : vh.slice(0, 10);
+    if (!buckets[key]) buckets[key] = {};
+    for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      buckets[key][c] = (buckets[key][c] ?? 0) + v;
+    }
+  }
+
+  let allKeys;
+  if (mode === "per-uur") {
+    const fromMs = fromDt ? fromDt.getTime() : new Date(viewHourKey(hourly[0].hour)).getTime();
+    const toMs   = toDt   ? toDt.getTime()   : Date.now();
+    allKeys = generateHourlyRange(fromMs, toMs);
+  } else {
+    const firstVh = viewHourKey(hourly[0].hour);
+    const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : firstVh.slice(0, 10);
+    const toDate   = toDt   ? toDt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    allKeys = generateDailyRange(fromDate, toDate);
+  }
+
+  return {
+    labels: allKeys.map(k => mode === "per-uur" ? shortHour(k) : shortDate(k)),
+    datasets: topCountries.map((country, i) => ({
+      label: country,
+      data:  allKeys.map(k => (buckets[k] ?? {})[country] ?? 0),
+      backgroundColor: COUNTRY_COLORS[i % COUNTRY_COLORS.length],
+    })),
+  };
+}
+
+function makeStackedChart(canvas, labels, datasets) {  return new Chart(canvas, {
+    type: "bar",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "bottom", labels: { font: { size: 10 }, padding: 8, boxWidth: 12 } },
+        tooltip: { mode: "index", intersect: false },
+      },
+      scales: {
+        x: {
+          stacked: true,
+          ticks: { font: { size: 10 }, maxRotation: 0, maxTicksLimit: mode === "per-uur" ? 6 : 7 },
+          grid: { display: false },
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          ticks: { font: { size: 10 }, precision: 0 },
+          grid: { color: "rgba(0,0,0,0.05)" },
+        },
+      },
+    },
+  });
+}
+
+function renderCountryChart(canvas, ctryData) {
+  if (settings.chartType === "line") {
+    const totalData = ctryData.labels.map((_, i) =>
+      ctryData.datasets.reduce((s, ds) => s + (ds.data[i] ?? 0), 0)
+    );
+    return makeChart(canvas, "line", ctryData.labels, totalData, COLORS.pageviews);
+  }
+  return makeStackedChart(canvas, ctryData.labels, ctryData.datasets);
+}
+
+function getChartData(site) {
+  if (nlOnly) {
+    // Gebruik country_hourly NL-deltas direct als databron (run-tijdstip ≈ view-tijdstip)
+    const fromMs   = fromDt ? fromDt.getTime() : Date.now();
+    const toMs     = toDt   ? toDt.getTime()   : Date.now();
+    const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const toDate   = toDt   ? toDt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+
+    if (mode === "per-uur") {
+      const nlHour    = nlPerHour(site);
+      const nonNLHour = nonNLPerHour(site);
+      const visRows   = filteredHourly(site);
+      const visLookup = Object.fromEntries(visRows.map(r => [r.hour, r.visitors]));
+      const allHours  = generateHourlyRange(fromMs, toMs);
+      const pvData    = allHours.map(h => nlHour[h] ?? 0);
+      const visData   = allHours.map(h => Math.max(0, (visLookup[h] ?? 0) - (nonNLHour[h] ?? 0)));
+      return { type: "bar", labels: allHours.map(h => shortHour(h)), pvData, visData };
+    }
+    const nlDay     = nlPerDay(site);
+    const nonNLDay  = nonNLPerDay(site);
+    const visRows   = filteredDaily(site);
+    const visLookup = Object.fromEntries(visRows.map(r => [r.date, r.visitors]));
+    const allDates  = generateDailyRange(fromDate, toDate);
+    if (mode === "totaal") {
+      let pvS = 0, visS = 0;
+      const pvData  = allDates.map(d => { pvS  += nlDay[d] ?? 0; return pvS; });
+      const visData = allDates.map(d => { visS += Math.max(0, (visLookup[d] ?? 0) - (nonNLDay[d] ?? 0)); return visS; });
+      return { type: "line", labels: allDates.map(d => shortDate(d)), pvData, visData };
+    }
+    const pvData  = allDates.map(d => nlDay[d] ?? 0);
+    const visData = allDates.map(d => Math.max(0, (visLookup[d] ?? 0) - (nonNLDay[d] ?? 0)));
+    return { type: "bar", labels: allDates.map(d => shortDate(d)), pvData, visData };
+  }
+
+  if (mode === "per-uur") {
+    const rows   = filteredHourly(site);
+    const lookup = Object.fromEntries(rows.map(r => [r.hour, r]));
+    const fromMs = fromDt ? fromDt.getTime() : (rows.length ? new Date(rows[0].hour).getTime() : Date.now());
+    const toMs   = toDt   ? toDt.getTime()   : Date.now();
+    const allHours = generateHourlyRange(fromMs, toMs);
+    return {
+      type:    "bar",
+      labels:  allHours.map(h => shortHour(h)),
+      pvData:  allHours.map(h => (lookup[h] ?? {pageviews: 0}).pageviews),
+      visData: allHours.map(h => (lookup[h] ?? {visitors:  0}).visitors),
+    };
+  }
+
+  const rows   = filteredDaily(site);
+  const lookup = Object.fromEntries(rows.map(r => [r.date, r]));
+  const fromDate = fromDt ? fromDt.toISOString().slice(0, 10)
+                          : (rows.length ? rows[0].date : new Date().toISOString().slice(0, 10));
+  const toDate   = toDt   ? toDt.toISOString().slice(0, 10)
+                          : new Date().toISOString().slice(0, 10);
+  const allDates = generateDailyRange(fromDate, toDate);
+
+  if (mode === "totaal") {
+    let pvSum = 0, visSum = 0;
+    return {
+      type:    "line",
+      labels:  allDates.map(d => shortDate(d)),
+      pvData:  allDates.map(d => { pvSum  += (lookup[d]?.pageviews ?? 0); return pvSum;  }),
+      visData: allDates.map(d => { visSum += (lookup[d]?.visitors  ?? 0); return visSum; }),
+    };
+  }
+
+  return {
+    type:    "bar",
+    labels:  allDates.map(d => shortDate(d)),
+    pvData:  allDates.map(d => (lookup[d]?.pageviews ?? 0)),
+    visData: allDates.map(d => (lookup[d]?.visitors  ?? 0)),
+  };
+}
+
+function filteredFormDaily(form) {
+  const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : null;
+  const toDate   = toDt   ? toDt.toISOString().slice(0, 10) : null;
+  return (form.daily ?? []).filter(d =>
+    (!fromDate || d.date >= fromDate) &&
+    (!toDate   || d.date <= toDate)
+  );
+}
+
+function filteredFormHourly(form) {
+  return (form.hourly ?? []).filter(r => inRange(r.hour));
+}
+
+function filteredFormTotal(form) {
+  if (mode === "per-uur") return filteredFormHourly(form).reduce((s, r) => s + r.count, 0);
+  return filteredFormDaily(form).reduce((s, d) => s + d.count, 0);
+}
+
+function getFormChartData(form) {
+  if (mode === "per-uur") {
+    const rows   = filteredFormHourly(form);
+    const lookup = Object.fromEntries(rows.map(r => [r.hour, r.count]));
+    const fromMs = fromDt ? fromDt.getTime() : (rows.length ? new Date(rows[0].hour).getTime() : Date.now());
+    const toMs   = toDt   ? toDt.getTime()   : Date.now();
+    const allHours = generateHourlyRange(fromMs, toMs);
+    return { labels: allHours.map(h => shortHour(h)), values: allHours.map(h => lookup[h] ?? 0) };
+  }
+  const rows     = filteredFormDaily(form);
+  const lookup   = Object.fromEntries(rows.map(r => [r.date, r.count]));
+  const fromDate = fromDt ? fromDt.toISOString().slice(0, 10) : (rows.length ? rows[0].date : new Date().toISOString().slice(0, 10));
+  const toDate   = toDt   ? toDt.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+  const allDates = generateDailyRange(fromDate, toDate);
+  return { labels: allDates.map(d => shortDate(d)), values: allDates.map(d => lookup[d] ?? 0) };
+}
+
+/* ─── NL-only helpers ────────────────────────────────────────────────────── */
+function isNL(country) {
+  const c = (country ?? "").toLowerCase();
+  return c === "nl" || c === "netherlands" || c === "nederland";
+}
+
+function nlPerHour(site) {
+  const result = {};
+  for (const row of (site.country_hourly ?? [])) {
+    if (!inRange(viewHourKey(row.hour))) continue;
+    const key = viewHourKey(row.hour);
+    for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      if (isNL(c)) result[key] = (result[key] ?? 0) + v;
+    }
+  }
+  return result;
+}
+
+function nlPerDay(site) {
+  const result = {};
+  for (const row of (site.country_hourly ?? [])) {
+    if (!inRange(viewHourKey(row.hour))) continue;
+    const day = viewHourKey(row.hour).slice(0, 10);
+    for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      if (isNL(c)) result[day] = (result[day] ?? 0) + v;
+    }
+  }
+  return result;
+}
+
+function nonNLPerHour(site) {
+  const result = {};
+  for (const row of (site.country_hourly ?? [])) {
+    if (!inRange(viewHourKey(row.hour))) continue;
+    const key = viewHourKey(row.hour);
+    for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      if (!isNL(c)) result[key] = (result[key] ?? 0) + v;
+    }
+  }
+  return result;
+}
+
+function nonNLPerDay(site) {
+  const result = {};
+  for (const row of (site.country_hourly ?? [])) {
+    if (!inRange(viewHourKey(row.hour))) continue;
+    const day = viewHourKey(row.hour).slice(0, 10);
+    for (const [c, v] of Object.entries(row.deltas ?? {})) {
+      if (!isNL(c)) result[day] = (result[day] ?? 0) + v;
+    }
+  }
+  return result;
+}
+
+function getTotals(site) {
+  if (nlOnly) {
+    const pv = Object.values(
+      mode === "per-uur" ? nlPerHour(site) : nlPerDay(site)
+    ).reduce((s, v) => s + v, 0);
+    const nonNL = Object.values(
+      mode === "per-uur" ? nonNLPerHour(site) : nonNLPerDay(site)
+    ).reduce((s, v) => s + v, 0);
+    const baseRows = mode === "per-uur" ? filteredHourly(site) : filteredDaily(site);
+    const baseVis  = baseRows.reduce((s, r) => s + r.visitors, 0);
+    return { pv, vis: Math.max(0, baseVis - nonNL) };
+  }
+  if (mode === "per-uur") {
+    const rows = filteredHourly(site);
+    return {
+      pv:  rows.reduce((s, r) => s + r.pageviews, 0),
+      vis: rows.reduce((s, r) => s + r.visitors,  0),
+    };
+  }
+  const rows = filteredDaily(site);
+  return {
+    pv:  rows.reduce((s, r) => s + r.pageviews, 0),
+    vis: rows.reduce((s, r) => s + r.visitors,  0),
+  };
+}
+
+/* ─── Range generators (vult ontbrekende dagen/uren op met 0) ── */
+function generateDailyRange(fromDate, toDate) {
+  const dates = [];
+  const cur = new Date(fromDate + "T00:00:00Z");
+  const end = new Date(toDate  + "T00:00:00Z");
+  while (cur <= end) {
+    const y  = cur.getUTCFullYear();
+    const mo = String(cur.getUTCMonth() + 1).padStart(2, "0");
+    const d  = String(cur.getUTCDate()).padStart(2, "0");
+    dates.push(`${y}-${mo}-${d}`);
+    cur.setUTCDate(cur.getUTCDate() + 1);
+  }
+  return dates;
+}
+
+function generateHourlyRange(fromMs, toMs) {
+  const hours = [];
+  const cur = new Date(fromMs);
+  cur.setUTCMinutes(0, 0, 0); // afronden naar heel uur
+  while (cur.getTime() <= toMs) {
+    const y  = cur.getUTCFullYear();
+    const mo = String(cur.getUTCMonth() + 1).padStart(2, "0");
+    const d  = String(cur.getUTCDate()).padStart(2, "0");
+    const h  = String(cur.getUTCHours()).padStart(2, "0");
+    hours.push(`${y}-${mo}-${d}T${h}:00:00+00:00`);
+    cur.setUTCHours(cur.getUTCHours() + 1);
+  }
+  return hours;
+}
+
+/* ─── Chart data ────────────────────────────────────────────────────────── */
+function makeChart(canvas, type, labels, values, color) {
+  const isBar = type === "bar";
+  return new Chart(canvas, {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        borderColor:      isBar ? color.bar  : color.line,
+        backgroundColor:  isBar ? color.bar  : color.fill,
+        borderWidth:      isBar ? 0 : 2,
+        borderRadius:     isBar ? 3 : 0,
+        pointRadius:      0,
+        pointHoverRadius: 5,
+        fill:    !isBar,
+        tension: 0.3,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 150 },
+      plugins: {
+        legend: { display: false },
+        tooltip: { mode: "index", intersect: false },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 10 }, maxRotation: 0, maxTicksLimit: mode === "per-uur" ? 6 : 7 },
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: "#f0f0f0" },
+          ticks: { font: { size: 10 }, precision: 0 },
+        },
+      },
+    },
+  });
+}
+
+/* ─── Mini chart (sparkline) ──────────────────────────────────────────── */
+function makeMiniChart(canvas, labels, values) {
+  return new Chart(canvas, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        borderColor: COLORS.pageviews.line,
+        backgroundColor: COLORS.pageviews.fill,
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.4,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 150 },
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: { display: false },
+        y: { display: false, beginAtZero: true },
+      },
+    },
+  });
+}
+
+/* ─── Compare section ────────────────────────────────────────────────────── */
+function renderCompare() {
+  const el = document.getElementById("compare");
+  el.innerHTML = "";
+
+  // Verwijder oude mini-chart instanties
+  for (const id of Object.keys(miniChartRefs)) {
+    if (miniChartRefs[id]) { miniChartRefs[id].destroy(); miniChartRefs[id] = null; }
+  }
+
+  const toChart = []; // na DOM-insert in één rAF renderen
+
+  for (const group of GROUPS) {
+    const col = document.createElement("div");
+    col.className = "compare-group";
+
+    const titleEl = document.createElement("div");
+    titleEl.className = "compare-group-title";
+    titleEl.textContent = group.title;
+    col.appendChild(titleEl);
+
+    for (const siteName of group.sites) {
+      const site = siteData.find(s => s.name === siteName);
+      if (!site) continue;
+
+      const label    = displayName(siteName);
+      const { labels, pvData } = getChartData(site);
+      const total    = getTotals(site).pv;
+      const canvasId = `mini-${site.id}`;
+
+      const card = document.createElement("div");
+      card.className = "mini-card";
+      card.title     = `Ga naar ${site.name}`;
+      card.innerHTML = `
+        <div class="mini-card-header">
+          <span class="mini-card-name">${esc(label)}</span>
+          <span class="mini-card-total">${fmt(total)} pv</span>
+        </div>
+        <div class="mini-chart-wrap">
+          ${labels.length
+            ? `<canvas id="${canvasId}"></canvas>`
+            : `<span style="font-size:0.7rem;color:var(--muted);font-style:italic">Geen data</span>`}
+        </div>
+      `;
+      card.addEventListener("click", () => {
+        document.getElementById(`card-${site.id}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      col.appendChild(card);
+
+      if (labels.length) {
+        toChart.push({ canvasId, labels, pvData, siteId: site.id });
+      }
+    }
+
+    el.appendChild(col); // kolom in DOM vóór charts renderen
+  }
+
+  // Alle kolommen staan nu in de DOM; render charts in één frame
+  requestAnimationFrame(() => {
+    for (const { canvasId, labels, pvData, siteId } of toChart) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) continue;
+      miniChartRefs[siteId] = makeMiniChart(canvas, labels, pvData);
+    }
+  });
+}
+
+function updateMiniCharts() {
+  renderCompare();
+}
+
+/* ─── Bar table ───────────────────────────────────────────────────────── */
+function barTable(rows, labelKey, valueKey, colA, colB) {
+  if (!rows || rows.length === 0) return `<p class="empty">Geen data in deze periode.</p>`;
+  const max = Math.max(...rows.map(r => r[valueKey] ?? 0), 1);
+  let html = `<table><thead><tr><th>${colA}</th><th>${colB}</th></tr></thead><tbody>`;
+  for (const row of rows) {
+    const val = row[valueKey] ?? 0;
+    const pct = Math.round((val / max) * 100);
+    html += `<tr>
+      <td class="bar-cell">
+        <div class="bar-bg" style="width:${pct}%"></div>
+        <span class="bar-text">${esc(String(row[labelKey] ?? ""))}</span>
+      </td>
+      <td>${fmt(val)}</td>
+    </tr>`;
+  }
+  return html + `</tbody></table>`;
+}
+
+/* ─── Render / update ────────────────────────────────────────────────────── */
+function statLabel(siteName) {
+  const qr  = displayName(siteName ?? "").toLowerCase().includes("qr");
+  const vis = qr ? "Unieke scans" : "Unieke bezoekers";
+  const pv  = qr ? "Alle scans"   : "Pageviews";
+  return [pv, vis];
+}
+
+function fmtStat(n) { return n === null ? "—" : fmt(n); }
+
+function renderSite(site) {
+  const card = document.createElement("div");
+  card.className = "site-card";
+  card.id = `card-${site.id}`;
+
+  const siteForms = formsData.filter(f => f.site_name === site.name);
+  const isQR    = displayName(site.name).toLowerCase().includes("qr");
+  const totals = getTotals(site);
+  const { type: rawType, labels, pvData, visData } = getChartData(site);
+  const type = settings.chartType || rawType;
+  const [pvLbl, visLbl] = statLabel(site.name);
+  const hasHourly = (site.hourly ?? []).length > 0;
+  const noChart   = mode === "per-uur" ? (!hasHourly || labels.length === 0) : labels.length === 0;
+  const noteMsg   = mode === "per-uur" && !hasHourly
+    ? "Nog geen uurdata — beschikbaar na de volgende scraper-run."
+    : "Geen data in deze periode.";
+
+  card.innerHTML = `
+    <div class="site-header">
+      <h2>${esc(displayName(site.name))}</h2>
+      ${!isQR ? `<a href="https://triqper.github.io/Test-ai/" target="_blank" rel="noopener">Bekijk pagina</a>` : ""}
+    </div>
+    <div class="summary-row">
+      <div class="stat-box" data-setting="${isQR ? 'scans-vis-card' : 'vis-card'}">
+        <div class="stat-label" id="lbl-vis-${site.id}">${esc(visLbl)}</div>
+        <div class="stat-value" id="val-vis-${site.id}">${fmtStat(totals.vis)}</div>
+      </div>
+      <div class="stat-box" data-setting="${isQR ? 'scans-pv-card' : 'pv-card'}">
+        <div class="stat-label" id="lbl-pv-${site.id}">${esc(pvLbl)}</div>
+        <div class="stat-value" id="val-pv-${site.id}">${fmtStat(totals.pv)}</div>
+      </div>
+      ${siteForms.map(f => `
+      <div class="stat-box" data-setting="form-card">
+        <div class="stat-label">Aanmeldingen</div>
+        <div class="stat-value" id="form-val-${f.id}">${fmt(filteredFormTotal(f))} <a href="./leads.html" style="font-size:0.7rem;font-weight:400;color:var(--accent);text-decoration:none;vertical-align:middle">Bekijk</a></div>
+      </div>`).join("")}
+    </div>
+    <div class="country-chart-section" data-setting="${isQR ? 'scans-vis-chart' : 'vis-chart'}">
+      <div class="table-title">${isQR ? "Unieke scans" : "Unieke bezoekers"}</div>
+      <div class="chart-wrap chart-wrap--country" id="wrap-vis-${site.id}">
+        ${noChart ? `<p class="chart-note">${noteMsg}</p>` : `<canvas id="vis-${site.id}"></canvas>`}
+      </div>
+    </div>
+    <div class="country-chart-section" data-setting="${isQR ? 'scans-ctry-chart' : 'ctry-chart'}">
+      <div class="table-title">${isQR ? "Alle scans" : "Pageviews"}</div>
+      <div class="chart-wrap chart-wrap--country" id="wrap-ctry-chart-${site.id}">
+        <canvas id="ctry-chart-${site.id}"></canvas>
+      </div>
+    </div>
+    ${siteForms.map(f => `
+    <div class="country-chart-section" data-setting="form-chart">
+      <div class="chart-title" id="form-chart-title-${f.id}">Aanmeldingen</div>
+      <div class="chart-wrap chart-wrap--country" id="form-wrap-${f.id}">
+        ${(() => { const d = getFormChartData(f); return `<canvas id="form-chart-${f.id}"></canvas>`; })()}
+      </div>
+    </div>`).join("")}
+    <div class="country-chart-section" data-setting="top-landen">
+      <div class="table-title">Landen</div>
+      <div id="tbl-ctry-${site.id}">${barTable(getCountries(site), "country", "pageviews", "Land", "Pageviews")}</div>
+    </div>
+    <div class="country-chart-section" data-setting="top-bronnen">
+      <div class="table-title">Bronnen</div>
+      <div id="tbl-src-${site.id}">${barTable(getSources(site), "source", "referrals", "Bron", "Verwijzingen")}</div>
+    </div>
+  `;
+
+  if (!noChart) {
+    requestAnimationFrame(() => {
+      const c2 = card.querySelector(`#vis-${site.id}`);
+      chartRefs[site.id] = {
+        vis: c2 ? makeChart(c2, type, labels, visData, COLORS.visitors) : null,
+      };
+    });
+  } else {
+    chartRefs[site.id] = { vis: null };
+  }
+
+  // Landen-over-tijd grafiek
+  requestAnimationFrame(() => {
+    const wrap = card.querySelector(`#wrap-ctry-chart-${site.id}`);
+    if (!wrap) return;
+    const ctryData = getCountryChartData(site);
+    wrap.innerHTML = `<canvas id="ctry-chart-${site.id}"></canvas>`;
+    const canvas = wrap.querySelector(`#ctry-chart-${site.id}`);
+    if (canvas) {
+      if (countryChartRefs[site.id]) { countryChartRefs[site.id].destroy(); }
+      countryChartRefs[site.id] = renderCountryChart(canvas, ctryData);
+    }
+  });
+
+  // Formuliergrafieken
+  requestAnimationFrame(() => {
+    for (const f of siteForms) {
+      const canvas = card.querySelector(`#form-chart-${f.id}`);
+      if (!canvas) continue;
+      const { labels, values } = getFormChartData(f);
+      if (formChartRefs[f.id]) { formChartRefs[f.id].destroy(); }
+      formChartRefs[f.id] = makeChart(canvas, settings.chartType || "bar", labels, values, {
+        line: "#7c3aed", fill: "rgba(124,58,237,0.10)", bar: "rgba(124,58,237,0.55)",
+      });
+    }
+    applySettings();
+  });
+
+  return card;
+}
+
+function updateAllCards() {
+  const el = id => document.getElementById(id);
+
+  for (const site of siteData) {
+    // Summary numbers
+    const totals         = getTotals(site);
+    const [pvLbl, visLbl] = statLabel(site.name);
+    if (el(`lbl-pv-${site.id}`))  el(`lbl-pv-${site.id}`).textContent  = pvLbl;
+    if (el(`lbl-vis-${site.id}`)) el(`lbl-vis-${site.id}`).textContent = visLbl;
+    if (el(`val-pv-${site.id}`))  el(`val-pv-${site.id}`).textContent  = fmtStat(totals.pv);
+    if (el(`val-vis-${site.id}`)) el(`val-vis-${site.id}`).textContent = fmtStat(totals.vis);
+
+    // Tables
+    const ctryEl = el(`tbl-ctry-${site.id}`);
+    const srcEl  = el(`tbl-src-${site.id}`);
+    if (ctryEl) ctryEl.innerHTML = barTable(getCountries(site), "country", "pageviews", "Land", "Pageviews");
+    if (srcEl)  srcEl.innerHTML  = barTable(getSources(site),   "source",  "referrals", "Bron", "Verwijzingen");
+
+    // Landen-over-tijd grafiek
+    if (countryChartRefs[site.id]) { countryChartRefs[site.id].destroy(); countryChartRefs[site.id] = null; }
+    const wCtry = el(`wrap-ctry-chart-${site.id}`);
+    if (wCtry) {
+      const ctryData = getCountryChartData(site);
+      wCtry.innerHTML = `<canvas id="ctry-chart-${site.id}"></canvas>`;
+      const ctryCanvas = el(`ctry-chart-${site.id}`);
+      if (ctryCanvas) countryChartRefs[site.id] = renderCountryChart(ctryCanvas, ctryData);
+    }
+
+    // Bezoekers grafiek: destroy old, recreate
+    const refs = chartRefs[site.id] ?? {};
+    if (refs.vis) { refs.vis.destroy(); refs.vis = null; }
+    chartRefs[site.id] = { vis: null };
+
+    const hasHourly = (site.hourly ?? []).length > 0;
+    const { type: rawType2, labels, visData } = getChartData(site);
+    const type = settings.chartType || rawType2;
+    const noChart = mode === "per-uur" ? (!hasHourly || labels.length === 0) : labels.length === 0;
+    const noteMsg = mode === "per-uur" && !hasHourly
+      ? "Nog geen uurdata — beschikbaar na de volgende scraper-run."
+      : "Geen data in deze periode.";
+
+    const wVis = el(`wrap-vis-${site.id}`);
+
+    if (noChart) {
+      if (wVis) wVis.innerHTML = `<p class="chart-note">${noteMsg}</p>`;
+      continue;
+    }
+
+    if (wVis) wVis.innerHTML = `<canvas id="vis-${site.id}"></canvas>`;
+
+    const c2 = el(`vis-${site.id}`);
+    chartRefs[site.id] = {
+      vis: c2 ? makeChart(c2, type, labels, visData, COLORS.visitors) : null,
+    };
+  }
+
+  // Formulieren bijwerken
+  for (const f of formsData) {
+    const valEl   = el(`form-val-${f.id}`);
+    const wrapEl  = el(`form-wrap-${f.id}`);
+    const titleEl = el(`form-chart-title-${f.id}`);
+    if (valEl)   valEl.innerHTML = `${fmt(filteredFormTotal(f))} <a href="./leads.html" style="font-size:0.7rem;font-weight:400;color:var(--accent);text-decoration:none;vertical-align:middle">Bekijk</a>`;
+    if (titleEl) titleEl.textContent = "Aanmeldingen";
+    if (!wrapEl) continue;
+
+    if (formChartRefs[f.id]) { formChartRefs[f.id].destroy(); formChartRefs[f.id] = null; }
+
+    const { labels, values } = getFormChartData(f);
+    wrapEl.innerHTML = `<canvas id="form-chart-${f.id}"></canvas>`;
+    const canvas = el(`form-chart-${f.id}`);
+    if (canvas) {
+      formChartRefs[f.id] = makeChart(canvas, settings.chartType || "bar", labels, values,
+        { line: "#7c3aed", fill: "rgba(124,58,237,0.10)", bar: "rgba(124,58,237,0.55)" }
+      );
+    }
+  }
+  applySettings();
+}
+
+/* ─── Controls wiring ────────────────────────────────────────────────────── */
+function readInputs() {
+  const fv = document.getElementById("from-dt").value;
+  const tv = document.getElementById("to-dt").value;
+  fromDt = fv ? new Date(fv) : null;
+  toDt   = tv ? new Date(tv) : null;
+  updateAllCards();
+}
+
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function fmtDateBtn(isoStr) {
+  if (!isoStr) return null;
+  const d   = new Date(isoStr);
+  const wd  = d.toLocaleDateString("nl-NL", { weekday: "short" }).replace(".", "");
+  const day = d.getDate();
+  const mo  = d.toLocaleDateString("nl-NL", { month: "long" });
+  const hh  = String(d.getHours()).padStart(2, "0");
+  const mm  = String(d.getMinutes()).padStart(2, "0");
+  return `${cap(wd)} ${day} ${cap(mo)} ${hh}:${mm}`;
+}
+function updateDateBtns() {
+  const fv = document.getElementById("from-dt").value;
+  const tv = document.getElementById("to-dt").value;
+  document.getElementById("from-btn").textContent = fmtDateBtn(fv) ?? "Van";
+  document.getElementById("to-btn").textContent   = fmtDateBtn(tv) ?? "Tot";
+}
+
+document.getElementById("from-btn").addEventListener("click", () => {
+  const inp = document.getElementById("from-dt");
+  inp.style.pointerEvents = "auto";
+  inp.showPicker?.();
+  inp.style.pointerEvents = "";
+});
+document.getElementById("to-btn").addEventListener("click", () => {
+  const inp = document.getElementById("to-dt");
+  inp.style.pointerEvents = "auto";
+  inp.showPicker?.();
+  inp.style.pointerEvents = "";
+});
+
+document.getElementById("from-dt").addEventListener("change", () => { updateDateBtns(); readInputs(); });
+document.getElementById("to-dt").addEventListener("change",   () => { updateDateBtns(); readInputs(); });
+
+document.getElementById("reset-filter").addEventListener("click", () => {
+  const now = new Date();
+  const toStr = now.getFullYear() + "-" +
+    String(now.getMonth() + 1).padStart(2, "0") + "-" +
+    String(now.getDate()).padStart(2, "0") + "T" +
+    String(now.getHours()).padStart(2, "0") + ":" +
+    String(now.getMinutes()).padStart(2, "0");
+  document.getElementById("from-dt").value = "2026-05-06T09:00";
+  document.getElementById("to-dt").value   = toStr;
+  updateDateBtns();
+  fromDt = new Date("2026-05-06T09:00");
+  toDt   = new Date(toStr);
+  updateAllCards();
+});
+
+function updateBasePickBtns() {
+  const fv = document.getElementById("base-from-dt").value;
+  const tv = document.getElementById("base-to-dt").value;
+  document.getElementById("base-from-btn").textContent = fmtDateBtn(fv) ?? "Alles";
+  document.getElementById("base-to-btn").textContent   = fmtDateBtn(tv) ?? "Alles";
+}
+function readBaseInputs() {
+  const fv = document.getElementById("base-from-dt").value;
+  const tv = document.getElementById("base-to-dt").value;
+  baseFromDt = fv ? new Date(fv) : null;
+  baseToDt   = tv ? new Date(tv) : null;
+  updateAllCards();
+}
+
+document.getElementById("base-from-btn").addEventListener("click", () => {
+  const inp = document.getElementById("base-from-dt");
+  inp.style.pointerEvents = "auto";
+  inp.showPicker?.();
+  inp.style.pointerEvents = "";
+});
+document.getElementById("base-to-btn").addEventListener("click", () => {
+  const inp = document.getElementById("base-to-dt");
+  inp.style.pointerEvents = "auto";
+  inp.showPicker?.();
+  inp.style.pointerEvents = "";
+});
+
+document.getElementById("base-from-dt").addEventListener("change", () => { updateBasePickBtns(); readBaseInputs(); });
+document.getElementById("base-to-dt").addEventListener("change",   () => { updateBasePickBtns(); readBaseInputs(); });
+
+document.getElementById("base-show-real").addEventListener("click", () => {
+  const fromStr = "2026-05-06T09:00";
+  document.getElementById("base-from-dt").value = fromStr;
+  document.getElementById("base-to-dt").value   = "";
+  updateBasePickBtns();
+  baseFromDt = new Date(fromStr);
+  baseToDt   = null;
+  updateAllCards();
+});
+
+document.getElementById("base-reset").addEventListener("click", () => {
+  document.getElementById("base-from-dt").value = "";
+  document.getElementById("base-to-dt").value   = "";
+  updateBasePickBtns();
+  baseFromDt = null;
+  baseToDt   = null;
+  updateAllCards();
+});
+
+document.getElementById("base-show-testdata").addEventListener("click", () => {
+  const toStr = "2026-05-05T23:59";
+  const fromDtVal = earliestDataPoint ?? new Date("2026-05-04T20:00");
+  const pad = n => String(n).padStart(2, "0");
+  const fromStr = `${fromDtVal.getFullYear()}-${pad(fromDtVal.getMonth()+1)}-${pad(fromDtVal.getDate())}T${pad(fromDtVal.getHours())}:${pad(fromDtVal.getMinutes())}`;
+  document.getElementById("base-from-dt").value = fromStr;
+  document.getElementById("base-to-dt").value   = toStr;
+  updateBasePickBtns();
+  baseFromDt = fromDtVal;
+  baseToDt   = new Date(toStr);
+  updateAllCards();
+});
+
+document.querySelectorAll(".mode-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    mode = btn.dataset.mode;
+    document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    updateAllCards();
+  });
+});
+
+document.getElementById("nl-toggle").addEventListener("click", () => {
+  nlOnly = !nlOnly;
+  document.getElementById("nl-toggle").classList.toggle("active", nlOnly);
+  updateAllCards();
+});
+
+
+/* ─── Settings panel wiring ───────────────────────────────────────────────── */
+function openSettings() {
+  document.getElementById("settings-panel").classList.add("open");
+  document.getElementById("settings-backdrop").classList.add("open");
+}
+function closeSettings() {
+  document.getElementById("settings-panel").classList.remove("open");
+  document.getElementById("settings-backdrop").classList.remove("open");
+}
+document.getElementById("settings-btn").addEventListener("click", openSettings);
+document.getElementById("settings-close").addEventListener("click", closeSettings);
+document.getElementById("settings-backdrop").addEventListener("click", closeSettings);
+
+const toggleMap = {
+  "s-vis-card":         v => { settings.showVisCard       = v; applySettings(); },
+  "s-pv-card":          v => { settings.showPvCard        = v; applySettings(); },
+  "s-form-card":        v => { settings.showFormCard      = v; applySettings(); },
+  "s-scans-vis-card":   v => { settings.showScansVisCard  = v; applySettings(); },
+  "s-scans-pv-card":    v => { settings.showScansPvCard   = v; applySettings(); },
+  "s-vis-chart":        v => { settings.showVisChart      = v; applySettings(); },
+  "s-ctry-chart":       v => { settings.showCtryChart     = v; applySettings(); },
+  "s-form-chart":        v => { settings.showFormChart     = v; applySettings(); },
+  "s-scans-vis-chart":  v => { settings.showScansVisChart  = v; applySettings(); },
+  "s-scans-ctry-chart": v => { settings.showScansCtryChart = v; applySettings(); },
+  "s-top-landen":       v => { settings.showTopLanden     = v; applySettings(); },
+  "s-top-bronnen":      v => { settings.showTopBronnen    = v; applySettings(); },
+};
+for (const [id, handler] of Object.entries(toggleMap)) {
+  document.getElementById(id).addEventListener("change", e => handler(e.target.checked));
+}
+
+// Default layout — reset alle toggles naar standaardwaarden
+const DEFAULT_SETTINGS = {
+  showVisCard: false, showPvCard: true, showFormCard: true,
+  showScansVisCard: false, showScansPvCard: true,
+  showVisChart: false, showCtryChart: true, showFormChart: false,
+  showScansVisChart: false, showScansCtryChart: true,
+  showTopLanden: false, showTopBronnen: false,
+};
+document.getElementById("s-default-layout").addEventListener("click", () => {
+  Object.assign(settings, DEFAULT_SETTINGS);
+  for (const [id, key] of [
+    ["s-vis-card","showVisCard"],["s-pv-card","showPvCard"],["s-form-card","showFormCard"],
+    ["s-scans-vis-card","showScansVisCard"],["s-scans-pv-card","showScansPvCard"],
+    ["s-vis-chart","showVisChart"],["s-ctry-chart","showCtryChart"],["s-form-chart","showFormChart"],
+    ["s-scans-vis-chart","showScansVisChart"],["s-scans-ctry-chart","showScansCtryChart"],
+    ["s-top-landen","showTopLanden"],["s-top-bronnen","showTopBronnen"],
+  ]) {
+    document.getElementById(id).checked = settings[key];
+  }
+  document.getElementById("s-alles-tonen").checked = false;
+  applySettings();
+});
+
+// Alles tonen — zet alle toggles aan
+document.getElementById("s-alles-tonen").addEventListener("change", e => {
+  if (!e.target.checked) return;
+  for (const id of Object.keys(toggleMap)) {
+    document.getElementById(id).checked = true;
+    toggleMap[id](true);
+  }
+});
+
+document.querySelectorAll("[data-chart-type]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    settings.chartType = btn.dataset.chartType;
+    document.querySelectorAll("[data-chart-type]").forEach(b =>
+      b.classList.toggle("active", b === btn)
+    );
+    updateAllCards();
+  });
+});
+
+/* ─── Load ─────────────────────────────────────────────────────────────────── */
+async function load() {
+  const bust = Date.now();
+  const [analyticsRes, formsRes] = await Promise.all([
+    fetch(`./data/analytics.json?v=${bust}`, { cache: "no-store" }),
+    fetch(`./data/forms.json?v=${bust}`,     { cache: "no-store" }),
+  ]);
+
+  const main = document.getElementById("main");
+  main.innerHTML = "";
+
+  if (!analyticsRes.ok) {
+    main.innerHTML = `<p style="color:red">Kon analytics.json niet laden (${analyticsRes.status}).</p>`;
+    return;
+  }
+
+  const data = await analyticsRes.json();
+  if (formsRes.ok) {
+    const formsJson = await formsRes.json();
+    formsData = formsJson.forms ?? [];
+  }
+
+  if (data.last_updated) {
+    const d = new Date(data.last_updated);
+    document.getElementById("updated-at").textContent =
+      "Laatst bijgewerkt: " + cap(d.toLocaleString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }));
+  }
+
+  if (data.zero_point) {
+    const d = new Date(data.zero_point);
+    document.getElementById("zero-point-at").textContent =
+      "Nulpunt: " + d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" });
+
+    // Stel datepicker-grenzen en standaardwaarden in
+    const zpLocal = new Date(data.zero_point);
+    const pad = n => String(n).padStart(2, "0");
+    const localStr = dt =>
+      `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+
+    const minStr = localStr(zpLocal);
+    const nowStr = localStr(new Date());
+
+    const fromEl = document.getElementById("from-dt");
+    const toEl   = document.getElementById("to-dt");
+
+    fromEl.min = minStr;
+    toEl.min   = minStr;
+    fromEl.max = nowStr;
+    toEl.max   = nowStr;
+
+    // Standaard: van = 6 mei 09:00, tot = nu
+    const defaultFromStr = "2026-05-06T09:00";
+    fromEl.value = defaultFromStr;
+    toEl.value   = nowStr;
+    updateDateBtns();
+    fromDt = new Date(defaultFromStr);
+    toDt   = new Date();
+
+    // Standaard basisdataset: vanaf 6 mei 09:00
+    const baseDefaultStr = "2026-05-06T09:00";
+    const baseFromEl = document.getElementById("base-from-dt");
+    baseFromEl.value = baseDefaultStr;
+    baseFromDt = new Date(baseDefaultStr);
+    updateBasePickBtns();
+  }
+
+  siteData = (data.sites ?? []).sort((a, b) => {
+    const ai = SITE_ORDER.indexOf(a.name), bi = SITE_ORDER.indexOf(b.name);
+    return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
+  });
+
+  // Vroegste datapunt bepalen over alle sites
+  for (const site of siteData) {
+    for (const r of (site.hourly ?? [])) {
+      const t = new Date(r.hour);
+      if (!earliestDataPoint || t < earliestDataPoint) earliestDataPoint = t;
+    }
+    for (const r of (site.daily ?? [])) {
+      const t = new Date(r.date + "T00:00:00Z");
+      if (!earliestDataPoint || t < earliestDataPoint) earliestDataPoint = t;
+    }
+  }
+
+  if (siteData.length === 0) {
+    const zp = data.zero_point
+      ? new Date(data.zero_point).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })
+      : "onbekend";
+    main.innerHTML = `<p style="color:var(--muted)">Nulpunt ingesteld op ${zp}. Wacht op de volgende scraper-run voor nieuwe data.</p>`;
+    return;
+  }
+
+  // Volledige cards gegroepeerd met groepstitels
+  for (const group of GROUPS) {
+    const groupSites = group.sites
+      .map(name => siteData.find(s => s.name === name))
+      .filter(Boolean);
+    if (groupSites.length === 0) continue;
+
+    const header = document.createElement("div");
+    header.className = "group-header";
+    header.textContent = group.title;
+    main.appendChild(header);
+
+    const row = document.createElement("div");
+    row.className = "group-cards";
+    for (const site of groupSites) {
+      row.appendChild(renderSite(site));
+    }
+    main.appendChild(row);
+  }
+}
+
+load().catch(err => {
+  document.getElementById("main").innerHTML = `<p style="color:red">Fout: ${err.message}</p>`;
+});
+</script>
+</body>
+</html>
