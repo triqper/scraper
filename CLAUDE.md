@@ -7,6 +7,8 @@ Gebruik altijd `mcp__github__push_files` om bestanden te pushen naar:
 - **repo**: `scraper`
 - **branch**: `main`
 
+> **Belangrijk:** Pushen naar `main` gaat direct naar de live omgeving op https://triqper.github.io/scraper/ via GitHub Pages. Elke push is dus meteen zichtbaar voor gebruikers.
+
 Na elke push de lokale repo synchroniseren:
 ```
 git fetch origin main && git reset --hard origin/main
