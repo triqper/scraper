@@ -199,7 +199,7 @@
       font-size: 0.75rem; padding: 0.28125rem 0.5rem;
       border: 1px solid var(--border); border-radius: var(--radius-sm);
       background: var(--surface); color: var(--text);
-      cursor: pointer; font-family: inherit; width: 100%; font-weight: 500;
+      cursor: pointer; font-family: inherit; font-weight: 500;
     }
     .status-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
     .status-select[data-status="Todo"]             { background: var(--muted-bg); color: var(--muted); border-color: var(--border); }
@@ -656,6 +656,15 @@ function renderRow(sub, netlifyUrl) {
   </tr>`;
 }
 
+function resizeSelect(sel) {
+  const tmp = document.createElement("span");
+  tmp.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;font-size:0.75rem;font-weight:500;font-family:inherit;padding:0 0.5rem";
+  tmp.textContent = sel.options[sel.selectedIndex]?.text || sel.value;
+  document.body.appendChild(tmp);
+  sel.style.width = (tmp.offsetWidth + 22) + "px";
+  document.body.removeChild(tmp);
+}
+
 function renderAll() {
   const main = document.getElementById("main");
   const bySite = {};
@@ -711,10 +720,12 @@ function renderAll() {
   });
 
   document.querySelectorAll(".status-select").forEach(sel => {
+    resizeSelect(sel);
     sel.addEventListener("change", async () => {
       const subId  = sel.dataset.subId;
       const status = sel.value;
       sel.dataset.status = status;
+      resizeSelect(sel);
       const note = document.getElementById(`saved-${subId}`);
       if (note) note.textContent = "Opslaan…";
       await saveStatus(subId, status);
@@ -890,6 +901,7 @@ async function load() {
     if (sel.value !== newStatus) {
       sel.value = newStatus;
       sel.dataset.status = newStatus;
+      resizeSelect(sel);
     }
   });
   document.querySelectorAll(".lead-note").forEach(ta => {
