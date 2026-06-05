@@ -1,17 +1,17 @@
 {
   "zero_point": "2026-05-04T07:52:59.540654+00:00",
-  "last_updated": "2026-06-05T11:00:46.623577+00:00",
+  "last_updated": "2026-06-05T12:00:42.671246+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
       "name": "woonstroom-interesse-landing",
       "url": "https://woonstroom-interesse-landing.netlify.app",
-      "total_pageviews": 24,
+      "total_pageviews": 23,
       "total_visitors": 12,
       "daily": [
         {
           "date": "2026-05-04",
-          "pageviews": 10,
+          "pageviews": 9,
           "visitors": 6
         },
         {
@@ -33,7 +33,7 @@
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 17
+          "pageviews": 16
         },
         {
           "country": "United States",
@@ -59,7 +59,7 @@
         },
         {
           "source": "woonstroom-interesse.netlify.app",
-          "referrals": 3
+          "referrals": 2
         }
       ],
       "country_hourly": [
@@ -205,11 +205,6 @@
       ],
       "hourly": [
         {
-          "hour": "2026-05-04T12:00:00+00:00",
-          "pageviews": 1,
-          "visitors": 1
-        },
-        {
           "hour": "2026-05-04T14:00:00+00:00",
           "pageviews": 1,
           "visitors": 1
@@ -265,12 +260,12 @@
       "id": "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5",
       "name": "woonstroom-woningwaarde-landing",
       "url": "https://woonstroom-woningwaarde-landing.netlify.app",
-      "total_pageviews": 23,
+      "total_pageviews": 22,
       "total_visitors": 14,
       "daily": [
         {
           "date": "2026-05-04",
-          "pageviews": 13,
+          "pageviews": 12,
           "visitors": 6
         },
         {
@@ -307,7 +302,7 @@
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 19
+          "pageviews": 18
         },
         {
           "country": "Norway",
@@ -325,7 +320,7 @@
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 13
+          "referrals": 12
         },
         {
           "source": "woonstroom-woningwaarde.netlify.app",
@@ -525,11 +520,6 @@
         }
       ],
       "hourly": [
-        {
-          "hour": "2026-05-04T12:00:00+00:00",
-          "pageviews": 1,
-          "visitors": 1
-        },
         {
           "hour": "2026-05-04T14:00:00+00:00",
           "pageviews": 2,
