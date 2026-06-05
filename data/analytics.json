@@ -1,18 +1,18 @@
 {
   "zero_point": "2026-05-04T07:52:59.540654+00:00",
-  "last_updated": "2026-06-05T13:00:41.931380+00:00",
+  "last_updated": "2026-06-05T14:00:42.578215+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
       "name": "woonstroom-interesse-landing",
       "url": "https://woonstroom-interesse-landing.netlify.app",
-      "total_pageviews": 23,
-      "total_visitors": 12,
+      "total_pageviews": 22,
+      "total_visitors": 11,
       "daily": [
         {
           "date": "2026-05-04",
-          "pageviews": 9,
-          "visitors": 6
+          "pageviews": 8,
+          "visitors": 5
         },
         {
           "date": "2026-05-05",
@@ -33,7 +33,7 @@
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 16
+          "pageviews": 15
         },
         {
           "country": "United States",
@@ -55,7 +55,7 @@
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 16
+          "referrals": 15
         },
         {
           "source": "woonstroom-interesse.netlify.app",
@@ -205,11 +205,6 @@
       ],
       "hourly": [
         {
-          "hour": "2026-05-04T14:00:00+00:00",
-          "pageviews": 1,
-          "visitors": 1
-        },
-        {
           "hour": "2026-05-04T15:00:00+00:00",
           "pageviews": 1,
           "visitors": 1
@@ -260,13 +255,13 @@
       "id": "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5",
       "name": "woonstroom-woningwaarde-landing",
       "url": "https://woonstroom-woningwaarde-landing.netlify.app",
-      "total_pageviews": 22,
-      "total_visitors": 14,
+      "total_pageviews": 20,
+      "total_visitors": 13,
       "daily": [
         {
           "date": "2026-05-04",
-          "pageviews": 12,
-          "visitors": 6
+          "pageviews": 10,
+          "visitors": 5
         },
         {
           "date": "2026-05-05",
@@ -302,7 +297,7 @@
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 18
+          "pageviews": 16
         },
         {
           "country": "Norway",
@@ -320,7 +315,7 @@
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 12
+          "referrals": 10
         },
         {
           "source": "woonstroom-woningwaarde.netlify.app",
@@ -521,11 +516,6 @@
       ],
       "hourly": [
         {
-          "hour": "2026-05-04T14:00:00+00:00",
-          "pageviews": 2,
-          "visitors": 1
-        },
-        {
           "hour": "2026-05-04T15:00:00+00:00",
           "pageviews": 1,
           "visitors": 1
@@ -596,12 +586,12 @@
       "id": "3970cc41-10db-4747-b7b2-89ea7532c283",
       "name": "woonstroom-aanbod-landing",
       "url": "https://woonstroom-aanbod-landing.netlify.app",
-      "total_pageviews": 16,
+      "total_pageviews": 14,
       "total_visitors": 10,
       "daily": [
         {
           "date": "2026-05-04",
-          "pageviews": 8,
+          "pageviews": 6,
           "visitors": 4
         },
         {
@@ -628,7 +618,7 @@
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 11
+          "pageviews": 9
         },
         {
           "country": "United States",
@@ -646,7 +636,7 @@
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 11
+          "referrals": 9
         },
         {
           "source": "woonstroom-aanbod.netlify.app",
@@ -794,11 +784,6 @@
         }
       ],
       "hourly": [
-        {
-          "hour": "2026-05-04T14:00:00+00:00",
-          "pageviews": 2,
-          "visitors": 1
-        },
         {
           "hour": "2026-05-04T15:00:00+00:00",
           "pageviews": 1,
