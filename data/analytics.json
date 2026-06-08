@@ -1,6 +1,6 @@
 {
   "zero_point": "2026-05-04T07:52:59.540654+00:00",
-  "last_updated": "2026-06-08T18:00:33.003692+00:00",
+  "last_updated": "2026-06-08T19:00:33.770161+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
@@ -435,14 +435,9 @@
       "id": "3970cc41-10db-4747-b7b2-89ea7532c283",
       "name": "woonstroom-aanbod-landing",
       "url": "https://woonstroom-aanbod-landing.netlify.app",
-      "total_pageviews": 5,
-      "total_visitors": 4,
+      "total_pageviews": 1,
+      "total_visitors": 1,
       "daily": [
-        {
-          "date": "2026-05-07",
-          "pageviews": 4,
-          "visitors": 3
-        },
         {
           "date": "2026-05-09",
           "pageviews": 1,
@@ -451,22 +446,14 @@
       ],
       "top_countries": [
         {
-          "country": "United States",
-          "pageviews": 3
-        },
-        {
           "country": "Netherlands",
-          "pageviews": 2
+          "pageviews": 1
         }
       ],
       "top_sources": [
         {
-          "source": "Direct traffic",
-          "referrals": 3
-        },
-        {
           "source": "woonstroom-aanbod.netlify.app",
-          "referrals": 2
+          "referrals": 1
         }
       ],
       "country_hourly": [
@@ -611,11 +598,6 @@
       ],
       "hourly": [
         {
-          "hour": "2026-05-07T19:00:00+00:00",
-          "pageviews": 4,
-          "visitors": 3
-        },
-        {
           "hour": "2026-05-09T13:00:00+00:00",
           "pageviews": 1,
           "visitors": 1
@@ -753,14 +735,9 @@
       "id": "82333e01-6c2b-48b2-a7ca-564ad851bf6b",
       "name": "woonstroom-aanbod",
       "url": "https://woonstroom-aanbod.netlify.app",
-      "total_pageviews": 4,
-      "total_visitors": 3,
+      "total_pageviews": 2,
+      "total_visitors": 1,
       "daily": [
-        {
-          "date": "2026-05-07",
-          "pageviews": 2,
-          "visitors": 2
-        },
         {
           "date": "2026-05-09",
           "pageviews": 2,
@@ -770,17 +747,13 @@
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 3
-        },
-        {
-          "country": "United States",
-          "pageviews": 1
+          "pageviews": 2
         }
       ],
       "top_sources": [
         {
           "source": "Direct traffic",
-          "referrals": 4
+          "referrals": 2
         }
       ],
       "country_hourly": [
@@ -825,11 +798,6 @@
         }
       ],
       "hourly": [
-        {
-          "hour": "2026-05-07T19:00:00+00:00",
-          "pageviews": 2,
-          "visitors": 2
-        },
         {
           "hour": "2026-05-09T13:00:00+00:00",
           "pageviews": 2,
