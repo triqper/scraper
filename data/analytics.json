@@ -1,6 +1,6 @@
 {
   "zero_point": "2026-05-04T07:52:59.540654+00:00",
-  "last_updated": "2026-06-17T16:00:44.404839+00:00",
+  "last_updated": "2026-06-17T17:00:47.437363+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
@@ -164,14 +164,9 @@
       "id": "9d037dfc-6ba6-4a9b-8ce3-3171b65082e5",
       "name": "woonstroom-woningwaarde-landing",
       "url": "https://woonstroom-woningwaarde-landing.netlify.app",
-      "total_pageviews": 2,
-      "total_visitors": 2,
+      "total_pageviews": 1,
+      "total_visitors": 1,
       "daily": [
-        {
-          "date": "2026-05-16",
-          "pageviews": 1,
-          "visitors": 1
-        },
         {
           "date": "2026-05-20",
           "pageviews": 1,
@@ -181,13 +176,13 @@
       "top_countries": [
         {
           "country": "Netherlands",
-          "pageviews": 2
+          "pageviews": 1
         }
       ],
       "top_sources": [
         {
           "source": "woonstroom-woningwaarde.netlify.app",
-          "referrals": 2
+          "referrals": 1
         }
       ],
       "country_hourly": [
@@ -384,11 +379,6 @@
       ],
       "hourly": [
         {
-          "hour": "2026-05-16T17:00:00+00:00",
-          "pageviews": 1,
-          "visitors": 1
-        },
-        {
           "hour": "2026-05-20T10:00:00+00:00",
           "pageviews": 1,
           "visitors": 1
@@ -556,32 +546,17 @@
       "id": "60c23cf1-4c52-4e2a-9e3d-f3399176f47d",
       "name": "woonstroom-woningwaarde",
       "url": "https://woonstroom-woningwaarde.netlify.app",
-      "total_pageviews": 2,
-      "total_visitors": 2,
+      "total_pageviews": 1,
+      "total_visitors": 1,
       "daily": [
-        {
-          "date": "2026-05-16",
-          "pageviews": 1,
-          "visitors": 1
-        },
         {
           "date": "2026-05-20",
           "pageviews": 1,
           "visitors": 1
         }
       ],
-      "top_countries": [
-        {
-          "country": "Netherlands",
-          "pageviews": 1
-        }
-      ],
-      "top_sources": [
-        {
-          "source": "Direct traffic",
-          "referrals": 1
-        }
-      ],
+      "top_countries": [],
+      "top_sources": [],
       "country_hourly": [
         {
           "hour": "2026-05-04T09:00:00+00:00",
@@ -647,11 +622,6 @@
         }
       ],
       "hourly": [
-        {
-          "hour": "2026-05-16T17:00:00+00:00",
-          "pageviews": 1,
-          "visitors": 1
-        },
         {
           "hour": "2026-05-20T10:00:00+00:00",
           "pageviews": 1,
