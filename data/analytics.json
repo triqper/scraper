@@ -1,6 +1,6 @@
 {
   "zero_point": "2026-05-04T07:52:59.540654+00:00",
-  "last_updated": "2026-06-21T09:00:35.954202+00:00",
+  "last_updated": "2026-06-21T10:00:32.724819+00:00",
   "sites": [
     {
       "id": "b49a7765-0c4e-404a-aa24-6e8fe81c5ce6",
@@ -173,18 +173,8 @@
           "visitors": 1
         }
       ],
-      "top_countries": [
-        {
-          "country": "Netherlands",
-          "pageviews": 1
-        }
-      ],
-      "top_sources": [
-        {
-          "source": "woonstroom-woningwaarde.netlify.app",
-          "referrals": 1
-        }
-      ],
+      "top_countries": [],
+      "top_sources": [],
       "country_hourly": [
         {
           "hour": "2026-05-04T09:00:00+00:00",
@@ -377,13 +367,7 @@
           }
         }
       ],
-      "hourly": [
-        {
-          "hour": "2026-05-20T10:00:00+00:00",
-          "pageviews": 1,
-          "visitors": 1
-        }
-      ]
+      "hourly": []
     },
     {
       "id": "3970cc41-10db-4747-b7b2-89ea7532c283",
@@ -621,13 +605,7 @@
           }
         }
       ],
-      "hourly": [
-        {
-          "hour": "2026-05-20T10:00:00+00:00",
-          "pageviews": 1,
-          "visitors": 1
-        }
-      ]
+      "hourly": []
     },
     {
       "id": "82333e01-6c2b-48b2-a7ca-564ad851bf6b",
